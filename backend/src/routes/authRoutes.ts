@@ -2,7 +2,6 @@ import Router from 'express';
 import Student from '../models/Student';
 import bcrypt from 'bcrypt';
 import { generateAccessToken, generateRefreshToken } from '../utils/helper';
-
 const router = Router();
 
 const saltRounds = 10;
@@ -58,13 +57,24 @@ router.post('/login', async (req, res) => {
                     const id = existingUser.getDataValue('id').toString('hex');
                     const accessToken = generateAccessToken({ email, id });
                     const refreshToken = generateRefreshToken({ email, id });
+
+                    res.cookie('accessToken', accessToken, {
+                        httpOnly: true,
+                        secure: true,
+                        sameSite: 'strict',
+                        expires: new Date(Date.now() + 15 * 60 * 1000), //15 minutes
+                    });
                     res.cookie('refreshToken', refreshToken, {
                         httpOnly: true,
                         secure: true,
+                        sameSite: 'strict',
+                        expires: new Date(
+                            Date.now() + 30 * 24 * 60 * 60 * 1000 // 30 days
+                        ),
                     });
                     res.status(200).json({
                         message: 'Log in successful',
-                        data: { accessToken, refreshToken },
+                        data: { accessToken },
                     });
                     return;
                 }
