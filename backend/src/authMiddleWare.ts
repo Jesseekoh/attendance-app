@@ -19,7 +19,6 @@ export const authenticateToken = (
         throw new Error('Access Token is not defined');
     }
     const user = jwt.verify(token, secret) as string | JwtPayload;
-    console.log(user);
     req.user = user;
     next();
 };

@@ -1,8 +1,10 @@
 import express from 'express';
 import { rateLimit } from 'express-rate-limit';
 import cors from 'cors';
+import cookieParser from 'cookie-parser';
 import { config } from 'dotenv';
 import authRoutes from './routes/authRoutes';
+import userRoutes from './routes/userRoutes';
 import sequelize from './config/db';
 config();
 const app = express();
@@ -16,6 +18,7 @@ const limiter = rateLimit({
 app.use(cors({}));
 app.use(limiter);
 app.use(express.json());
+app.use(cookieParser());
 
 // test database connection
 try {
@@ -30,7 +33,7 @@ try {
 }
 
 app.use('/auth', authRoutes);
-
+app.use('/users', userRoutes);
 app.listen(process.env.PORT, () => {
     console.log('Server listening on port', process.env.PORT);
 });
