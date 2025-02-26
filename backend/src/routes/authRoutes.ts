@@ -1,6 +1,7 @@
 import Router from 'express';
 import Student from '../models/Student';
 import bcrypt from 'bcrypt';
+import { generateAccessToken, generateRefreshToken } from '../utils/helper';
 
 const router = Router();
 
@@ -54,10 +55,19 @@ router.post('/login', async (req, res) => {
             existingUser?.getDataValue('passwordHash'),
             (err, result) => {
                 if (result) {
-                    res.status(200).json({ message: 'Log in successful' });
+                    const id = existingUser.getDataValue('id').toString('hex');
+                    const accessToken = generateAccessToken({ email, id });
+                    const refreshToken = generateRefreshToken({ email, id });
+                    res.cookie('refreshToken', refreshToken, {
+                        httpOnly: true,
+                        secure: true,
+                    });
+                    res.status(200).json({
+                        message: 'Log in successful',
+                        data: { accessToken, refreshToken },
+                    });
                     return;
                 }
-
                 res.status(401).json({ message: 'Wrong email or password' });
             }
         );
