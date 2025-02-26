@@ -11,7 +11,6 @@ router.post('/register', async (req, res) => {
     try {
         let passwordHash = await bcrypt.hash(password, saltRounds);
 
-        console.log(passwordHash);
         const newStudent = await Student.create({
             firstName,
             lastName,
