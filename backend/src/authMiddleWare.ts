@@ -6,7 +6,7 @@ export const authenticateToken = (
     res: Response,
     next: NextFunction
 ) => {
-    const token = req.header('Authorization')?.split(' ')[1];
+    const token = req.cookies.accessToken;
 
     if (!token) {
         res.status(401).json({ message: 'Unauthorized. Please log in' });
@@ -19,7 +19,6 @@ export const authenticateToken = (
         throw new Error('Access Token is not defined');
     }
     const user = jwt.verify(token, secret) as string | JwtPayload;
-    console.log(user);
     req.user = user;
     next();
 };
