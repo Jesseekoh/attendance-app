@@ -3,8 +3,8 @@ import sequelize from '../config/db';
 import Course from './Course';
 import Student from './Student';
 
-const Enrollments = sequelize.define(
-    'Enrollments',
+const Enrollment = sequelize.define(
+    'Enrollment',
     {
         CourseId: {
             type: DataTypes.BLOB,
@@ -32,7 +32,6 @@ const Enrollments = sequelize.define(
         },
     },
     {
-        tableName: 'enrollments',
         indexes: [
             {
                 unique: true,
@@ -42,4 +41,4 @@ const Enrollments = sequelize.define(
     }
 );
 
-export default Enrollments;
+export default Enrollment;
