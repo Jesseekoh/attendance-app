@@ -1,8 +1,9 @@
+import crypto from 'crypto';
 import sequelize from '../config/db';
 import { DataTypes } from 'sequelize';
 import User from './User';
 
-const Student = sequelize.define('Student', {
+const Teacher = sequelize.define('Teacher', {
     id: {
         type: DataTypes.BLOB,
         primaryKey: true,
@@ -10,11 +11,6 @@ const Student = sequelize.define('Student', {
             model: User,
             key: 'id',
         },
-    },
-    matricNumber: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        unique: true,
     },
     level: {
         type: DataTypes.SMALLINT,
@@ -26,4 +22,4 @@ const Student = sequelize.define('Student', {
     },
 });
 
-export default Student;
+export default Teacher;
