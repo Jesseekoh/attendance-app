@@ -5,7 +5,7 @@ import cookieParser from 'cookie-parser';
 import { config } from 'dotenv';
 import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
-import sequelize from './config/db';
+import { sequelize } from './models';
 config();
 const app = express();
 
@@ -25,7 +25,7 @@ try {
     sequelize.authenticate();
     console.log('Connected successfully');
     sequelize
-        .sync({ alter: true, force: false })
+        .sync({ alter: true, force: true })
         .then(() => console.log('Created Tables successfully'))
         .catch((error) => console.log('Error creating tables: ', error));
 } catch (error) {
