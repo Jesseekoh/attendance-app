@@ -3,6 +3,8 @@ import User from './User';
 import Student from './Student';
 import Teacher from './Teacher';
 import Course from './Course';
+import Class from './Class';
+import Enrollments from './Enrollments';
 
 //One-One relationship between Teacher and User
 User.hasOne(Teacher, { foreignKey: 'id' });
@@ -20,13 +22,27 @@ Course.belongsToMany(Teacher, {
     through: 'taught_courses',
 });
 
+// Many-Many relationship between Class and Student
+Student.belongsToMany(Class, { through: 'attendance' });
+Class.belongsToMany(Student, { through: 'attendance' });
+
+// One-Many relationship between Class and courses
+Course.hasMany(Class, { foreignKey: 'courseId', as: 'classes' });
+Class.belongsTo(Course, { as: 'course' });
+
 // Many-Many relationship between Student and Course
 // one student can enroll in many courses and one course can have many students
 Student.belongsToMany(Course, {
-    through: 'enrollments',
+    through: {
+        model: Enrollments,
+        unique: false,
+    },
 });
 Course.belongsToMany(Student, {
-    through: 'enrollments',
+    through: {
+        model: Enrollments,
+        unique: false,
+    },
 });
 
 export { sequelize, User, Teacher };
