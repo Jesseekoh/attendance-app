@@ -2,6 +2,7 @@ import sequelize from '../config/db';
 import { DataTypes } from 'sequelize';
 import crypto from 'crypto';
 import Teacher from './Teacher';
+import Course from './Course';
 
 const Class = sequelize.define('Class', {
     id: {
@@ -14,6 +15,14 @@ const Class = sequelize.define('Class', {
         type: DataTypes.BLOB,
         references: {
             model: Teacher,
+            key: 'id',
+        },
+    },
+
+    courseId: {
+        type: DataTypes.BLOB,
+        references: {
+            model: Course,
             key: 'id',
         },
     },
