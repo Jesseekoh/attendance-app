@@ -1,12 +1,12 @@
+import { config } from 'dotenv';
+config();
 import express from 'express';
 import { rateLimit } from 'express-rate-limit';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import { config } from 'dotenv';
 import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
 import { sequelize } from './models';
-config();
 const app = express();
 
 const limiter = rateLimit({

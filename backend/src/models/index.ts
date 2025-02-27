@@ -4,7 +4,7 @@ import Student from './Student';
 import Teacher from './Teacher';
 import Course from './Course';
 import Class from './Class';
-import Enrollments from './Enrollments';
+import Enrollment from './Enrollment';
 
 //One-One relationship between Teacher and User
 User.hasOne(Teacher, { foreignKey: 'id' });
@@ -34,13 +34,13 @@ Class.belongsTo(Course, { as: 'course' });
 // one student can enroll in many courses and one course can have many students
 Student.belongsToMany(Course, {
     through: {
-        model: Enrollments,
+        model: Enrollment,
         unique: false,
     },
 });
 Course.belongsToMany(Student, {
     through: {
-        model: Enrollments,
+        model: Enrollment,
         unique: false,
     },
 });
