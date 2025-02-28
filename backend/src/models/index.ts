@@ -45,4 +45,4 @@ Course.belongsToMany(Student, {
     },
 });
 
-export { sequelize, User, Teacher };
+export { sequelize, User, Teacher, Student, Class, Course, Enrollment };
