@@ -1,29 +1,44 @@
 import sequelize from '../config/db';
-import { DataTypes } from 'sequelize';
+import { BlobDataType, DataTypes, Model } from 'sequelize';
 import User from './User';
 
-const Student = sequelize.define('Student', {
-    id: {
-        type: DataTypes.BLOB,
-        primaryKey: true,
-        references: {
-            model: User,
-            key: 'id',
+class Student extends Model {
+    public id!: BlobDataType;
+    public matricNumber!: string;
+    public level!: 100 | 200 | 300 | 400 | 500;
+    public department!: string;
+}
+Student.init(
+    {
+        id: {
+            type: DataTypes.BLOB,
+            primaryKey: true,
+            references: {
+                model: User,
+                key: 'id',
+            },
+        },
+        matricNumber: {
+            type: DataTypes.STRING,
+            allowNull: false,
+            unique: true,
+        },
+        level: {
+            type: DataTypes.SMALLINT,
+            allowNull: false,
+            validate: {
+                isIn: {
+                    args: [[100, 200, 300, 400, 500]],
+                    msg: 'Invalid level',
+                },
+            },
+        },
+        department: {
+            type: DataTypes.STRING,
+            allowNull: false,
         },
     },
-    matricNumber: {
-        type: DataTypes.STRING,
-        allowNull: false,
-        unique: true,
-    },
-    level: {
-        type: DataTypes.SMALLINT,
-        allowNull: false,
-    },
-    department: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
-});
+    { sequelize }
+);
 
 export default Student;
