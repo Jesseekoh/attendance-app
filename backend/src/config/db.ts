@@ -1,3 +1,5 @@
+import { config } from 'dotenv';
+config();
 import { Sequelize } from 'sequelize';
 
 const DATABASE_URI = process.env.DATABASE_URI;
