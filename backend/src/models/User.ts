@@ -1,8 +1,16 @@
 import crypto from 'crypto';
-import { DataTypes } from 'sequelize';
+import { BlobDataType, DataTypes, Model, StringDataType } from 'sequelize';
 import sequelize from '../config/db';
-const User = sequelize.define(
-    'User',
+
+class User extends Model {
+    public id!: BlobDataType;
+    public firstname!: string;
+    public lastName!: string;
+    public email!: string;
+    public role!: string;
+    public passwordHash!: string;
+}
+User.init(
     {
         id: {
             type: DataTypes.BLOB,
@@ -40,7 +48,7 @@ const User = sequelize.define(
             allowNull: false,
         },
     },
-    { tableName: 'users' }
+    { tableName: 'users', sequelize }
 );
 
 export default User;
