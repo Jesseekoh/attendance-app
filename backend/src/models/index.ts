@@ -35,13 +35,13 @@ Class.belongsTo(Course, { as: 'course' });
 Student.belongsToMany(Course, {
     through: {
         model: Enrollment,
-        unique: false,
+        // unique: false,
     },
 });
 Course.belongsToMany(Student, {
     through: {
         model: Enrollment,
-        unique: false,
+        // unique: false,
     },
 });
 
