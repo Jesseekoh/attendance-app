@@ -5,6 +5,7 @@ import Teacher from './Teacher';
 import Course from './Course';
 import Class from './Class';
 import Enrollment from './Enrollment';
+import Department from './Department';
 
 //One-One relationship between Teacher and User
 User.hasOne(Teacher, { foreignKey: 'id' });
@@ -45,4 +46,13 @@ Course.belongsToMany(Student, {
     },
 });
 
-export { sequelize, User, Teacher, Student, Class, Course, Enrollment };
+export {
+    sequelize,
+    User,
+    Teacher,
+    Student,
+    Class,
+    Course,
+    Enrollment,
+    Department,
+};
