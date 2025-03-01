@@ -1,4 +1,4 @@
-import { faker, fakerRO } from '@faker-js/faker';
+import { faker } from '@faker-js/faker';
 import bcrypt from 'bcrypt';
 import {
     sequelize,
@@ -22,8 +22,8 @@ async function generateTeachers(count: number) {
             lastName,
         });
         const role = 'teacher';
-        const password = faker.internet.password();
-        const passwordHash = await bcrypt.hash(password, 10);
+
+        const passwordHash = await bcrypt.hash('password', 10);
         const department = faker.commerce.department();
 
         const user = await User.create({
@@ -312,8 +312,8 @@ async function generateStudents(count: number) {
         const matricNumber = faker.string.numeric({ length: 7 });
         const level = faker.helpers.arrayElement([100, 200, 300, 400, 500]);
         const department = faker.commerce.department();
-        const password = faker.internet.password();
-        const passwordHash = await bcrypt.hash(password, 10);
+
+        const passwordHash = await bcrypt.hash('password', 10);
 
         const user = await User.create({
             firstName,
@@ -334,7 +334,6 @@ async function generateStudents(count: number) {
             firstName,
             lastName,
             email,
-            password,
             department,
             level,
             matricNumber,
