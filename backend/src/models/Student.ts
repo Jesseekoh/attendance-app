@@ -38,7 +38,7 @@ Student.init(
             allowNull: false,
         },
     },
-    { sequelize }
+    { sequelize, timestamps: false }
 );
 
 export default Student;

@@ -20,7 +20,7 @@ Department.init(
             },
         },
     },
-    { sequelize, tableName: 'departments' }
+    { sequelize, tableName: 'departments', timestamps: false }
 );
 
 export default Department;

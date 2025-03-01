@@ -30,15 +30,10 @@ const Enrollment = sequelize.define(
                 max: 100,
             },
         },
+    },
+    {
+        timestamps: false,
     }
-    // {
-    //     indexes: [
-    //         {
-    //             unique: true,
-    //             fields: ['StudentId', 'CourseId'],
-    //         },
-    //     ],
-    // }
 );
 
 export default Enrollment;
