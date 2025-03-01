@@ -1,12 +1,12 @@
+import { config } from 'dotenv';
+config();
 import express from 'express';
 import { rateLimit } from 'express-rate-limit';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import { config } from 'dotenv';
 import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
-import sequelize from './config/db';
-config();
+import { sequelize } from './models';
 const app = express();
 
 const limiter = rateLimit({
@@ -25,7 +25,7 @@ try {
     sequelize.authenticate();
     console.log('Connected successfully');
     sequelize
-        .sync({ alter: true, force: false })
+        .sync({ alter: true, force: true })
         .then(() => console.log('Created Tables successfully'))
         .catch((error) => console.log('Error creating tables: ', error));
 } catch (error) {

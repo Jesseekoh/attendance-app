@@ -1,5 +1,5 @@
 import Router from 'express';
-import Student from '../models/Student';
+import User from '../models/User';
 import bcrypt from 'bcrypt';
 import { generateAccessToken, generateRefreshToken } from '../utils/helper';
 const router = Router();
@@ -7,16 +7,18 @@ const router = Router();
 const saltRounds = 10;
 
 router.post('/register', async (req, res) => {
-    const { firstName, lastName, email, matricNumber, password } = req.body;
+    const { firstName, lastName, email, matricNumber, role, password } =
+        req.body;
     try {
         let passwordHash = await bcrypt.hash(password, saltRounds);
 
-        const newStudent = await Student.create({
+        const newUser = await User.create({
             firstName,
             lastName,
             email,
             passwordHash,
             matricNumber,
+            role,
         });
         res.status(200).json({ message: 'User created successfully' });
         return;
@@ -42,7 +44,7 @@ router.post('/login', async (req, res) => {
         return;
     }
     try {
-        const existingUser = await Student.findOne({ where: { email } });
+        const existingUser = await User.findOne({ where: { email } });
 
         if (!existingUser) {
             res.status(404).json({ message: 'User does not exist' });

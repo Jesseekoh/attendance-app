@@ -1,8 +1,13 @@
+import { config } from 'dotenv';
+config();
 import { Sequelize } from 'sequelize';
 
-const sequelize = new Sequelize({
-    dialect: 'sqlite',
-    storage: 'database.db',
-});
+const DATABASE_URI = process.env.DATABASE_URI;
+
+if (!DATABASE_URI) {
+    throw new Error('DATABASE_URI not defined in env file');
+}
+
+const sequelize = new Sequelize(DATABASE_URI);
 
 export default sequelize;

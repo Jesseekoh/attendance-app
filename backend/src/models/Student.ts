@@ -1,38 +1,44 @@
-import crypto from 'crypto';
-import { Sequelize, DataTypes } from 'sequelize';
 import sequelize from '../config/db';
-const Student = sequelize.define(
-    'Student',
+import { DataTypes, Model } from 'sequelize';
+import User from './User';
+
+class Student extends Model {
+    public id!: string;
+    public matricNumber!: string;
+    public level!: 100 | 200 | 300 | 400 | 500;
+    public department!: string;
+}
+Student.init(
     {
-        firstName: {
-            type: DataTypes.STRING,
-            allowNull: false,
-        },
-        lastName: {
-            type: DataTypes.STRING,
-            allowNull: false,
-        },
-        email: {
-            type: DataTypes.STRING,
-            allowNull: false,
-            unique: true,
+        id: {
+            type: DataTypes.UUID,
+            primaryKey: true,
+            references: {
+                model: User,
+                key: 'id',
+            },
         },
         matricNumber: {
             type: DataTypes.STRING,
             allowNull: false,
             unique: true,
         },
-        passwordHash: {
+        level: {
+            type: DataTypes.SMALLINT,
+            allowNull: false,
+            validate: {
+                isIn: {
+                    args: [[100, 200, 300, 400, 500]],
+                    msg: 'Invalid level',
+                },
+            },
+        },
+        department: {
             type: DataTypes.STRING,
             allowNull: false,
         },
-        id: {
-            type: DataTypes.BLOB,
-            primaryKey: true,
-            defaultValue: () => crypto.randomBytes(16),
-        },
     },
-    { tableName: 'students' }
+    { sequelize, timestamps: false }
 );
 
 export default Student;
