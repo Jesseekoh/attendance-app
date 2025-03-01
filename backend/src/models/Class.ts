@@ -6,13 +6,13 @@ import Course from './Course';
 
 const Class = sequelize.define('Class', {
     id: {
-        type: DataTypes.BLOB,
+        type: DataTypes.UUID,
         primaryKey: true,
         unique: true,
         defaultValue: () => crypto.randomBytes(16),
     },
     teacherId: {
-        type: DataTypes.BLOB,
+        type: DataTypes.UUID,
         references: {
             model: Teacher,
             key: 'id',
@@ -20,7 +20,7 @@ const Class = sequelize.define('Class', {
     },
 
     courseId: {
-        type: DataTypes.BLOB,
+        type: DataTypes.UUID,
         references: {
             model: Course,
             key: 'id',

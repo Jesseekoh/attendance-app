@@ -7,7 +7,7 @@ const Enrollment = sequelize.define(
     'Enrollment',
     {
         CourseId: {
-            type: DataTypes.BLOB,
+            type: DataTypes.UUID,
             allowNull: false,
             references: {
                 model: Course,
@@ -15,7 +15,7 @@ const Enrollment = sequelize.define(
             },
         },
         StudentId: {
-            type: DataTypes.BLOB,
+            type: DataTypes.UUID,
             allowNull: false,
             references: {
                 model: Student,
@@ -30,15 +30,15 @@ const Enrollment = sequelize.define(
                 max: 100,
             },
         },
-    },
-    {
-        indexes: [
-            {
-                unique: true,
-                fields: ['StudentId', 'CourseId'],
-            },
-        ],
     }
+    // {
+    //     indexes: [
+    //         {
+    //             unique: true,
+    //             fields: ['StudentId', 'CourseId'],
+    //         },
+    //     ],
+    // }
 );
 
 export default Enrollment;

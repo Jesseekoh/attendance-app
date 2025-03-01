@@ -5,7 +5,7 @@ import User from './User';
 
 const Teacher = sequelize.define('Teacher', {
     id: {
-        type: DataTypes.BLOB,
+        type: DataTypes.UUID,
         primaryKey: true,
         references: {
             model: User,

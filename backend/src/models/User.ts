@@ -1,9 +1,10 @@
 import crypto from 'crypto';
-import { BlobDataType, DataTypes, Model, StringDataType } from 'sequelize';
+import Sequelize from 'sequelize';
+import { DataTypes, Model, StringDataType } from 'sequelize';
 import sequelize from '../config/db';
 
 class User extends Model {
-    public id!: BlobDataType;
+    public id!: string;
     public firstname!: string;
     public lastName!: string;
     public email!: string;
@@ -13,9 +14,9 @@ class User extends Model {
 User.init(
     {
         id: {
-            type: DataTypes.BLOB,
+            type: DataTypes.UUID,
             primaryKey: true,
-            defaultValue: () => crypto.randomBytes(16),
+            defaultValue: Sequelize.UUIDV4,
         },
         firstName: {
             type: DataTypes.STRING,

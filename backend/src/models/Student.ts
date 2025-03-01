@@ -1,9 +1,9 @@
 import sequelize from '../config/db';
-import { BlobDataType, DataTypes, Model } from 'sequelize';
+import { DataTypes, Model } from 'sequelize';
 import User from './User';
 
 class Student extends Model {
-    public id!: BlobDataType;
+    public id!: string;
     public matricNumber!: string;
     public level!: 100 | 200 | 300 | 400 | 500;
     public department!: string;
@@ -11,7 +11,7 @@ class Student extends Model {
 Student.init(
     {
         id: {
-            type: DataTypes.BLOB,
+            type: DataTypes.UUID,
             primaryKey: true,
             references: {
                 model: User,

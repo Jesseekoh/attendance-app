@@ -1,13 +1,13 @@
 import crypto from 'crypto';
 import { DataTypes } from 'sequelize';
 import sequelize from '../config/db';
-
+import Sequelize from 'sequelize';
 const Course = sequelize.define('Course', {
     id: {
-        type: DataTypes.BLOB,
+        type: DataTypes.UUID,
         primaryKey: true,
         unique: true,
-        defaultValue: () => crypto.randomBytes(16),
+        defaultValue: Sequelize.UUIDV4,
     },
     code: {
         type: DataTypes.STRING,
