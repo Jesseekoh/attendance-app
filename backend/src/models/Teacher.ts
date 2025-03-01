@@ -12,10 +12,6 @@ const Teacher = sequelize.define('Teacher', {
             key: 'id',
         },
     },
-    level: {
-        type: DataTypes.SMALLINT,
-        allowNull: false,
-    },
     department: {
         type: DataTypes.STRING,
         allowNull: false,
