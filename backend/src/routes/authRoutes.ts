@@ -1,15 +1,29 @@
+import bcrypt from 'bcrypt';
+import { z } from 'zod';
 import Router from 'express';
 import User from '../models/User';
-import bcrypt from 'bcrypt';
 import { generateAccessToken, generateRefreshToken } from '../utils/helper';
+import { Student, Teacher } from '../models';
+import registerSchema from '../schemas/registerSchema';
 const router = Router();
 
 const saltRounds = 10;
 
 router.post('/register', async (req, res) => {
-    const { firstName, lastName, email, matricNumber, role, password } =
-        req.body;
+    // if (!firstName || !lastName || !email || !)
+    // TODO: Validate request payload
     try {
+        const {
+            firstName,
+            lastName,
+            email,
+            role,
+            password,
+            matricNumber,
+            level,
+            department,
+        } = registerSchema.parse(req.body);
+
         let passwordHash = await bcrypt.hash(password, saltRounds);
 
         const newUser = await User.create({
@@ -17,22 +31,39 @@ router.post('/register', async (req, res) => {
             lastName,
             email,
             passwordHash,
-            matricNumber,
             role,
         });
+
+        if (role === 'student') {
+            const student = await Student.create({
+                id: newUser.id,
+                matricNumber,
+                department,
+                level,
+            });
+        } else if (role === 'teacher') {
+            const teacher = await Teacher.create({
+                id: newUser.id,
+                department,
+            });
+        }
+
         res.status(200).json({ message: 'User created successfully' });
         return;
     } catch (error: any) {
         console.log('Error: ', error);
-        if (error?.name == 'SequelizeUniqueConstraintError') {
+        if (error instanceof z.ZodError) {
+            res.status(400).json({
+                message: 'Invalid request payload',
+                errors: error.errors,
+            });
+        } else if (error?.name == 'SequelizeUniqueConstraintError') {
             res.status(409).json({ message: 'User already exists' });
-            return;
+        } else {
+            res.status(500).json({
+                message: 'Something went wrong. Please try again later',
+            });
         }
-
-        res.status(500).json({
-            message: 'Something went wrong. Please try again later',
-        });
-        return;
     }
 });
 
