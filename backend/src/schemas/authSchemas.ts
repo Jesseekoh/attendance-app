@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import { Department } from '../models';
 
 export const registerSchema = z
     .object({
