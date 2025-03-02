@@ -4,15 +4,12 @@ import Router from 'express';
 import User from '../models/User';
 import { generateAccessToken, generateRefreshToken } from '../utils/helper';
 import { Student, Teacher } from '../models';
-import registerSchema from '../schemas/registerSchema';
+import { registerSchema, loginSchema } from '../schemas/authSchemas';
 const router = Router();
 
-const saltRounds = 10;
-
 router.post('/register', async (req, res) => {
-    // if (!firstName || !lastName || !email || !)
-    // TODO: Validate request payload
     try {
+        // parse and validate request body using register schema
         const {
             firstName,
             lastName,
@@ -24,8 +21,11 @@ router.post('/register', async (req, res) => {
             department,
         } = registerSchema.parse(req.body);
 
-        let passwordHash = await bcrypt.hash(password, saltRounds);
+        // hash password
+        const saltRounds = 10;
+        const passwordHash = await bcrypt.hash(password, saltRounds);
 
+        // Create a new User in database
         const newUser = await User.create({
             firstName,
             lastName,
@@ -34,6 +34,7 @@ router.post('/register', async (req, res) => {
             role,
         });
 
+        // Create a new Student record if the user role is 'student'
         if (role === 'student') {
             const student = await Student.create({
                 id: newUser.id,
@@ -42,6 +43,7 @@ router.post('/register', async (req, res) => {
                 level,
             });
         } else if (role === 'teacher') {
+            // Create a new Teacher record if the user role is 'teacher'
             const teacher = await Teacher.create({
                 id: newUser.id,
                 department,
@@ -52,14 +54,17 @@ router.post('/register', async (req, res) => {
         return;
     } catch (error: any) {
         console.log('Error: ', error);
+        // Handle validation errors
         if (error instanceof z.ZodError) {
             res.status(400).json({
                 message: 'Invalid request payload',
                 errors: error.errors,
             });
         } else if (error?.name == 'SequelizeUniqueConstraintError') {
+            // Handle unique constraint
             res.status(409).json({ message: 'User already exists' });
         } else {
+            // Handle other errors
             res.status(500).json({
                 message: 'Something went wrong. Please try again later',
             });
@@ -68,13 +73,12 @@ router.post('/register', async (req, res) => {
 });
 
 router.post('/login', async (req, res) => {
-    const { email, password } = req.body;
-
-    if (!email || !password) {
-        res.status(400).json({ message: 'Email and password required' });
-        return;
-    }
     try {
+        const { email, password } = loginSchema.parse(req.body);
+        // if (!email || !password) {
+        //     res.status(400).json({ message: 'Email and password required' });
+        //     return;
+        // }
         const existingUser = await User.findOne({ where: { email } });
 
         if (!existingUser) {
@@ -114,9 +118,13 @@ router.post('/login', async (req, res) => {
             }
         );
     } catch (error: any) {
-        res.status(500).json({
-            message: 'Something went wrong. Please try again later',
-        });
+        if (error instanceof z.ZodError) {
+            res.status(400).json({ message: 'Email and password required' });
+        } else {
+            res.status(500).json({
+                message: 'Something went wrong. Please try again later',
+            });
+        }
     }
 });
 
