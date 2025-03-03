@@ -1,6 +1,9 @@
 import { Request, Response } from 'express';
 import { Enrollment, User } from '../models';
 
+/**
+ * Enrolls a student in the specified courses
+ */
 export async function enrollCourses(req: Request, res: Response) {
     const { id } = req.user;
     const { courses } = req.body;
@@ -17,6 +20,7 @@ export async function enrollCourses(req: Request, res: Response) {
 
             res.status(200).json({ message: 'Successfully enrolled courses' });
         }
+        res.status(403).json({ message: 'Only students can enroll courses' });
     } catch (error: any) {
         console.log(error);
         res.status(500).json({
