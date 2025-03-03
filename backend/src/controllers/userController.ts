@@ -6,7 +6,7 @@ import { User, Student, Teacher, sequelize } from '../models';
 import { generateAccessToken, generateRefreshToken } from '../utils/helper';
 
 export const registerUser = async (req: Request, res: Response) => {
-    // Start transaction so I can rollback any changes if any DB operations fail
+    // Start transaction so I can rollback any changes if any DB operation fails
     const transaction = await sequelize.transaction();
     try {
         // parse and validate request body using register schema
@@ -50,10 +50,13 @@ export const registerUser = async (req: Request, res: Response) => {
             );
         } else if (role === 'teacher') {
             // Create a new Teacher record if the user role is 'teacher'
-            const teacher = await Teacher.create({
-                id: newUser.id,
-                department,
-            });
+            const teacher = await Teacher.create(
+                {
+                    id: newUser.id,
+                    department,
+                },
+                { transaction }
+            );
         }
         await transaction.commit();
         res.status(200).json({ message: 'User created successfully' });
