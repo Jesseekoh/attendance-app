@@ -6,6 +6,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
+import courseRoutes from './routes/courseRoutes';
 import { sequelize } from './models';
 const app = express();
 
@@ -25,7 +26,7 @@ try {
     sequelize.authenticate();
     console.log('Connected successfully');
     sequelize
-        .sync({ alter: true, force: true })
+        .sync({ alter: true })
         .then(() => console.log('Created Tables successfully'))
         .catch((error) => console.log('Error creating tables: ', error));
 } catch (error) {
@@ -33,6 +34,7 @@ try {
 }
 
 app.use('/auth', authRoutes);
+app.use('/courses', courseRoutes);
 app.use('/users', userRoutes);
 app.listen(process.env.PORT, () => {
     console.log('Server listening on port', process.env.PORT);
