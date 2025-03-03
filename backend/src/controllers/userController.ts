@@ -98,9 +98,10 @@ export const logInUser = async (req: Request, res: Response): Promise<void> => {
             existingUser?.getDataValue('passwordHash'),
             (err, result) => {
                 if (result) {
-                    const id = existingUser.getDataValue('id').toString('hex');
-                    const accessToken = generateAccessToken({ email, id });
-                    const refreshToken = generateRefreshToken({ email, id });
+                    const id = existingUser.getDataValue('id');
+                    const role = existingUser.getDataValue('role');
+                    const accessToken = generateAccessToken({ role, id });
+                    const refreshToken = generateRefreshToken({ role, id });
 
                     res.cookie('accessToken', accessToken, {
                         httpOnly: true,
@@ -144,12 +145,18 @@ export const logOutUser = async (
     res.clearCookie('refreshToken');
 };
 
+// Function to refresh access token
+export const refreshToken = async (
+    req: Request,
+    res: Response
+): Promise<void> => {};
+
 // Function to get the profile of the currently logged in user
 export const getMyProfile = async (
     req: Request,
     res: Response
 ): Promise<void> => {
-    const { id, email } = req.user;
+    const { id } = req.user;
     const user = await User.findOne({
         where: { id },
     });
@@ -158,8 +165,6 @@ export const getMyProfile = async (
     return;
 };
 
-// Function to refresh access token
-export const refreshToken = async (
-    req: Request,
-    res: Response
-): Promise<void> => {};
+export const getUserCourses = async (req: Request, res: Response) => {
+    const { id } = req.user;
+};
