@@ -15,7 +15,7 @@ const limiter = rateLimit({
     standardHeaders: 'draft-8',
     legacyHeaders: false,
 });
-app.use(cors({}));
+app.use(cors({ credentials: true }));
 app.use(limiter);
 app.use(express.json());
 app.use(cookieParser());
