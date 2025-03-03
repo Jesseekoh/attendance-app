@@ -11,9 +11,17 @@ export async function enrollCourses(req: Request, res: Response) {
                 CourseId: courseId,
                 StudentId: id,
             }));
-            await Enrollment.bulkCreate(enrollments);
+            await Enrollment.bulkCreate(enrollments, {
+                updateOnDuplicate: ['CourseId', 'StudentId'],
+            });
+
+            res.status(200).json({ message: 'Successfully enrolled courses' });
         }
-    } catch (error) {
+    } catch (error: any) {
         console.log(error);
+        res.status(500).json({
+            message: 'Something went wrong. Please try again',
+            error: error.message,
+        });
     }
 }
