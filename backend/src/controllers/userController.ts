@@ -5,6 +5,7 @@ import { registerSchema, loginSchema } from '../schemas/authSchemas';
 import { User, Student, Teacher, sequelize } from '../models';
 import { generateAccessToken, generateRefreshToken } from '../utils/helper';
 
+// Function to register a new user
 export const registerUser = async (req: Request, res: Response) => {
     // Start transaction so I can rollback any changes if any DB operation fails
     const transaction = await sequelize.transaction();
@@ -82,6 +83,7 @@ export const registerUser = async (req: Request, res: Response) => {
     }
 };
 
+// Function to log in a user
 export const logInUser = async (req: Request, res: Response): Promise<void> => {
     try {
         const { email, password } = loginSchema.parse(req.body);
@@ -134,6 +136,7 @@ export const logInUser = async (req: Request, res: Response): Promise<void> => {
     }
 };
 
+// Function to log out user
 export const logOutUser = async (
     req: Request,
     res: Response
@@ -141,6 +144,21 @@ export const logOutUser = async (
     res.clearCookie('refreshToken');
 };
 
+// Function to get the profile of the currently logged in user
+export const getMyProfile = async (
+    req: Request,
+    res: Response
+): Promise<void> => {
+    const { id, email } = req.user;
+    const user = await User.findOne({
+        where: { id },
+    });
+
+    res.json({ status: 'success', data: { user } });
+    return;
+};
+
+// Function to refresh access token
 export const refreshToken = async (
     req: Request,
     res: Response
