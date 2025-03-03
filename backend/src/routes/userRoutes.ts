@@ -1,17 +1,10 @@
 import { Router, Request } from 'express';
 import { authenticateToken } from '../middlewares/authMiddleware';
 import User from '../models/User';
+import { getMyProfile } from '../controllers/userController';
 
 const router = Router();
 
-router.get('/me', authenticateToken, async (req: Request, res) => {
-    const { id, email } = req.user;
-    const user = await User.findOne({
-        where: { id },
-    });
-
-    res.json({ status: 'success', data: { user } });
-    return;
-});
+router.get('/me', authenticateToken, getMyProfile);
 
 export default router;
