@@ -45,6 +45,7 @@ export async function getStudentCourses(req: Request, res: Response) {
                 include: {
                     model: Course,
                     attributes: ['id', 'code', 'title'],
+                    through: { attributes: [] },
                 },
             });
 
