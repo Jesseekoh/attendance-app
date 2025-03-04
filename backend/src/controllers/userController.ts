@@ -157,14 +157,28 @@ export const getMyProfile = async (
     res: Response
 ): Promise<void> => {
     const { id } = req.user;
-    const user = await User.findOne({
-        where: { id },
-    });
 
-    res.json({ status: 'success', data: { user } });
+    try {
+        const user = await User.findOne({
+            where: { id },
+        });
+        if (user) {
+            const {
+                passwordHash,
+                createdAt,
+                updatedAt,
+                ...userWithoutPasswordHash
+            } = user.dataValues;
+            res.status(200).json({
+                message: 'Successfully returned user data',
+                data: { user: userWithoutPasswordHash },
+            });
+        } else {
+            res.status(404).json({ message: 'User not found' });
+        }
+    } catch (error) {
+        console.log('An error occured: ', error);
+        res.status(500).json({ message: 'An error occured', error });
+    }
     return;
-};
-
-export const getUserCourses = async (req: Request, res: Response) => {
-    const { id } = req.user;
 };
