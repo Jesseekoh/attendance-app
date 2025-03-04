@@ -6,7 +6,8 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
-import courseRoutes from './routes/courseRoutes';
+import studentRoutes from './routes/studentRoutes';
+import teacherRoutes from './routes/teacherRoutes';
 import { sequelize } from './models';
 const app = express();
 
@@ -33,9 +34,10 @@ try {
     console.log('failed to connect to database: ', error);
 }
 
-app.use('/auth', authRoutes);
-app.use('/courses', courseRoutes);
-app.use('/users', userRoutes);
+app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/users', userRoutes);
+app.use('/api/v1/teachers', teacherRoutes);
+app.use('/api/v1/students', studentRoutes);
 app.listen(process.env.PORT, () => {
     console.log('Server listening on port', process.env.PORT);
 });
