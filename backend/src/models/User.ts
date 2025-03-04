@@ -10,6 +10,8 @@ class User extends Model {
     public email!: string;
     public role!: string;
     public passwordHash!: string;
+    public createdAt!: string;
+    public updatedAt!: string;
 }
 User.init(
     {
