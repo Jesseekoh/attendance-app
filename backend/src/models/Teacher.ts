@@ -1,10 +1,14 @@
-import crypto from 'crypto';
 import sequelize from '../config/db';
-import { DataTypes } from 'sequelize';
+import { DataTypes, Model } from 'sequelize';
 import User from './User';
+import Course from './Course';
 
-const Teacher = sequelize.define(
-    'Teacher',
+class Teacher extends Model {
+    public id!: string;
+    public department!: string;
+    public Courses!: Course[];
+}
+Teacher.init(
     {
         id: {
             type: DataTypes.UUID,
@@ -19,7 +23,7 @@ const Teacher = sequelize.define(
             allowNull: false,
         },
     },
-    { timestamps: false }
+    { timestamps: false, sequelize }
 );
 
 export default Teacher;
