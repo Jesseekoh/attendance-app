@@ -40,6 +40,7 @@ export async function getStudentCourses(req: Request, res: Response) {
         const student = await Student.findOne({ where: { id } });
 
         if (student) {
+            // get all courses a student is enrolled in
             const data = await Student.findOne({
                 where: { id },
                 include: {
