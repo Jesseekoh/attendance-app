@@ -10,6 +10,7 @@ import {
     Enrollment,
 } from '../models';
 import { Model } from 'sequelize';
+import logger from './logger';
 
 async function generateTeachers(count: number) {
     const teachers = [];
@@ -295,7 +296,7 @@ async function generateCourses() {
         const results = await Course.bulkCreate(courses);
         return results;
     } catch (error) {
-        console.log(error);
+        logger.error('Error: ', error);
     }
 }
 async function generateStudents(count: number) {
@@ -348,7 +349,7 @@ export const seedDatabase = async () => {
         const students = await generateStudents(20);
         const courses = await generateCourses();
     } catch (error) {
-        console.log(error);
+        logger.error('Error:', error);
     }
 };
 

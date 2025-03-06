@@ -1,6 +1,7 @@
 import { Request, Response } from 'express';
 import { Course, sequelize, Teacher } from '../models';
 import { Sequelize } from 'sequelize';
+import logger from '../utils/logger';
 
 export async function addTeacherCourses(req: Request, res: Response) {
     const { id } = req.user;
@@ -25,11 +26,11 @@ export async function addTeacherCourses(req: Request, res: Response) {
             res.status(200).json({ message: 'Courses added Successfully' });
         } else {
             res.status(403).json({
-                message: 'Only teachers can teach coursess',
+                message: 'Only teachers can teach courses',
             });
         }
     } catch (error) {
-        console.log(error);
+        logger.error('An error occurred', error);
         res.status(500).json({ message: 'Something went wrong. Try again' });
     }
 }
@@ -56,7 +57,7 @@ export async function getTeacherCourses(req: Request, res: Response) {
             res.status(404).json({ message: 'Teacher not found' });
         }
     } catch (error) {
-        console.log('An error occured', error);
+        logger.error('An error occured', error);
         res.status(500).json({ message: 'An error occured', error });
     }
 }

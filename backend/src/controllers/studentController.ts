@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { Course, Enrollment, Student, User } from '../models';
+import logger from '../utils/logger';
 
 /**
  * Enrolls a student in the specified courses
@@ -25,7 +26,7 @@ export async function enrollCourses(req: Request, res: Response) {
             });
         }
     } catch (error: any) {
-        console.log(error);
+        logger.error('An error occured', error);
         res.status(500).json({
             message: 'Something went wrong. Please try again',
             error: error.message,
@@ -67,7 +68,7 @@ export async function getStudentCourses(req: Request, res: Response) {
             res.status(404).json({ message: 'Student not found' });
         }
     } catch (error) {
-        console.log(error);
+        logger.error('An error occured', error);
         res.status(500).json({
             message: 'Something went wrong. Please try again',
         });

@@ -4,6 +4,7 @@ import { Request, Response } from 'express';
 import { registerSchema, loginSchema } from '../schemas/authSchemas';
 import { User, Student, Teacher, sequelize } from '../models';
 import { generateAccessToken, generateRefreshToken } from '../utils/helper';
+import logger from '../utils/logger';
 
 // Function to register a new user
 export const registerUser = async (req: Request, res: Response) => {
@@ -64,7 +65,7 @@ export const registerUser = async (req: Request, res: Response) => {
         return;
     } catch (error: any) {
         await transaction.rollback();
-        console.log('Error: ', error);
+        logger.error('Error: ', error);
         // Handle validation errors
         if (error instanceof z.ZodError) {
             res.status(400).json({
@@ -177,7 +178,7 @@ export const getMyProfile = async (
             res.status(404).json({ message: 'User not found' });
         }
     } catch (error) {
-        console.log('An error occured: ', error);
+        logger.error('An error occured: ', error);
         res.status(500).json({ message: 'An error occured', error });
     }
     return;
