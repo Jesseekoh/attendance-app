@@ -30,11 +30,11 @@ const Class = sequelize.define('Class', {
         type: DataTypes.TEXT,
         allowNull: false,
     },
-    start_time: {
+    startTime: {
         type: DataTypes.TIME,
     },
 
-    end_time: {
+    endTime: {
         type: DataTypes.TIME,
         allowNull: false,
     },
