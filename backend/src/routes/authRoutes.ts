@@ -1,15 +1,10 @@
 import Router from 'express';
-import {
-    logInUser,
-    logOutUser,
-    refreshToken,
-    registerUser,
-} from '../controllers/userController';
+import userController from '../controllers/userController';
 
 const router = Router();
 
-router.post('/register', registerUser);
-router.post('/login', logInUser);
-router.post('/logout', logOutUser);
-router.post('/refresh-token', refreshToken);
+router.post('/register', userController.registerUser);
+router.post('/login', userController.logInUser);
+router.post('/logout', userController.logOutUser);
+router.post('/refresh-token', userController.refreshToken);
 export default router;

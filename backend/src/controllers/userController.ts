@@ -5,6 +5,7 @@ import { registerSchema, loginSchema } from '../schemas/authSchemas';
 import { User, Student, Teacher, sequelize } from '../models';
 import { generateAccessToken, generateRefreshToken } from '../utils/helper';
 import logger from '../utils/logger';
+import { ITokenPayload } from '../types';
 
 // Function to register a new user
 export const registerUser = async (req: Request, res: Response) => {
@@ -157,7 +158,7 @@ export const getMyProfile = async (
     req: Request,
     res: Response
 ): Promise<void> => {
-    const { id } = req.user;
+    const { id } = req.user as ITokenPayload;
 
     try {
         const user = await User.findOne({
@@ -182,4 +183,12 @@ export const getMyProfile = async (
         res.status(500).json({ message: 'An error occured', error });
     }
     return;
+};
+
+export default {
+    refreshToken,
+    getMyProfile,
+    logOutUser,
+    logInUser,
+    registerUser,
 };

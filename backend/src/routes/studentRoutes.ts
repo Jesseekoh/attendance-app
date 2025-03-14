@@ -1,13 +1,10 @@
 import { Router } from 'express';
-import {
-    enrollCourses,
-    getStudentCourses,
-} from '../controllers/studentController';
+import studentController from '../controllers/studentController';
 import { authenticateToken } from '../middlewares/authMiddleware';
 
 const router = Router();
 
-router.get('/courses', authenticateToken, getStudentCourses);
-router.post('/courses', authenticateToken, enrollCourses);
+router.get('/courses', authenticateToken, studentController.getStudentCourses);
+router.post('/courses', authenticateToken, studentController.enrollCourses);
 
 export default router;

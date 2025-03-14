@@ -1,10 +1,10 @@
 import { Router, Request } from 'express';
 import { authenticateToken } from '../middlewares/authMiddleware';
 import User from '../models/User';
-import { getMyProfile } from '../controllers/userController';
+import userController from '../controllers/userController';
 
 const router = Router();
 
-router.get('/me', authenticateToken, getMyProfile);
+router.get('/me', authenticateToken, userController.getMyProfile);
 
 export default router;
