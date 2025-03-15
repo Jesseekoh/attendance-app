@@ -1,5 +1,6 @@
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
+import { ITokenPayload } from '../types';
 
 export const authenticateToken = (
     req: Request,
@@ -19,6 +20,6 @@ export const authenticateToken = (
         throw new Error('Access Token is not defined');
     }
     const user = jwt.verify(token, secret) as string | JwtPayload;
-    req.user = user;
+    req.user = user as ITokenPayload;
     next();
 };

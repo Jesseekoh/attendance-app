@@ -1,6 +1,7 @@
 import { Request, Response, Router } from 'express';
 import { sequelize } from '../models';
 import { authenticateToken } from '../middlewares/authMiddleware';
+import { ITokenPayload } from '../types';
 
 const router = Router();
 
@@ -11,7 +12,7 @@ router.get(
     '/:courseId/students',
     authenticateToken,
     (req: Request, res: Response) => {
-        const { id } = req.user;
+        const { id } = req.user as ITokenPayload;
     }
 );
 
