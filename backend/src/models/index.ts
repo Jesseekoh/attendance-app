@@ -23,6 +23,9 @@ Course.belongsToMany(Teacher, {
     through: 'taught_courses',
 });
 
+Teacher.hasMany(Class, { foreignKey: 'teacherId' });
+Class.belongsTo(Teacher, { foreignKey: 'teacherId' });
+
 // Many-Many relationship between Class and Student
 Student.belongsToMany(Class, { through: 'attendance' });
 Class.belongsToMany(Student, { through: 'attendance' });
