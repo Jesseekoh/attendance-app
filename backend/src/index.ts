@@ -5,10 +5,14 @@ import pinoHttp from 'pino-http';
 import { rateLimit } from 'express-rate-limit';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
-import authRoutes from './routes/authRoutes';
-import userRoutes from './routes/userRoutes';
-import studentRoutes from './routes/studentRoutes';
-import teacherRoutes from './routes/teacherRoutes';
+import {
+    authRoutes,
+    classRoutes,
+    courseRoutes,
+    studentRoutes,
+    teacherRoutes,
+    userRoutes,
+} from './routes';
 import { sequelize } from './models';
 import logger from './utils/logger';
 
@@ -41,6 +45,7 @@ app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/teachers', teacherRoutes);
 app.use('/api/v1/students', studentRoutes);
+app.use('/api/v1/classes', classRoutes);
 app.listen(process.env.PORT, () => {
     logger.info(`Server is listening on port ${process.env.PORT}`);
 });
