@@ -2,10 +2,9 @@ import { Request, Response } from 'express';
 import { Course, sequelize, Teacher } from '../models';
 import { Sequelize } from 'sequelize';
 import logger from '../utils/logger';
-import { ITokenPayload } from '../types';
 
 export async function addTeacherCourses(req: Request, res: Response) {
-    const { id } = req.user as ITokenPayload;
+    const { id } = req.user;
     const { courses } = req.body;
 
     try {
@@ -37,7 +36,7 @@ export async function addTeacherCourses(req: Request, res: Response) {
 }
 
 export async function getTeacherCourses(req: Request, res: Response) {
-    const { id } = req.user as ITokenPayload;
+    const { id } = req.user;
 
     try {
         const teacher = await Teacher.findOne({ where: { id } });

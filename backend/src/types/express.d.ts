@@ -4,7 +4,7 @@ import { ITokenPayload } from '.';
 declare global {
     namespace Express {
         interface Request {
-            user?: ITokenPayload; // or a custom User type
+            user?: any; // or a custom User type
         }
     }
 }

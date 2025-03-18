@@ -1,7 +1,7 @@
 import { Request, Response, Router } from 'express';
 import { sequelize } from '../models';
+import courseController from '../controllers/courseController';
 import { authenticateToken } from '../middlewares/authMiddleware';
-import { ITokenPayload } from '../types';
 
 const router = Router();
 
@@ -11,11 +11,10 @@ const router = Router();
 router.get(
     '/:courseId/students',
     authenticateToken,
-    (req: Request, res: Response) => {
-        const { id } = req.user as ITokenPayload;
-    }
+    courseController.getAllCourseStudents
 );
 
-// get all courses in a depsrtment
+// get all the attendance for the specified course
+router.get('/:courseId/attendance', authenticateToken);
 
 export default router;
