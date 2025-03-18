@@ -62,6 +62,7 @@ export const registerUser = async (req: Request, res: Response) => {
             );
         }
         await transaction.commit();
+        logger.info('User registered successfully');
         res.status(200).json({ message: 'User created successfully' });
         return;
     } catch (error: any) {
@@ -119,6 +120,7 @@ export const logInUser = async (req: Request, res: Response): Promise<void> => {
                             Date.now() + 30 * 24 * 60 * 60 * 1000 // 30 days
                         ),
                     });
+                    logger.info('User logged in successfully');
                     res.status(200).json({
                         message: 'Log in successful',
                         data: { accessToken },
@@ -145,6 +147,8 @@ export const logOutUser = async (
     res: Response
 ): Promise<void> => {
     res.clearCookie('refreshToken');
+    logger.info('User logged out successfully');
+    res.status(200).json({ message: 'Logged out successfully' });
 };
 
 // Function to refresh access token
