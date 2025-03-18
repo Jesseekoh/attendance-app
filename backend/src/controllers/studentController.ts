@@ -1,13 +1,12 @@
 import { Request, Response } from 'express';
 import { Course, Enrollment, Student, User } from '../models';
 import logger from '../utils/logger';
-import { ITokenPayload } from '../types';
 
 /**
  * Enrolls a student in the specified courses
  */
 export async function enrollCourses(req: Request, res: Response) {
-    const { id } = req.user as ITokenPayload;
+    const { id } = req.user;
     const { courses } = req.body;
     try {
         const user = await Student.findOne({ where: { id } });
@@ -36,7 +35,7 @@ export async function enrollCourses(req: Request, res: Response) {
 }
 
 export async function getStudentCourses(req: Request, res: Response) {
-    const { id } = req.user as ITokenPayload;
+    const { id } = req.user;
 
     try {
         const student = await Student.findOne({ where: { id } });
