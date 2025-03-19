@@ -12,6 +12,7 @@ import {
     studentRoutes,
     teacherRoutes,
     userRoutes,
+    venueRoutes,
 } from './routes';
 import { sequelize } from './models';
 import logger from './utils/logger';
@@ -34,7 +35,7 @@ try {
     sequelize.authenticate();
     logger.info('Database connected successfully');
     sequelize
-        .sync({ alter: true })
+        .sync()
         .then(() => logger.info('Created Tables successfully'))
         .catch((error) => logger.error('Error creating tables: ', error));
 } catch (error) {
@@ -42,11 +43,12 @@ try {
 }
 
 app.use('/api/v1/auth', authRoutes);
-app.use('/api/v1/users', userRoutes);
-app.use('/api/v1/teachers', teacherRoutes);
-app.use('/api/v1/students', studentRoutes);
 app.use('/api/v1/classes', classRoutes);
 app.use('/api/v1/courses', courseRoutes);
+app.use('/api/v1/students', studentRoutes);
+app.use('/api/v1/teachers', teacherRoutes);
+app.use('/api/v1/users', userRoutes);
+app.use('/api/v1/venues', venueRoutes);
 app.listen(process.env.PORT, () => {
     logger.info(`Server is listening on port ${process.env.PORT}`);
 });
