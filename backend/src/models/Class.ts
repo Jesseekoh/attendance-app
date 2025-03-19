@@ -1,15 +1,16 @@
 import sequelize from '../config/db';
 import { DataTypes } from 'sequelize';
-import crypto from 'crypto';
+import Sequelize from 'sequelize';
 import Teacher from './Teacher';
 import Course from './Course';
+import Venue from './Venue';
 
 const Class = sequelize.define('Class', {
     id: {
         type: DataTypes.UUID,
         primaryKey: true,
         unique: true,
-        defaultValue: () => crypto.randomBytes(16),
+        defaultValue: Sequelize.UUIDV4,
     },
     teacherId: {
         type: DataTypes.UUID,
@@ -26,10 +27,15 @@ const Class = sequelize.define('Class', {
             key: 'id',
         },
     },
-    location: {
-        type: DataTypes.TEXT,
+    venueId: {
+        type: DataTypes.UUID,
         allowNull: false,
+        references: {
+            model: Venue,
+            key: 'id',
+        },
     },
+
     startTime: {
         type: DataTypes.TIME,
     },

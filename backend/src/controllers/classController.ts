@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { Class, sequelize, Teacher, User } from '../models';
+import { Class, sequelize, User } from '../models';
 import logger from '../utils/logger';
 import { Sequelize } from 'sequelize';
 
@@ -131,4 +131,9 @@ async function markAttendance(req: Request, res: Response) {
     }
 }
 
-export default { createClass, getClass, updateClassDetails, markAttendance };
+export default {
+    createClass,
+    getClass,
+    updateClassDetails,
+    markAttendance,
+};
