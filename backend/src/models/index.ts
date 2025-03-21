@@ -6,6 +6,7 @@ import Course from './Course';
 import Class from './Class';
 import Enrollment from './Enrollment';
 import Department from './Department';
+import Venue from './Venue';
 
 //One-One relationship between Teacher and User
 User.hasOne(Teacher, { foreignKey: 'id' });
@@ -29,6 +30,9 @@ Class.belongsTo(Teacher, { foreignKey: 'teacherId' });
 // Many-Many relationship between Class and Student
 Student.belongsToMany(Class, { through: 'attendance' });
 Class.belongsToMany(Student, { through: 'attendance' });
+
+Venue.hasMany(Class, { foreignKey: 'venueId' });
+Class.belongsTo(Venue, { foreignKey: 'venueId' });
 
 // One-Many relationship between Class and courses
 Course.hasMany(Class, { foreignKey: 'courseId', as: 'classes' });
@@ -56,6 +60,7 @@ export {
     Student,
     Class,
     Course,
+    Venue,
     Enrollment,
     Department,
 };
