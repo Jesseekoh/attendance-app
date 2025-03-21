@@ -1,6 +1,20 @@
 import { Request, Response } from 'express';
-import { sequelize, User } from '../models';
+import { Course, sequelize, User } from '../models';
 import logger from '../utils/logger';
+
+// Gets all courses
+async function getAllCourses(req: Request, res: Response) {
+    try {
+        const courses = await Course.findAll();
+        res.status(200).json({
+            message: 'Courses retrieved successfully',
+            data: courses,
+        });
+    } catch (error) {
+        logger.error(error);
+        res.status(500).json({ message: 'An Error occurred' });
+    }
+}
 
 // Gets all students taking a course
 async function getAllCourseStudents(req: Request, res: Response) {
@@ -41,4 +55,4 @@ async function getAllCourseStudents(req: Request, res: Response) {
     }
 }
 
-export default { getAllCourseStudents };
+export default { getAllCourseStudents, getAllCourses };

@@ -5,7 +5,8 @@ import { authenticateToken } from '../middlewares/authMiddleware';
 
 const router = Router();
 
-// router.get('/courses/:courseId')
+// Get all courses
+router.get('/', courseController.getAllCourses);
 
 // get all students taking a course
 router.get(
