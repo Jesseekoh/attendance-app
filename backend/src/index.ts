@@ -35,7 +35,7 @@ try {
     sequelize.authenticate();
     logger.info('Database connected successfully');
     sequelize
-        .sync()
+        .sync({ alter: true })
         .then(() => logger.info('Created Tables successfully'))
         .catch((error) => logger.error('Error creating tables: ', error));
 } catch (error) {
