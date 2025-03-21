@@ -5,9 +5,9 @@ import { Sequelize } from 'sequelize';
 
 async function createClass(req: Request, res: Response) {
     const { id } = req.user;
-    const { startTime, endTime, classVenue, courseId } = req.body;
+    const { startTime, endTime, venueId, courseId } = req.body;
 
-    if (!(startTime && endTime && classVenue && courseId)) {
+    if (!(startTime && endTime && venueId && courseId)) {
         res.status(400).json({
             message:
                 'You need to provide startTime, endTime, classVenue and courseId',
@@ -25,14 +25,20 @@ async function createClass(req: Request, res: Response) {
         const newClass = await Class.create({
             teacherId: id,
             courseId,
-            location: classVenue,
+            venueId,
             startTime,
             endTime,
         });
 
         res.status(200).json({ message: 'Class created successfully' });
-    } catch (error) {
+    } catch (error: any) {
         logger.error(error);
+        if (error?.name === 'SequelizeForeignKeyConstraintError') {
+            res.status(400).json({
+                message: 'Class venue or Course does not exist in database',
+            });
+            return;
+        }
         res.status(500).json({ message: 'Error creating class' });
     }
 }

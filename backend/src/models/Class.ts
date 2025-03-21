@@ -37,11 +37,11 @@ const Class = sequelize.define('Class', {
     },
 
     startTime: {
-        type: DataTypes.TIME,
+        type: DataTypes.DATE,
     },
 
     endTime: {
-        type: DataTypes.TIME,
+        type: DataTypes.DATE,
         allowNull: false,
     },
 });
