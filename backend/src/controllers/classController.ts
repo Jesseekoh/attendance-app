@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { Class, sequelize, User } from '../models';
+import { Class, sequelize, User, Venue } from '../models';
 import logger from '../utils/logger';
 import { Sequelize } from 'sequelize';
 
@@ -33,8 +33,15 @@ async function createClass(req: Request, res: Response) {
         res.status(200).json({ message: 'Class created successfully' });
     } catch (error: any) {
         logger.error(error);
+        if (error?.name === 'SequelizeUniqueConstraintError') {
+            res.status(400).json({
+                success: false,
+                message: 'Class already exists',
+            });
+        }
         if (error?.name === 'SequelizeForeignKeyConstraintError') {
             res.status(400).json({
+                success: false,
                 message: 'Class venue or Course does not exist in database',
             });
             return;
@@ -46,8 +53,8 @@ async function createClass(req: Request, res: Response) {
 async function getClass(req: Request, res: Response) {
     const { classId } = req.params;
     try {
-        const classData = await Class.findOne({
-            where: { id: classId },
+        const classData = await Class.findByPk(classId, {
+            include: { model: Venue },
         });
         if (classData) {
             res.status(200).json({ message: 'successful', data: classData });
@@ -112,22 +119,58 @@ async function updateClassDetails(req: Request, res: Response) {
 
 async function markAttendance(req: Request, res: Response) {
     const { id } = req.user;
-    const { userLocation } = req.body;
+    const { studentLocation } = req.body;
     const { classId } = req.params;
     try {
-        const classData = await Class.findByPk(classId);
+        const classData = await Class.findByPk(classId, {
+            include: { model: Venue },
+        });
         if (!classData) {
             res.status(404).json({ message: 'Class not found' });
             return;
         }
         const user = await User.findByPk(id);
         if (user?.getDataValue('role') === 'student') {
-            await sequelize.models.attendance.create({
-                StudentId: id,
-                ClassId: classData.getDataValue('id'),
-            });
+            const currentTime = new Date();
 
-            res.status(200).json({ message: 'Attendance marked successfully' });
+            // checks if the attendance is too early or too late
+            if (
+                currentTime < classData.getDataValue('startTime') ||
+                currentTime > classData.getDataValue('endTime')
+            ) {
+                res.status(400).json({
+                    success: false,
+                    message: 'Attendance is not allowed at this time',
+                });
+                return;
+            }
+
+            // TODO: Check if user's location matxhes the venue of the class
+
+            if (
+                studentLocation.latitude ===
+                    parseFloat(classData.getDataValue('Venue').latitude) &&
+                studentLocation.longitude ===
+                    parseFloat(classData.getDataValue('Venue').longitude)
+            ) {
+                await sequelize.models.attendance.create({
+                    StudentId: id,
+                    ClassId: classData.getDataValue('id'),
+                });
+                res.status(200).json({
+                    message: 'Attendance marked successfully',
+                    data: {
+                        studentLocation,
+                        location:
+                            typeof classData.getDataValue('Venue').latitude,
+                    },
+                });
+                return;
+            }
+            res.status(403).json({
+                success: false,
+                message: 'You are not at the class venue',
+            });
             return;
         }
         res.status(403).json({ message: 'Only Students can mark attendance' });
