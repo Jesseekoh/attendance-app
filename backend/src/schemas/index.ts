@@ -1,6 +1,13 @@
 import { z } from 'zod';
 
-export const registerSchema = z
+export const ClassSchema = z.object({
+    courseId: z.string().length(36),
+    venueId: z.string().length(36),
+    startTime: z.string().datetime(),
+    endTime: z.string().datetime(),
+});
+
+export const RegisterSchema = z
     .object({
         firstName: z.string().min(1),
         lastName: z.string().min(1),
@@ -38,7 +45,7 @@ export const registerSchema = z
         { message: 'Department is required for teachers' }
     );
 
-export const loginSchema = z.object({
+export const LoginSchema = z.object({
     email: z.string().email(),
     password: z.string().min(6),
 });
