@@ -16,6 +16,8 @@ import {
 } from './routes';
 import { sequelize } from './models';
 import logger from './utils/logger';
+import swaggerJSDoc from 'swagger-jsdoc';
+import swaggerUi from 'swagger-ui-express';
 
 const app = express();
 const limiter = rateLimit({
@@ -24,6 +26,20 @@ const limiter = rateLimit({
     standardHeaders: 'draft-8',
     legacyHeaders: false,
 });
+
+const swaggerOptions = {
+    definition: {
+        openapi: '3.0.0',
+        info: {
+            title: 'Attendance app',
+            version: '1.0.0',
+        },
+    },
+    apis: ['./src/routes/*.js'],
+};
+
+const swaggerDocs = swaggerJSDoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 app.use(pinoHttp({ logger }));
 app.use(cors({ credentials: true }));
 app.use(limiter);
