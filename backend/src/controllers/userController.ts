@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt';
 import { z } from 'zod';
 import { Request, Response } from 'express';
-import { registerSchema, loginSchema } from '../schemas/authSchemas';
+import { RegisterSchema, LoginSchema } from '../schemas';
 import { User, Student, Teacher, sequelize } from '../models';
 import { generateAccessToken, generateRefreshToken } from '../utils/helper';
 import logger from '../utils/logger';
@@ -22,7 +22,7 @@ export const registerUser = async (req: Request, res: Response) => {
             matricNumber,
             level,
             department,
-        } = registerSchema.parse(req.body);
+        } = RegisterSchema.parse(req.body);
 
         // hash password
         const saltRounds = 10;
@@ -63,7 +63,10 @@ export const registerUser = async (req: Request, res: Response) => {
         }
         await transaction.commit();
         logger.info('User registered successfully');
-        res.status(200).json({ message: 'User created successfully' });
+        res.status(200).json({
+            success: true,
+            message: 'User created successfully',
+        });
         return;
     } catch (error: any) {
         await transaction.rollback();
@@ -71,15 +74,20 @@ export const registerUser = async (req: Request, res: Response) => {
         // Handle validation errors
         if (error instanceof z.ZodError) {
             res.status(400).json({
+                success: false,
                 message: 'Invalid request payload',
                 errors: error.errors,
             });
         } else if (error?.name == 'SequelizeUniqueConstraintError') {
             // Handle unique constraint
-            res.status(409).json({ message: 'User already exists' });
+            res.status(409).json({
+                success: false,
+                message: 'User already exists',
+            });
         } else {
             // Handle other errors
             res.status(500).json({
+                success: false,
                 message: 'Something went wrong. Please try again later',
             });
         }
@@ -89,11 +97,22 @@ export const registerUser = async (req: Request, res: Response) => {
 // Function to log in a user
 export const logInUser = async (req: Request, res: Response): Promise<void> => {
     try {
-        const { email, password } = loginSchema.parse(req.body);
+        const isValidRequest = LoginSchema.safeParse(req.body);
+        if (!isValidRequest.success) {
+            res.status(400).json({
+                success: false,
+                message: 'Email and password required',
+            });
+            return;
+        }
+        const { email, password } = LoginSchema.parse(req.body);
         const existingUser = await User.findOne({ where: { email } });
 
         if (!existingUser) {
-            res.status(404).json({ message: 'User does not exist' });
+            res.status(404).json({
+                success: false,
+                message: 'User does not exist',
+            });
             return;
         }
         bcrypt.compare(
@@ -122,22 +141,23 @@ export const logInUser = async (req: Request, res: Response): Promise<void> => {
                     });
                     logger.info('User logged in successfully');
                     res.status(200).json({
+                        success: true,
                         message: 'Log in successful',
                         data: { accessToken },
                     });
                     return;
                 }
-                res.status(401).json({ message: 'Wrong email or password' });
+                res.status(401).json({
+                    success: false,
+                    message: 'Wrong email or password',
+                });
             }
         );
     } catch (error: any) {
-        if (error instanceof z.ZodError) {
-            res.status(400).json({ message: 'Email and password required' });
-        } else {
-            res.status(500).json({
-                message: 'Something went wrong. Please try again later',
-            });
-        }
+        res.status(500).json({
+            success: false,
+            message: 'Something went wrong. Please try again later',
+        });
     }
 };
 
@@ -148,7 +168,7 @@ export const logOutUser = async (
 ): Promise<void> => {
     res.clearCookie('refreshToken');
     logger.info('User logged out successfully');
-    res.status(200).json({ message: 'Logged out successfully' });
+    res.status(200).json({ success: true, message: 'Logged out successfully' });
 };
 
 // Function to refresh access token
@@ -176,15 +196,20 @@ export const getMyProfile = async (
                 ...userWithoutPasswordHash
             } = user.dataValues;
             res.status(200).json({
+                success: true,
                 message: 'Successfully returned user data',
                 data: { user: userWithoutPasswordHash },
             });
         } else {
-            res.status(404).json({ message: 'User not found' });
+            res.status(404).json({ success: false, message: 'User not found' });
         }
     } catch (error) {
         logger.error('An error occured: ', error);
-        res.status(500).json({ message: 'An error occured', error });
+        res.status(500).json({
+            success: false,
+            message: 'An error occured',
+            error,
+        });
     }
     return;
 };

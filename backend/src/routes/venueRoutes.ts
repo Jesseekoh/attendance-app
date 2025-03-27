@@ -9,12 +9,13 @@ async function getAllVenues(req: Request, res: Response) {
         const venues = await Venue.findAll();
 
         res.status(200).json({
+            success: true,
             data: venues,
             message: 'Venues retrieved successfully',
         });
     } catch (error) {
         logger.error(error);
-        res.status(500).json({ message: 'An error occurred' });
+        res.status(500).json({ success: false, message: 'An error occurred' });
     }
 }
 
