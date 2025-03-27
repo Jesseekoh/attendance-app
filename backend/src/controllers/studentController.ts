@@ -19,15 +19,20 @@ export async function enrollCourses(req: Request, res: Response) {
                 updateOnDuplicate: ['CourseId', 'StudentId'],
             });
 
-            res.status(200).json({ message: 'Successfully enrolled courses' });
+            res.status(200).json({
+                success: true,
+                message: 'Successfully enrolled courses',
+            });
         } else {
             res.status(403).json({
+                success: false,
                 message: 'Only students can enroll courses',
             });
         }
     } catch (error: any) {
         logger.error('An error occured', error);
         res.status(500).json({
+            success: false,
             message: 'Something went wrong. Please try again',
             error: error.message,
         });
@@ -55,21 +60,27 @@ export async function getStudentCourses(req: Request, res: Response) {
 
             if (courses) {
                 res.status(200).json({
+                    success: true,
                     message: 'Successfully fetched data',
                     data: { courses },
                 });
             } else {
                 res.status(200).json({
+                    success: true,
                     message: 'Student is enrolled in no courses',
                 });
             }
         } else {
             // response if no student is found
-            res.status(404).json({ message: 'Student not found' });
+            res.status(404).json({
+                success: false,
+                message: 'Student not found',
+            });
         }
     } catch (error) {
         logger.error('An error occured', error);
         res.status(500).json({
+            success: false,
             message: 'Something went wrong. Please try again',
         });
     }
