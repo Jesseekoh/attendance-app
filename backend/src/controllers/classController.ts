@@ -1,23 +1,26 @@
 import { Request, Response } from 'express';
 import { Class, sequelize, User, Venue } from '../models';
 import logger from '../utils/logger';
-import { Sequelize } from 'sequelize';
+import { ClassSchema } from '../schemas';
 
 async function createClass(req: Request, res: Response) {
-    const { id } = req.user;
-    const { startTime, endTime, venueId, courseId } = req.body;
-
-    if (!(startTime && endTime && venueId && courseId)) {
+    const isValidRequest = ClassSchema.safeParse(req.body);
+    if (!isValidRequest.success) {
         res.status(400).json({
+            success: false,
             message:
                 'You need to provide startTime, endTime, classVenue and courseId',
         });
         return;
     }
+    const { id } = req.user;
+    const { startTime, endTime, venueId, courseId } = req.body;
+
     try {
         const user = await User.findOne({ where: { id } });
         if (user?.getDataValue('role') !== 'teacher') {
             res.status(403).json({
+                success: false,
                 message: 'Only teachers can access this route',
             });
             return;
@@ -30,7 +33,10 @@ async function createClass(req: Request, res: Response) {
             endTime,
         });
 
-        res.status(200).json({ message: 'Class created successfully' });
+        res.status(200).json({
+            success: true,
+            message: 'Class created successfully',
+        });
     } catch (error: any) {
         logger.error(error);
         if (error?.name === 'SequelizeUniqueConstraintError') {
@@ -46,7 +52,10 @@ async function createClass(req: Request, res: Response) {
             });
             return;
         }
-        res.status(500).json({ message: 'Error creating class' });
+        res.status(500).json({
+            success: false,
+            message: 'Error creating class',
+        });
     }
 }
 
@@ -57,15 +66,23 @@ async function getClass(req: Request, res: Response) {
             include: { model: Venue },
         });
         if (classData) {
-            res.status(200).json({ message: 'successful', data: classData });
+            res.status(200).json({
+                success: true,
+                message: 'successful',
+                data: classData,
+            });
             return;
         } else {
             // response if class with specified id is not found
-            res.status(404).json({ message: 'Class does not exist' });
+            res.status(404).json({
+                success: false,
+                message: 'Class does not exist',
+            });
         }
     } catch (error) {
         logger.error(error);
         res.status(500).json({
+            success: false,
             message: 'Error retrieving class details',
             error,
         });
@@ -87,12 +104,16 @@ async function updateClassDetails(req: Request, res: Response) {
             });
 
             if (!classData) {
-                res.status(404).json({ message: 'Class not found' });
+                res.status(404).json({
+                    success: false,
+                    message: 'Class not found',
+                });
                 return;
             }
 
             if (id !== classData?.getDataValue('teacherId')) {
                 res.status(403).json({
+                    success: false,
                     message: "You're not authorized to update this class",
                 });
                 return;
@@ -105,15 +126,22 @@ async function updateClassDetails(req: Request, res: Response) {
             if (endTime) updateData.endTime = endTime;
             await classData?.update(updateData);
 
-            res.status(200).json({ message: 'Class updated successfully' });
+            res.status(200).json({
+                success: true,
+                message: 'Class updated successfully',
+            });
         } else {
             res.status(403).json({
+                success: false,
                 message: 'Only teachers can update class details',
             });
         }
     } catch (error) {
         logger.error(error);
-        res.status(500).json({ message: 'Error updating class details' });
+        res.status(500).json({
+            success: false,
+            message: 'Error updating class details',
+        });
     }
 }
 
@@ -126,7 +154,10 @@ async function markAttendance(req: Request, res: Response) {
             include: { model: Venue },
         });
         if (!classData) {
-            res.status(404).json({ message: 'Class not found' });
+            res.status(404).json({
+                success: false,
+                message: 'Class not found',
+            });
             return;
         }
         const user = await User.findByPk(id);
@@ -158,6 +189,7 @@ async function markAttendance(req: Request, res: Response) {
                     ClassId: classData.getDataValue('id'),
                 });
                 res.status(200).json({
+                    success: true,
                     message: 'Attendance marked successfully',
                     data: {
                         studentLocation,
@@ -173,10 +205,16 @@ async function markAttendance(req: Request, res: Response) {
             });
             return;
         }
-        res.status(403).json({ message: 'Only Students can mark attendance' });
+        res.status(403).json({
+            success: false,
+            message: 'Only Students can mark attendance',
+        });
     } catch (error) {
         logger.error(error);
-        res.status(500).json({ message: 'Error marking attendance' });
+        res.status(500).json({
+            success: false,
+            message: 'Error marking attendance',
+        });
     }
 }
 

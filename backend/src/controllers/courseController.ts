@@ -7,12 +7,13 @@ async function getAllCourses(req: Request, res: Response) {
     try {
         const courses = await Course.findAll();
         res.status(200).json({
+            success: true,
             message: 'Courses retrieved successfully',
             data: courses,
         });
     } catch (error) {
         logger.error(error);
-        res.status(500).json({ message: 'An Error occurred' });
+        res.status(500).json({ success: false, message: 'An Error occurred' });
     }
 }
 
@@ -41,15 +42,21 @@ async function getAllCourseStudents(req: Request, res: Response) {
                 department: student.department,
             }));
 
-            res.status(200).json({ message: 'Successful', data: students });
+            res.status(200).json({
+                success: true,
+                message: 'Successful',
+                data: students,
+            });
         } else {
             res.status(403).json({
+                success: false,
                 message: 'Only teachers can access this route',
             });
         }
     } catch (error) {
         logger.error(error);
         res.status(500).json({
+            success: false,
             message: 'An error occurred retrieving students',
         });
     }
