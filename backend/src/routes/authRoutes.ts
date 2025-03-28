@@ -1,96 +1,95 @@
 import Router from 'express';
-import User from '../models/User';
-import bcrypt from 'bcrypt';
-import { generateAccessToken, generateRefreshToken } from '../utils/helper';
+import userController from '../controllers/userController';
+
 const router = Router();
 
-const saltRounds = 10;
+/**
+ * @swagger
+ * /api/v1/auth/register:
+ *  post:
+ *    summary: Register a new user
+ *    description: Register a new user
+ *    requestBody:
+ *      required: true
+ *      content:
+ *        application/json:
+ *          schema:
+ *            type: object
+ *            properties:
+ *              firstName:
+ *                type: string
+ *                description: The first name of the user
+ *              lastName:
+ *                type: string
+ *                description: The last name of the user
+ *              email:
+ *                type: string
+ *                description: The email address of the user
+ *              role:
+ *                type: string
+ *                description: The role of the user. Can be either student or teacher
+ *              matricNumber:
+ *                type: string
+ *                description: The user's matric number if the user is a student
+ *              department:
+ *                type: string
+ *                description: The department of the user
+ *    responses:
+ *      "200":
+ *        description: User registered successfully
+ *      "400":
+ *        description: Invalid request body
+ *      "409":
+ *        description: User already exists
 
-router.post('/register', async (req, res) => {
-    const { firstName, lastName, email, matricNumber, role, password } =
-        req.body;
-    try {
-        let passwordHash = await bcrypt.hash(password, saltRounds);
+ */
+router.post('/register', userController.registerUser);
 
-        const newUser = await User.create({
-            firstName,
-            lastName,
-            email,
-            passwordHash,
-            matricNumber,
-            role,
-        });
-        res.status(200).json({ message: 'User created successfully' });
-        return;
-    } catch (error: any) {
-        console.log('Error: ', error);
-        if (error?.name == 'SequelizeUniqueConstraintError') {
-            res.status(409).json({ message: 'User already exists' });
-            return;
-        }
+/**
+ * @swagger
+ * /api/v1/auth/login:
+ *  post:
+ *    summary: Log in a user
+ *    requestBody:
+ *      required: true
+ *      content:
+ *        application/json:
+ *          schema:
+ *            type: object
+ *            properties:
+ *              email:
+ *                type: string
+ *              password:
+ *                type: string
+ *    responses:
+ *      "200":
+ *        description: User logged in successfully
+ *      "400":
+ *        description: Invalid request body
+ *      "404":
+ *        description: User not found
+ */
+router.post('/login', userController.logInUser);
 
-        res.status(500).json({
-            message: 'Something went wrong. Please try again later',
-        });
-        return;
-    }
-});
+/**
+ * @swagger
+ *  /api/v1/auth/logout:
+ *    post:
+ *      summary: Log user out
+ *      responses:
+ *        "200":
+ *          description: User logged out successfully
+ */
+router.post('/logout', userController.logOutUser);
 
-router.post('/login', async (req, res) => {
-    const { email, password } = req.body;
-
-    if (!email || !password) {
-        res.status(400).json({ message: 'Email and password required' });
-        return;
-    }
-    try {
-        const existingUser = await User.findOne({ where: { email } });
-
-        if (!existingUser) {
-            res.status(404).json({ message: 'User does not exist' });
-            return;
-        }
-        bcrypt.compare(
-            password,
-            existingUser?.getDataValue('passwordHash'),
-            (err, result) => {
-                if (result) {
-                    const id = existingUser.getDataValue('id').toString('hex');
-                    const accessToken = generateAccessToken({ email, id });
-                    const refreshToken = generateRefreshToken({ email, id });
-
-                    res.cookie('accessToken', accessToken, {
-                        httpOnly: true,
-                        secure: true,
-                        sameSite: 'strict',
-                        expires: new Date(Date.now() + 15 * 60 * 1000), //15 minutes
-                    });
-                    res.cookie('refreshToken', refreshToken, {
-                        httpOnly: true,
-                        secure: true,
-                        sameSite: 'strict',
-                        expires: new Date(
-                            Date.now() + 30 * 24 * 60 * 60 * 1000 // 30 days
-                        ),
-                    });
-                    res.status(200).json({
-                        message: 'Log in successful',
-                        data: { accessToken },
-                    });
-                    return;
-                }
-                res.status(401).json({ message: 'Wrong email or password' });
-            }
-        );
-    } catch (error: any) {
-        res.status(500).json({
-            message: 'Something went wrong. Please try again later',
-        });
-    }
-});
-
-router.post('/logout', (req, res) => {
-    res.send('Logged out');
-});
-
+/**
+ * @swagger
+ *  /api/v1/auth/refresh-token:
+ *    post:
+ *      summary: refresh JWT
+ *    responses:
+ *      "200":
+ *        descripton: Tokens refreshed successfully
+ */
+router.post('/refresh-token', userController.refreshToken);
 export default router;

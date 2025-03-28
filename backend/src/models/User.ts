@@ -10,6 +10,8 @@ class User extends Model {
     public email!: string;
     public role!: string;
     public passwordHash!: string;
+    public createdAt!: string;
+    public updatedAt!: string;
 }
 User.init(
     {
@@ -21,16 +23,10 @@ User.init(
         firstName: {
             type: DataTypes.STRING,
             allowNull: false,
-            validate: {
-                isAlpha: true,
-            },
         },
         lastName: {
             type: DataTypes.STRING,
             allowNull: false,
-            validate: {
-                isAlpha: true,
-            },
         },
         email: {
             type: DataTypes.STRING,

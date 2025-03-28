@@ -1,15 +1,24 @@
 import { faker } from '@faker-js/faker';
 import bcrypt from 'bcrypt';
-import {
-    sequelize,
-    User,
-    Teacher,
-    Student,
-    Class,
-    Course,
-    Enrollment,
-} from '../models';
-import { Model } from 'sequelize';
+import { sequelize, User, Teacher, Student, Course, Venue } from '../models';
+import logger from './logger';
+
+const departments = [
+    'Computer Science',
+    'Mechanical Engineering',
+    'Electrical Engineering',
+    'Biology',
+    'Mathematics',
+    'Physics',
+    'Economics',
+    'Psychology',
+    'Business Administration',
+    'Medicine',
+    'Mass Communication',
+    'Nursing',
+    'Industrial Chemistry',
+    'Microbiology',
+];
 
 async function generateTeachers(count: number) {
     const teachers = [];
@@ -20,11 +29,12 @@ async function generateTeachers(count: number) {
         const email = faker.internet.email({
             firstName,
             lastName,
+            provider: 'calebuniversity.edu.ng',
         });
         const role = 'teacher';
 
         const passwordHash = await bcrypt.hash('password', 10);
-        const department = faker.commerce.department();
+        const department = faker.helpers.arrayElement(departments);
 
         const user = await User.create({
             firstName,
@@ -32,6 +42,10 @@ async function generateTeachers(count: number) {
             email,
             role,
             passwordHash,
+        });
+
+        const teacher = await Teacher.create({
+            id: user.id,
             department,
         });
     }
@@ -295,60 +309,118 @@ async function generateCourses() {
         const results = await Course.bulkCreate(courses);
         return results;
     } catch (error) {
-        console.log(error);
+        logger.error('Error: ', error);
     }
 }
 async function generateStudents(count: number) {
     const students = [];
 
-    for (let i = 0; i < count; i++) {
-        const firstName = faker.person.firstName();
-        const lastName = faker.person.lastName();
-        const email = faker.internet.email({
-            firstName,
-            lastName,
-            provider: 'calebuniversity.edu.ng',
-        });
-        const matricNumber = faker.string.numeric({ length: 7 });
-        const level = faker.helpers.arrayElement([100, 200, 300, 400, 500]);
-        const department = faker.commerce.department();
+    try {
+        for (let i = 0; i < count; i++) {
+            const firstName = faker.person.firstName();
+            const lastName = faker.person.lastName();
+            const email = faker.internet.email({
+                firstName,
+                lastName,
+                provider: 'calebuniversity.edu.ng',
+            });
+            const matricNumber = faker.string.numeric({ length: 7 });
+            const level = faker.helpers.arrayElement([100, 200, 300, 400, 500]);
+            const department = faker.helpers.arrayElement(departments);
 
-        const passwordHash = await bcrypt.hash('password', 10);
+            const passwordHash = await bcrypt.hash('password', 10);
 
-        const user = await User.create({
-            firstName,
-            lastName,
-            email,
-            role: 'student',
-            passwordHash,
-        });
-        const student = await Student.create({
-            id: user.id,
-            level,
-            department,
-            matricNumber,
-        });
+            const user = await User.create({
+                firstName,
+                lastName,
+                email,
+                role: 'student',
+                passwordHash,
+            });
+            const student = await Student.create({
+                id: user.id,
+                level,
+                department,
+                matricNumber,
+            });
 
-        students.push({
-            id: user.id,
-            firstName,
-            lastName,
-            email,
-            department,
-            level,
-            matricNumber,
-        });
+            students.push({
+                id: user.id,
+                firstName,
+                lastName,
+                email,
+                department,
+                level,
+                matricNumber,
+            });
+        }
+        return students;
+    } catch (error) {
+        logger.error(error);
     }
-    return students;
+}
+
+async function generateVenues() {
+    const venues = [
+        {
+            latitude: 6.668391494248774,
+            longitude: 3.6363936409367517,
+            name: 'Mass Comm. Auditorium',
+        },
+        {
+            latitude: 6.66876384961853,
+            longitude: 3.636510151680673,
+            name: 'R101',
+        },
+        {
+            latitude: 6.668761018446419,
+            longitude: 3.6365329553443084,
+            name: 'R201',
+        },
+        {
+            latitude: 6.668744031413449,
+            longitude: 3.636427488399994,
+            name: 'R301',
+        },
+        {
+            latitude: 6.6702509815264905,
+            longitude: 3.6358318962882894,
+            name: 'Multipurpose Hall',
+        },
+        {
+            latitude: 6.670072153029815,
+            longitude: 3.637512527536462,
+            name: 'University Auditorium',
+        },
+        {
+            latitude: 6.669935570974693,
+            longitude: 3.637206513145681,
+            name: 'Software Lab',
+        },
+        {
+            latitude: 6.669737430742542,
+            longitude: 3.637359520341071,
+            name: 'E-Library',
+        },
+    ];
+
+    try {
+        const results = await Venue.bulkCreate(venues);
+        return results;
+    } catch (error) {
+        logger.error(error);
+    }
 }
 
 export const seedDatabase = async () => {
     try {
-        // await sequelize.sync({ force: true });
-        const students = await generateStudents(20);
-        const courses = await generateCourses();
+        await sequelize.sync({ force: true });
+        const students = await generateStudents(5);
+        const teachers = await generateTeachers(5);
+        await generateCourses();
+        await generateVenues();
     } catch (error) {
-        console.log(error);
+        logger.error(error);
     }
 };
 

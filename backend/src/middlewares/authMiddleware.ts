@@ -9,7 +9,10 @@ export const authenticateToken = (
     const token = req.cookies.accessToken;
 
     if (!token) {
-        res.status(401).json({ message: 'Unauthorized. Please log in' });
+        res.status(401).json({
+            success: false,
+            message: 'Unauthorized. Please log in',
+        });
 
         return;
     }

@@ -1,12 +1,14 @@
 import sequelize from '../config/db';
 import { DataTypes, Model } from 'sequelize';
 import User from './User';
+import Course from './Course';
 
 class Student extends Model {
     public id!: string;
     public matricNumber!: string;
     public level!: 100 | 200 | 300 | 400 | 500;
     public department!: string;
+    public Courses!: Course[];
 }
 Student.init(
     {
