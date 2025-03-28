@@ -5,14 +5,38 @@ import { authenticateToken } from '../middlewares/authMiddleware';
 
 const router = Router();
 
-// Get all courses
+/**
+ * @swagger
+ * /api/v1/courses/:
+ *  get:
+ *    summary: Get all courses
+ *    responses:
+ *      200:
+ *        description: OK
+ *
+ */
 router.get('/', courseController.getAllCourses);
 
-// get all students taking a course
+/**
+ * @swagger
+ *  /api/v1/courses/:courseId/students:
+ *    get:
+ *      summary: Get all students taking a course
+ *      parameters:
+ *        - in: path
+ *          name: courseId
+ *          schema:
+ *            type: string
+ *          required: true
+ *          description: The UUID of the course
+ *      responses:
+ *        200:
+ *          description: OK
+ */
 router.get(
-    '/:courseId/students',
-    authenticateToken,
-    courseController.getAllCourseStudents
+  '/:courseId/students',
+  authenticateToken,
+  courseController.getAllCourseStudents
 );
 
 // get all the attendance for the specified course
