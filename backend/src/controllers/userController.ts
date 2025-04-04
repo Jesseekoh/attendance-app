@@ -33,7 +33,7 @@ export const registerUser = async (req: Request, res: Response) => {
       {
         firstName,
         lastName,
-        email,
+        email: email.toLowerCase(),
         passwordHash,
         role,
       },
@@ -47,7 +47,7 @@ export const registerUser = async (req: Request, res: Response) => {
           id: newUser.id,
           matricNumber,
           department,
-          level,
+          level: Number(level),
         },
         { transaction }
       );
@@ -107,7 +107,9 @@ export const logInUser = async (req: Request, res: Response): Promise<void> => {
       return;
     }
     const { email, password } = LoginSchema.parse(req.body);
-    const existingUser = await User.findOne({ where: { email } });
+    const existingUser = await User.findOne({
+      where: { email: email.toLowerCase() },
+    });
 
     if (!existingUser) {
       res.status(404).json({
