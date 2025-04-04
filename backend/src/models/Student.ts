@@ -4,43 +4,43 @@ import User from './User';
 import Course from './Course';
 
 class Student extends Model {
-    public id!: string;
-    public matricNumber!: string;
-    public level!: 100 | 200 | 300 | 400 | 500;
-    public department!: string;
-    public Courses!: Course[];
+  public id!: string;
+  public matricNumber!: string;
+  public level!: 100 | 200 | 300 | 400 | 500;
+  public department!: string;
+  public Courses!: Course[];
 }
 Student.init(
-    {
-        id: {
-            type: DataTypes.UUID,
-            primaryKey: true,
-            references: {
-                model: User,
-                key: 'id',
-            },
-        },
-        matricNumber: {
-            type: DataTypes.STRING,
-            allowNull: false,
-            unique: true,
-        },
-        level: {
-            type: DataTypes.SMALLINT,
-            allowNull: false,
-            validate: {
-                isIn: {
-                    args: [[100, 200, 300, 400, 500]],
-                    msg: 'Invalid level',
-                },
-            },
-        },
-        department: {
-            type: DataTypes.STRING,
-            allowNull: false,
-        },
+  {
+    id: {
+      type: DataTypes.UUID,
+      primaryKey: true,
+      references: {
+        model: User,
+        key: 'id',
+      },
     },
-    { sequelize, timestamps: false }
+    matricNumber: {
+      type: DataTypes.STRING,
+      allowNull: false,
+      unique: true,
+    },
+    level: {
+      type: DataTypes.SMALLINT,
+      allowNull: false,
+      validate: {
+        isIn: {
+          args: [[100, 200, 300, 400, 500]],
+          msg: 'Invalid level',
+        },
+      },
+    },
+    department: {
+      type: DataTypes.STRING,
+      allowNull: false,
+    },
+  },
+  { sequelize, timestamps: false }
 );
 
 export default Student;
