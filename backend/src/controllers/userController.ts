@@ -132,7 +132,7 @@ export const logInUser = async (req: Request, res: Response): Promise<void> => {
             httpOnly: true,
             secure: true,
             sameSite: 'strict',
-            expires: new Date(Date.now() + 15 * 60 * 1000), //15 minutes
+            expires: new Date(Date.now() + 5 * 60 * 1000), //15 minutes
           });
           res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
@@ -180,7 +180,9 @@ export const logOutUser = async (
 export const refreshToken = async (
   req: Request,
   res: Response
-): Promise<void> => {};
+): Promise<void> => {
+  const refreshToken = req.cookies.refreshToken;
+};
 
 // Function to get the profile of the currently logged in user
 export const getMyProfile = async (
