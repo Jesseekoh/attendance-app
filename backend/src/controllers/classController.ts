@@ -1,226 +1,243 @@
 import { Request, Response } from 'express';
-import { Class, sequelize, User, Venue } from '../models';
+import { Class, sequelize, Teacher, User, Venue } from '../models';
 import logger from '../utils/logger';
 import { ClassSchema } from '../schemas';
+import { z } from 'zod';
 
 async function createClass(req: Request, res: Response) {
-    const isValidRequest = ClassSchema.safeParse(req.body);
-    if (!isValidRequest.success) {
-        res.status(400).json({
-            success: false,
-            message:
-                'You need to provide startTime, endTime, classVenue and courseId',
-        });
-        return;
-    }
-    const { id } = req.user;
-    const { startTime, endTime, venueId, courseId } = req.body;
+  const isValidRequest = ClassSchema.safeParse(req.body);
+  if (!isValidRequest.success) {
+    res.status(400).json({
+      success: false,
+      message:
+        'You need to provide startTime, endTime, classVenue and courseId',
+    });
+    return;
+  }
+  const { id } = req.user;
+  const { startTime, endTime, venueId, courseId } = req.body;
 
-    try {
-        const user = await User.findOne({ where: { id } });
-        if (user?.getDataValue('role') !== 'teacher') {
-            res.status(403).json({
-                success: false,
-                message: 'Only teachers can access this route',
-            });
-            return;
-        }
-        const newClass = await Class.create({
-            teacherId: id,
-            courseId,
-            venueId,
-            startTime,
-            endTime,
-        });
-
-        res.status(200).json({
-            success: true,
-            message: 'Class created successfully',
-        });
-    } catch (error: any) {
-        logger.error(error);
-        if (error?.name === 'SequelizeUniqueConstraintError') {
-            res.status(400).json({
-                success: false,
-                message: 'Class already exists',
-            });
-        }
-        if (error?.name === 'SequelizeForeignKeyConstraintError') {
-            res.status(400).json({
-                success: false,
-                message: 'Class venue or Course does not exist in database',
-            });
-            return;
-        }
-        res.status(500).json({
-            success: false,
-            message: 'Error creating class',
-        });
+  try {
+    const user = await User.findOne({ where: { id } });
+    if (user?.getDataValue('role') !== 'teacher') {
+      res.status(403).json({
+        success: false,
+        message: 'Only teachers can access this route',
+      });
+      return;
     }
+    const newClass = await Class.create({
+      teacherId: id,
+      courseId,
+      venueId,
+      startTime,
+      endTime,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Class created successfully',
+    });
+  } catch (error: any) {
+    logger.error(error);
+    if (error?.name === 'SequelizeUniqueConstraintError') {
+      res.status(400).json({
+        success: false,
+        message: 'Class already exists',
+      });
+    }
+    if (error?.name === 'SequelizeForeignKeyConstraintError') {
+      res.status(400).json({
+        success: false,
+        message: 'Class venue or Course does not exist in database',
+      });
+      return;
+    }
+    res.status(500).json({
+      success: false,
+      message: 'Error creating class',
+    });
+  }
 }
 
 async function getClass(req: Request, res: Response) {
-    const { classId } = req.params;
-    try {
-        const classData = await Class.findByPk(classId, {
-            include: { model: Venue },
-        });
-        if (classData) {
-            res.status(200).json({
-                success: true,
-                message: 'successful',
-                data: classData,
-            });
-            return;
-        } else {
-            // response if class with specified id is not found
-            res.status(404).json({
-                success: false,
-                message: 'Class does not exist',
-            });
-        }
-    } catch (error) {
-        logger.error(error);
-        res.status(500).json({
-            success: false,
-            message: 'Error retrieving class details',
-            error,
-        });
+  const { classId } = req.params;
+  const validationResult = z.string().uuid().safeParse(classId);
+
+  if (!validationResult.success) {
+    res
+      .status(400)
+      .json({ success: false, message: 'Route only accepts uuid' });
+    return;
+  }
+
+  try {
+    const classData = await Class.findByPk(classId, {
+      include: [
+        { model: Venue },
+        {
+          model: Teacher,
+          include: [
+            { model: User, attributes: ['firstName', 'lastName', 'email'] },
+          ],
+        },
+      ],
+    });
+    if (classData) {
+      res.status(200).json({
+        success: true,
+        message: 'successful',
+        data: classData,
+      });
+      return;
+    } else {
+      // response if class with specified id is not found
+      res.status(404).json({
+        success: false,
+        message: 'Class does not exist',
+      });
     }
+  } catch (error) {
+    logger.error(error);
+    res.status(500).json({
+      success: false,
+      message: 'Error retrieving class details',
+      error,
+    });
+  }
 }
 
 async function updateClassDetails(req: Request, res: Response) {
-    const { classId } = req.params;
-    const { id } = req.user;
-    const { courseId, classVenue, startTime, endTime } = req.body;
+  const { classId } = req.params;
+  const { id } = req.user;
+  const { courseId, classVenue, startTime, endTime } = req.body;
 
-    try {
-        const user = await User.findOne({ where: { id } });
-        if (user?.getDataValue('role') === 'teacher') {
-            const classData = await Class.findOne({
-                where: {
-                    id: classId,
-                },
-            });
+  try {
+    const user = await User.findOne({ where: { id } });
+    if (user?.getDataValue('role') === 'teacher') {
+      const classData = await Class.findOne({
+        where: {
+          id: classId,
+        },
+      });
 
-            if (!classData) {
-                res.status(404).json({
-                    success: false,
-                    message: 'Class not found',
-                });
-                return;
-            }
-
-            if (id !== classData?.getDataValue('teacherId')) {
-                res.status(403).json({
-                    success: false,
-                    message: "You're not authorized to update this class",
-                });
-                return;
-            }
-
-            const updateData: any = {};
-            if (courseId) updateData.courseId = courseId;
-            if (classVenue) updateData.classVenue = classVenue;
-            if (startTime) updateData.startTime = startTime;
-            if (endTime) updateData.endTime = endTime;
-            await classData?.update(updateData);
-
-            res.status(200).json({
-                success: true,
-                message: 'Class updated successfully',
-            });
-        } else {
-            res.status(403).json({
-                success: false,
-                message: 'Only teachers can update class details',
-            });
-        }
-    } catch (error) {
-        logger.error(error);
-        res.status(500).json({
-            success: false,
-            message: 'Error updating class details',
+      if (!classData) {
+        res.status(404).json({
+          success: false,
+          message: 'Class not found',
         });
+        return;
+      }
+
+      if (id !== classData?.getDataValue('teacherId')) {
+        res.status(403).json({
+          success: false,
+          message: "You're not authorized to update this class",
+        });
+        return;
+      }
+
+      const updateData: any = {};
+      if (courseId) updateData.courseId = courseId;
+      if (classVenue) updateData.classVenue = classVenue;
+      if (startTime) updateData.startTime = startTime;
+      if (endTime) updateData.endTime = endTime;
+      await classData?.update(updateData);
+
+      res.status(200).json({
+        success: true,
+        message: 'Class updated successfully',
+      });
+    } else {
+      res.status(403).json({
+        success: false,
+        message: 'Only teachers can update class details',
+      });
     }
+  } catch (error) {
+    logger.error(error);
+    res.status(500).json({
+      success: false,
+      message: 'Error updating class details',
+    });
+  }
 }
 
 async function markAttendance(req: Request, res: Response) {
-    const { id } = req.user;
-    const { studentLocation } = req.body;
-    const { classId } = req.params;
-    try {
-        const classData = await Class.findByPk(classId, {
-            include: { model: Venue },
-        });
-        if (!classData) {
-            res.status(404).json({
-                success: false,
-                message: 'Class not found',
-            });
-            return;
-        }
-        const user = await User.findByPk(id);
-        if (user?.getDataValue('role') === 'student') {
-            const currentTime = new Date();
-
-            // checks if the attendance is too early or too late
-            if (
-                currentTime < classData.getDataValue('startTime') ||
-                currentTime > classData.getDataValue('endTime')
-            ) {
-                res.status(400).json({
-                    success: false,
-                    message: 'Attendance is not allowed at this time',
-                });
-                return;
-            }
-
-            // TODO: Check if user's location matxhes the venue of the class
-
-            if (
-                studentLocation.latitude ===
-                    parseFloat(classData.getDataValue('Venue').latitude) &&
-                studentLocation.longitude ===
-                    parseFloat(classData.getDataValue('Venue').longitude)
-            ) {
-                await sequelize.models.attendance.create({
-                    StudentId: id,
-                    ClassId: classData.getDataValue('id'),
-                });
-                res.status(200).json({
-                    success: true,
-                    message: 'Attendance marked successfully',
-                    data: {
-                        studentLocation,
-                        location:
-                            typeof classData.getDataValue('Venue').latitude,
-                    },
-                });
-                return;
-            }
-            res.status(403).json({
-                success: false,
-                message: 'You are not at the class venue',
-            });
-            return;
-        }
-        res.status(403).json({
-            success: false,
-            message: 'Only Students can mark attendance',
-        });
-    } catch (error) {
-        logger.error(error);
-        res.status(500).json({
-            success: false,
-            message: 'Error marking attendance',
-        });
+  const { id } = req.user;
+  const { studentLocation } = req.body;
+  const { classId } = req.params;
+  try {
+    const classData = await Class.findByPk(classId, {
+      include: { model: Venue },
+    });
+    if (!classData) {
+      res.status(404).json({
+        success: false,
+        message: 'Class not found',
+      });
+      return;
     }
+    const user = await User.findByPk(id);
+    if (user?.getDataValue('role') === 'student') {
+      const currentTime = new Date();
+
+      // checks if the attendance is too early or too late
+      if (
+        currentTime < classData.getDataValue('startTime') ||
+        currentTime > classData.getDataValue('endTime')
+      ) {
+        res.status(400).json({
+          success: false,
+          message: 'Attendance is not allowed at this time',
+        });
+        return;
+      }
+
+      // TODO: Check if user's location matxhes the venue of the class
+
+      if (
+        studentLocation.latitude ===
+          parseFloat(classData.getDataValue('Venue').latitude) &&
+        studentLocation.longitude ===
+          parseFloat(classData.getDataValue('Venue').longitude)
+      ) {
+        await sequelize.models.attendance.create({
+          StudentId: id,
+          ClassId: classData.getDataValue('id'),
+        });
+        res.status(200).json({
+          success: true,
+          message: 'Attendance marked successfully',
+          data: {
+            studentLocation,
+            location: typeof classData.getDataValue('Venue').latitude,
+          },
+        });
+        return;
+      }
+      res.status(403).json({
+        success: false,
+        message: 'You are not at the class venue',
+      });
+      return;
+    }
+    res.status(403).json({
+      success: false,
+      message: 'Only Students can mark attendance',
+    });
+  } catch (error) {
+    logger.error(error);
+    res.status(500).json({
+      success: false,
+      message: 'Error marking attendance',
+    });
+  }
 }
 
 export default {
-    createClass,
-    getClass,
-    updateClassDetails,
-    markAttendance,
+  createClass,
+  getClass,
+  updateClassDetails,
+  markAttendance,
 };
