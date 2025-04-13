@@ -1,8 +1,9 @@
 import { Request, Response } from 'express';
-import { Class, sequelize, Teacher, User, Venue } from '../models';
+import { Class, Course, sequelize, Teacher, User, Venue } from '../models';
 import logger from '../utils/logger';
 import { ClassSchema } from '../schemas';
 import { z } from 'zod';
+import { Op } from 'sequelize';
 
 async function createClass(req: Request, res: Response) {
   const isValidRequest = ClassSchema.safeParse(req.body);
@@ -81,6 +82,7 @@ async function getClass(req: Request, res: Response) {
             { model: User, attributes: ['firstName', 'lastName', 'email'] },
           ],
         },
+        { model: Course, attributes: ['title', 'desc', 'code'], as: 'course' },
       ],
     });
     if (classData) {
@@ -163,6 +165,39 @@ async function updateClassDetails(req: Request, res: Response) {
   }
 }
 
+async function getUpcomingClasses(req: Request, res: Response) {
+  const { id, role } = req.user;
+  try {
+    const classes = await Class.findAll({
+      where: {
+        startTime: {
+          [Op.gt]: new Date(),
+        },
+      },
+      include: [
+        { model: Venue },
+        {
+          model: Teacher,
+          include: [
+            { model: User, attributes: ['firstName', 'lastName', 'email'] },
+          ],
+        },
+        { model: Course, attributes: ['title', 'desc', 'code'], as: 'course' },
+      ],
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Fetched classes successfully',
+      data: classes,
+    });
+    return;
+  } catch (error) {
+    logger.error(error);
+    res.status(500).json({ success: false, message: 'Sever Error' });
+  }
+}
+
 async function markAttendance(req: Request, res: Response) {
   const { id } = req.user;
   const { studentLocation } = req.body;
@@ -238,6 +273,7 @@ async function markAttendance(req: Request, res: Response) {
 export default {
   createClass,
   getClass,
+  getUpcomingClasses,
   updateClassDetails,
   markAttendance,
 };
