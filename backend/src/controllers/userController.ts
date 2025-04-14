@@ -132,7 +132,7 @@ export const logInUser = async (req: Request, res: Response): Promise<void> => {
             httpOnly: true,
             secure: true,
             sameSite: 'strict',
-            expires: new Date(Date.now() + 5 * 60 * 1000), //15 minutes
+            expires: new Date(Date.now() + 15 * 60 * 1000), //15 minutes
           });
           res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
@@ -189,19 +189,39 @@ export const getMyProfile = async (
   req: Request,
   res: Response
 ): Promise<void> => {
-  const { id } = req.user as ITokenPayload;
+  const { id, role } = req.user;
 
   try {
-    const user = await User.findOne({
-      where: { id },
-    });
+    let user;
+    if (role === 'student') {
+      user = await User.findOne({
+        where: { id },
+        include: [
+          {
+            model: Student,
+            attributes: ['matricNumber', 'department', 'level'],
+          },
+        ],
+      });
+    }
+    if (role === 'teacher') {
+      user = await User.findOne({
+        where: { id },
+        include: [
+          {
+            model: Teacher,
+            attributes: ['department'],
+          },
+        ],
+      });
+    }
     if (user) {
       const { passwordHash, createdAt, updatedAt, ...userWithoutPasswordHash } =
         user.dataValues;
       res.status(200).json({
         success: true,
         message: 'Successfully returned user data',
-        data: { user: userWithoutPasswordHash },
+        data: userWithoutPasswordHash,
       });
     } else {
       res.status(404).json({ success: false, message: 'User not found' });
