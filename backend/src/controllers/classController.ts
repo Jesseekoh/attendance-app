@@ -66,9 +66,10 @@ async function getClass(req: Request, res: Response) {
   const validationResult = z.string().uuid().safeParse(classId);
 
   if (!validationResult.success) {
-    res
-      .status(400)
-      .json({ success: false, message: 'Route only accepts uuid' });
+    res.status(404).json({
+      success: false,
+      message: 'Class does not exist',
+    });
     return;
   }
 
@@ -165,15 +166,49 @@ async function updateClassDetails(req: Request, res: Response) {
   }
 }
 
+async function getRecentClasses(req: Request, res: Response) {
+  const { id, role } = req.user;
+  try {
+    const recentClasses = await Class.findAll({
+      where: {
+        startTime: {
+          [Op.lt]: new Date(),
+        },
+      },
+      order: [['startTime', 'ASC']],
+      include: [
+        { model: Venue },
+        {
+          model: Teacher,
+          include: [
+            { model: User, attributes: ['firstName', 'lastName', 'email'] },
+          ],
+        },
+        { model: Course, attributes: ['title', 'desc', 'code'], as: 'course' },
+      ],
+    });
+    res.status(200).json({
+      success: true,
+      message: 'Fetched classes successfully',
+      data: recentClasses,
+    });
+    return;
+  } catch (error) {
+    logger.error(error);
+    res.status(500).json({ success: false, message: 'Sever Error' });
+  }
+}
+
 async function getUpcomingClasses(req: Request, res: Response) {
   const { id, role } = req.user;
   try {
-    const classes = await Class.findAll({
+    const upcomingClasses = await Class.findAll({
       where: {
         startTime: {
           [Op.gt]: new Date(),
         },
       },
+      order: [['startTime', 'ASC']],
       include: [
         { model: Venue },
         {
@@ -189,7 +224,7 @@ async function getUpcomingClasses(req: Request, res: Response) {
     res.status(200).json({
       success: true,
       message: 'Fetched classes successfully',
-      data: classes,
+      data: upcomingClasses,
     });
     return;
   } catch (error) {
@@ -274,6 +309,7 @@ export default {
   createClass,
   getClass,
   getUpcomingClasses,
+  getRecentClasses,
   updateClassDetails,
   markAttendance,
 };
