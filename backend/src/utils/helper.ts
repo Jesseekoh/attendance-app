@@ -6,7 +6,7 @@ export function generateAccessToken({ id, role }: ITokenPayload) {
   if (!secret) {
     throw new Error('Access JWT secret is not defined');
   }
-  return jwt.sign({ id, role }, secret, { expiresIn: '5m' });
+  return jwt.sign({ id, role }, secret, { expiresIn: '15m' });
 }
 
 export function generateRefreshToken({ id, role }: ITokenPayload) {
