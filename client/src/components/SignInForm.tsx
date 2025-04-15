@@ -47,6 +47,7 @@ const SignInForm = () => {
             </label>
             <input
               className="block w-full outline-2 outline-neutral-content aria-[invalid=true]:outline-error focus:outline-accent focus:bg-base-200 py-2 bg-base-300 rounded-md px-4"
+              placeholder="Email"
               {...register('email', { required: true })}
               aria-invalid={errors.email ? 'true' : 'false'}
             />
@@ -64,6 +65,7 @@ const SignInForm = () => {
               className="block w-full outline-transparent  aria-[invalid=true]:outline-error focus:outline-accent focus:outline-2 py-2 bg-base-300 rounded-md px-4"
               {...register('password', { required: true, minLength: 6 })}
               type="password"
+              placeholder="Password"
               aria-invalid={errors.password ? 'true' : 'false'}
             />
             {errors.password && (
@@ -80,7 +82,7 @@ const SignInForm = () => {
           </p>
           <button
             type="submit"
-            className="bg-primary text-lg px-4 py-2 block text-white rounded-md w-full mt-4"
+            className="bg-neutral text-lg px-4 py-2 block text-neutral-content rounded-md w-full mt-4"
           >
             Sign in
           </button>
