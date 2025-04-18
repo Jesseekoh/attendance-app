@@ -172,6 +172,7 @@ export const logOutUser = async (
   res: Response
 ): Promise<void> => {
   res.clearCookie('refreshToken');
+  res.clearCookie('accessToken');
   logger.info('User logged out successfully');
   res.status(200).json({ success: true, message: 'Logged out successfully' });
 };
