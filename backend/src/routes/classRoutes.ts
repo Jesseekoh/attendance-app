@@ -73,7 +73,7 @@ router.get('/recent', authenticateToken, classController.getRecentClasses);
  *        404:
  *          description: Class not found
  */
-router.get('/:classId', classController.getClass);
+router.get('/:classId', authenticateToken, classController.getClass);
 
 /**
  * @swagger
