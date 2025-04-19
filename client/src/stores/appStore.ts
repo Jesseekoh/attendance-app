@@ -64,10 +64,7 @@ export const useStore = create<AppState & Action>()(
         signUp: async (credentials: SignUpFormType) => {
           console.log(credentials);
           try {
-            const response = await api.post(
-              'http://localhost:5000/api/v1/auth/register',
-              credentials
-            );
+            const response = await api.post('/auth/register', credentials);
 
             return response.data;
           } catch (error) {

@@ -47,7 +47,7 @@ export const authenticateToken = (
     res.cookie('accessToken', newToken, {
       httpOnly: true,
       secure: true,
-      sameSite: 'strict',
+      sameSite: 'lax',
       maxAge: 15 * 60 * 1000,
     });
 
