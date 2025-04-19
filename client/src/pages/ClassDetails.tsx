@@ -2,6 +2,7 @@ import { useLoaderData, useParams } from 'react-router';
 import { api } from '../api/axiosClient';
 import { BookOpen, Calendar, Clock, MapPin, User } from 'lucide-react';
 import toast from 'react-hot-toast';
+import { AxiosError } from 'axios';
 
 const ClassDetails = () => {
   const classData = useLoaderData();
@@ -30,8 +31,17 @@ const ClassDetails = () => {
             },
           })
           .then(() => toast.success('Marked attendance successfully'))
-          .catch((error) => console.log(error));
+          .catch((error: AxiosError) => {
+            toast.error(error.response!.statusText);
+            console.log(error);
+          });
         console.log(pos);
+        toast.success(
+          'latitude: ' +
+            pos.coords.latitude +
+            ', longitude: ' +
+            pos.coords.longitude
+        );
       },
       (err) => console.log(err),
       { maximumAge: 0, timeout: 5000, enableHighAccuracy: true }
