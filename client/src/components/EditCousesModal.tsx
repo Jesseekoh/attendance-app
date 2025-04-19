@@ -1,17 +1,17 @@
-import { useQuery } from '@tanstack/react-query';
+// import { useQuery } from '@tanstack/react-query';
 import { useRef } from 'react';
-import { api } from '../api/axiosClient';
+// import { api } from '../api/axiosClient';
 const EditCousesModal = () => {
   const courseModal = useRef<HTMLDialogElement>(null);
-  const { data, isError, isLoading } = useQuery({
-    queryKey: ['all-courses'],
-    queryFn: async () => {
-      return api.get('/courses').then((data) => {
-        console.log(data);
-        return data.data;
-      });
-    },
-  });
+  // const { data, isError, isLoading } = useQuery({
+  //   queryKey: ['all-courses'],
+  //   queryFn: async () => {
+  //     return api.get('/courses').then((data) => {
+  //       console.log(data);
+  //       return data.data;
+  //     });
+  //   },
+  // });
 
   const openModal = () => {
     courseModal.current?.showModal();

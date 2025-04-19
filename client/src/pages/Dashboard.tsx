@@ -13,7 +13,7 @@ const Dashboard = () => {
         <div className="px-4">
           <div
             className="radial-progress text-primary flex-1"
-            style={{ '--value': 70 } /* as React.CSSProperties */}
+            style={{ '--value': 70 } as React.CSSProperties}
             aria-valuenow={70}
             role="progressbar"
           >

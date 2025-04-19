@@ -1,6 +1,5 @@
 import QrScanner from 'qr-scanner';
 import { useEffect, useRef, useState } from 'react';
-import { Scanner } from '@yudiel/react-qr-scanner';
 const ClassQrScanner = () => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const scannerRef = useRef<QrScanner | null>(null);

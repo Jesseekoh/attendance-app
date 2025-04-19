@@ -23,8 +23,8 @@ export async function classDetailsLoader({ params }: LoaderFunctionArgs) {
 export async function logOutLoader() {
   return api
     .post('/auth/logout')
-    .then((response) => redirect('/signup'))
-    .catch((error) => {
+    .then(() => redirect('/signup'))
+    .catch(() => {
       throw new Error('Log out failed');
     });
 }
