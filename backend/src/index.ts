@@ -71,7 +71,15 @@ const swaggerOptions = {
 const swaggerDocs = swaggerJSDoc(swaggerOptions);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 app.use(pinoHttp({ logger }));
-app.use(cors({ credentials: true, origin: 'http://localhost:5173' }));
+app.use(
+  cors({
+    credentials: true,
+    origin: [
+      'http://localhost:5173',
+      'https://attendance-app-frontend-09ja.onrender.com',
+    ],
+  })
+);
 app.use(limiter);
 app.use(express.json());
 app.use(cookieParser());
