@@ -131,13 +131,13 @@ export const logInUser = async (req: Request, res: Response): Promise<void> => {
           res.cookie('accessToken', accessToken, {
             httpOnly: true,
             secure: true,
-            sameSite: 'strict',
+            sameSite: 'none',
             expires: new Date(Date.now() + 15 * 60 * 1000), //15 minutes
           });
           res.cookie('refreshToken', refreshToken, {
             httpOnly: true,
             secure: true,
-            sameSite: 'strict',
+            sameSite: 'none',
             expires: new Date(
               Date.now() + 30 * 24 * 60 * 60 * 1000 // 30 days
             ),
