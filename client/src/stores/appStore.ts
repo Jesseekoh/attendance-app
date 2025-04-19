@@ -81,7 +81,7 @@ export const useStore = create<AppState & Action>()(
       }),
       {
         name: 'auth-storage',
-        storage: createJSONStorage(() => sessionStorage),
+        storage: createJSONStorage(() => localStorage),
       }
     )
   )

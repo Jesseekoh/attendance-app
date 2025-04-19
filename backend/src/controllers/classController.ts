@@ -46,6 +46,7 @@ async function createClass(req: Request, res: Response) {
         success: false,
         message: 'Class already exists',
       });
+      return;
     }
     if (error?.name === 'SequelizeForeignKeyConstraintError') {
       res.status(400).json({
@@ -296,8 +297,15 @@ async function markAttendance(req: Request, res: Response) {
       success: false,
       message: 'Only Students can mark attendance',
     });
-  } catch (error) {
+  } catch (error: any) {
     logger.error(error);
+    if (error.name === 'SequelizeUniqueConstraintError') {
+      res.status(200).json({
+        success: true,
+        message: 'Attendance marked successfully',
+      });
+      return;
+    }
     res.status(500).json({
       success: false,
       message: 'Error marking attendance',

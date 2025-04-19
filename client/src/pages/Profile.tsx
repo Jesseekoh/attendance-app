@@ -1,36 +1,57 @@
 import { useQuery } from '@tanstack/react-query';
-import { AxiosError } from 'axios';
-import { useNavigate } from 'react-router';
-import { useStore } from '../stores/appStore';
 import { api } from '../api/axiosClient';
+import { User2 } from 'lucide-react';
 const Profile = () => {
-  const { updateUser } = useStore();
-  const navigate = useNavigate();
-  const { data, isLoading, isError } = useQuery({
+  const {
+    data: profileData,
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ['profile'],
     queryFn: async () => {
-      try {
-        const response = await api.get('/users/me');
-        console.log(data);
-        return response.data;
-      } catch (error) {
-        if (error instanceof AxiosError) {
-          if (error.response?.status === 401) {
-            updateUser(null);
-            navigate('/signin');
-          }
-          return error.response?.data;
-        }
-      }
+      const response = await api.get('/users/me');
+      console.log(response.data);
+      return response.data;
     },
+    refetchOnWindowFocus: false,
+    refetchOnMount: true,
   });
 
-  if (isLoading) return <p>Loading...</p>;
+  if (isLoading) {
+    return (
+      <div className="flex flex-col gap-4 w-full">
+        <div className="flex items-center gap-4">
+          <div className="skeleton h-16 w-16 shrink-0 rounded-full"></div>
+          <div className="flex flex-col gap-4">
+            <div className="skeleton h-4 w-20"></div>
+            <div className="skeleton h-4 w-28"></div>
+          </div>
+        </div>
+        <div className="skeleton h-32 w-full"></div>
+      </div>
+    );
+  }
 
   if (isError) {
     return <p>An error occurred</p>;
   }
-  return <div>{data.data.user.firstName}</div>;
+  return (
+    <div>
+      <div className="avatar w-full">
+        <div className="rounded-full bg-sky-200 mx-auto">
+          <User2 size={100} />
+        </div>
+      </div>
+      <div>
+        <h1 className="font-bold text-2xl text-center">
+          {profileData.data.firstName + ' ' + profileData.data.lastName}
+        </h1>
+        <p className="text-neutral/60 text-center">
+          {profileData.data.Student.matricNumber}
+        </p>
+      </div>
+    </div>
+  );
 };
 
 export default Profile;

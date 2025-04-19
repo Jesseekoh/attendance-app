@@ -7,6 +7,7 @@ import {
   SunMedium,
   ScanQrCode,
   Moon,
+  Presentation,
 } from 'lucide-react';
 import { Link } from 'react-router';
 // import { useStore } from '../stores/appStore';
@@ -21,6 +22,7 @@ const NavBarMobile = () => {
     { label: 'Dashboard', component: LayoutDashboard, path: '/dashboard' },
     { label: 'My Courses', component: BookOpenText, path: '/courses' },
     { label: 'Attendance', component: BookTemplate, path: '/attendance' },
+    { label: 'Classes', component: Presentation, path: '/classes' },
   ];
   return (
     <>
@@ -112,11 +114,11 @@ const NavBarMobile = () => {
           </label>
 
           <div className="flex items-center gap-2">
-            <div className="avatar">
+            <Link to={'/my-profile'} className="avatar">
               <div className="!flex items-center ring-primary ring-offset-base-100 w-10 rounded-full ring ring-offset-2">
                 <User size={20} className="mx-auto" />
               </div>
-            </div>
+            </Link>
             {/* <span>{user?.firstName}</span> */}
           </div>
         </div>

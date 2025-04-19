@@ -14,14 +14,14 @@ api.interceptors.response.use(
       const status = error.response?.status;
 
       if (status === 401) {
-        console.log('Unauthorized, redirecting to login...');
         updateUser(null);
         // logout logic or redirect
-      } else if (status === 500) {
-        console.log('Server error');
-      } else {
-        console.log(`Error status: ${status}`);
       }
+      // else if (status === 500) {
+      //   console.log('Server error');
+      // } else {
+      //   console.log(`Error status: ${status}`);
+      // }
     }
 
     return Promise.reject(error);
