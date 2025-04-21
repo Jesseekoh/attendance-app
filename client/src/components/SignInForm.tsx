@@ -1,5 +1,4 @@
 import { Link, useLocation, useNavigate } from 'react-router';
-import toast from 'react-hot-toast';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -23,17 +22,14 @@ const SignInForm = () => {
     handleSubmit,
   } = useForm<SignInFormType>({ resolver: zodResolver(SignInSchema) });
 
+  const navigate = useNavigate();
   const { signIn } = useStore();
   const onSubmit = async ({ email, password }: SignInFormType) => {
     const loggedIn = await signIn({ email, password });
     if (loggedIn) {
-      toast.success('Signed in successfully');
       navigate(previousUrl, { replace: true });
-    } else {
-      toast.error('Failed to sign in');
     }
   };
-  const navigate = useNavigate();
   return (
     <>
       <div className="max-w-sm w-full px-4 py-8 rounded-md font-[Inter]">
