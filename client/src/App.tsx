@@ -13,7 +13,7 @@ import { useStore } from './stores/appStore';
 import ClassDetails from './pages/ClassDetails';
 import Logout from './pages/Logout';
 import Error from './pages/Error';
-import { classDetailsLoader, logOutLoader } from './loaders';
+import { classDetailsLoader } from './loaders';
 
 function App() {
   const { user } = useStore();
@@ -79,7 +79,6 @@ function App() {
     {
       path: '/logout',
       element: <Logout />,
-      loader: logOutLoader,
     },
   ]);
   return (
