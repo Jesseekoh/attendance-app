@@ -3,7 +3,7 @@ import { Class, Course, sequelize, Teacher, User, Venue } from '../models';
 import logger from '../utils/logger';
 import { ClassSchema } from '../schemas';
 import { z } from 'zod';
-import { Op } from 'sequelize';
+import { literal, Op } from 'sequelize';
 
 async function createClass(req: Request, res: Response) {
   const isValidRequest = ClassSchema.safeParse(req.body);
@@ -167,13 +167,18 @@ async function updateClassDetails(req: Request, res: Response) {
   }
 }
 
-async function getRecentClasses(req: Request, res: Response) {
+async function getOngoingClasses(req: Request, res: Response) {
   const { id, role } = req.user;
+
   try {
-    const recentClasses = await Class.findAll({
+    const currentTime = new Date();
+    const ongoingClasses = await Class.findAll({
       where: {
         startTime: {
-          [Op.lt]: new Date(),
+          [Op.lt]: currentTime,
+        },
+        endTime: {
+          [Op.gt]: currentTime,
         },
       },
       order: [['startTime', 'ASC']],
@@ -187,6 +192,53 @@ async function getRecentClasses(req: Request, res: Response) {
         },
         { model: Course, attributes: ['title', 'desc', 'code'], as: 'course' },
       ],
+    });
+    res.status(200).json({
+      success: true,
+      message: 'Fetched classes successfully',
+      data: ongoingClasses,
+    });
+  } catch (error) {
+    logger.error(error);
+    res.status(500).json({ success: false, message: 'Error fetching classes' });
+  }
+}
+
+async function getRecentClasses(req: Request, res: Response) {
+  const { id, role } = req.user;
+  try {
+    const recentClasses = await Class.findAll({
+      where: {
+        startTime: {
+          [Op.lt]: new Date(),
+        },
+      },
+      order: [['startTime', 'DESC']],
+      include: [
+        { model: Venue },
+        {
+          model: Teacher,
+          include: [
+            { model: User, attributes: ['firstName', 'lastName', 'email'] },
+          ],
+        },
+        { model: Course, attributes: ['title', 'desc', 'code'], as: 'course' },
+      ],
+      attributes: {
+        include: [
+          [
+            literal(`
+          EXISTS (
+            SELECT 1
+            FROM attendance
+            WHERE attendance."ClassId" = "Class"."id"
+            AND attendance."StudentId" = '${id}'
+          )
+        `),
+            'attended',
+          ],
+        ],
+      },
     });
     res.status(200).json({
       success: true,
@@ -318,6 +370,7 @@ export default {
   getClass,
   getUpcomingClasses,
   getRecentClasses,
+  getOngoingClasses,
   updateClassDetails,
   markAttendance,
 };

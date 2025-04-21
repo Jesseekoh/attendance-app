@@ -156,4 +156,5 @@ router.post('/:classId', authenticateToken, classController.markAttendance);
 // Update class details
 router.put('/:classId', authenticateToken, classController.updateClassDetails);
 
+router.get('/ongoing', authenticateToken, classController.getOngoingClasses);
 export default router;

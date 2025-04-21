@@ -1,11 +1,11 @@
 import { Request, Response } from 'express';
-import { Course, Enrollment, Student, User } from '../models';
+import { Class, Course, Enrollment, sequelize, Student, User } from '../models';
 import logger from '../utils/logger';
 
 /**
  * Enrolls a student in the specified courses
  */
-export async function enrollCourses(req: Request, res: Response) {
+async function enrollCourses(req: Request, res: Response) {
   const { id } = req.user;
   const { courses } = req.body;
   try {
@@ -39,7 +39,7 @@ export async function enrollCourses(req: Request, res: Response) {
   }
 }
 
-export async function getStudentCourses(req: Request, res: Response) {
+async function getStudentCourses(req: Request, res: Response) {
   const { id } = req.user;
 
   try {
@@ -88,4 +88,26 @@ export async function getStudentCourses(req: Request, res: Response) {
   }
 }
 
-export default { enrollCourses, getStudentCourses };
+async function getStudentStats(req: Request, res: Response) {
+  const { id, role } = req.user;
+  try {
+    const [totalClasses, attendedClasses] = await Promise.all([
+      Class.count(),
+      sequelize.models.attendance.count({ where: { StudentId: id } }),
+    ]);
+    res.status(200).json({
+      success: true,
+      message: 'Fetched stats successfully',
+      data: {
+        totalClasses,
+        attendedClasses,
+        missedClasses: totalClasses - attendedClasses,
+      },
+    });
+  } catch (error) {
+    logger.error(error);
+    res.status(500).json({ success: false, message: 'Error fetching stats' });
+  }
+}
+
+export default { enrollCourses, getStudentCourses, getStudentStats };
