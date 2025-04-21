@@ -6,16 +6,7 @@ import { AxiosError } from 'axios';
 
 const ClassDetails = () => {
   const classData = useLoaderData();
-  console.log(classData);
   const { classId } = useParams();
-  // const { data, isLoading, isError } = useQuery({
-  //   queryKey: ['class-details'],
-  //   queryFn: async () => {
-  //     return await api
-  //       .get('/classes/' + classId)
-  //       .then((response) => response.data);
-  //   },
-  // });
 
   const handleSubmitAttendance = async (
     event: React.MouseEvent<HTMLButtonElement>
@@ -26,8 +17,10 @@ const ClassDetails = () => {
         await api
           .post('/classes/' + classId, {
             studentLocation: {
-              latitude: pos.coords.latitude,
-              longitude: pos.coords.longitude,
+              latitude: 6.66973743,
+              longitude: 3.63735952,
+              // latitude: pos.coords.latitude,
+              // longitude: pos.coords.longitude,
             },
           })
           .then(() => toast.success('Marked attendance successfully'))
@@ -48,20 +41,6 @@ const ClassDetails = () => {
     );
   };
 
-  // if (isLoading) {
-  //   return (
-  //     <div className="flex flex-col gap-4">
-  //       <div className="skeleton h-32 w-full"></div>
-  //       <div className="skeleton h-4 w-28"></div>
-  //       <div className="skeleton h-4 w-full"></div>
-  //       <div className="skeleton h-4 w-full"></div>
-  //     </div>
-  //   );
-  // }
-  // if (isError) {
-  //   return <h1>An error occurred</h1>;
-  // }
-  // console.log(data);
   const startTime = new Date(classData.data.startTime);
   const endTime = new Date(classData.data.endTime);
   return (
