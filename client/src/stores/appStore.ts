@@ -3,6 +3,7 @@ import { AxiosError } from 'axios';
 import { persist, devtools, createJSONStorage } from 'zustand/middleware';
 import { SignUpFormType } from '../components/SignUpForm';
 import { api } from '../api/axiosClient';
+import toast from 'react-hot-toast';
 export interface UserType {
   id: string;
   firstName: string;
@@ -51,9 +52,14 @@ export const useStore = create<AppState & Action>()(
 
             if (response.status === 200) {
               set({ user: response.data.data.user });
-              // setAccessToken(response.data.data.accessToken);
+              toast.success('Log in successful');
               return true;
             } else {
+              if (response.status === 404) {
+                toast.error('User not found');
+              } else {
+                toast.error('Failed to log in');
+              }
               return false;
             }
           } catch (error) {
