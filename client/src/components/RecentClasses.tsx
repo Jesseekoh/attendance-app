@@ -14,6 +14,7 @@ export interface ClassInfoType {
   Venue: Venue;
   Teacher: Teacher;
   course: Course;
+  attended?: boolean;
 }
 
 export interface Venue {

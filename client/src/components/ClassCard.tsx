@@ -2,6 +2,7 @@ import { BookOpen, MapPin, User, Calendar, Clock } from 'lucide-react';
 import { Link } from 'react-router';
 import { ClassInfoType } from './RecentClasses';
 import React from 'react';
+import clsx from 'clsx';
 
 interface ClassCardProps {
   classInfo: ClassInfoType;
@@ -49,6 +50,19 @@ const ClassCard: React.FC<ClassCardProps> = ({ classInfo }) => {
                 classInfo.Teacher.User.lastName}
             </p>
           </div>
+
+          {classInfo.attended !== undefined && (
+            <div>
+              <div
+                className={clsx('badge badge-soft badge-outline', {
+                  'badge-success': classInfo.attended,
+                  'badge-error': !classInfo.attended,
+                })}
+              >
+                {classInfo.attended ? 'Attended' : 'Absent'}
+              </div>
+            </div>
+          )}
         </div>
         <div className="card-action">
           <Link
