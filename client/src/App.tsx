@@ -8,23 +8,47 @@ import Protected from './components/Protected';
 import Profile from './pages/Profile';
 import AppLayout from './layout/AppLayout';
 import Dashboard from './pages/Dashboard';
-import Courses from './pages/Courses';
+// import Courses from './pages/Courses';
 import { useStore } from './stores/appStore';
 import ClassDetails from './pages/ClassDetails';
 import Logout from './pages/Logout';
 import Error from './pages/Error';
 import { classDetailsLoader } from './loaders';
+import { useEffect, useState } from 'react';
 
 function App() {
-  const { user } = useStore();
+  const { user, fetchUser } = useStore();
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const initializeUser = async () => {
+      await fetchUser();
+      setIsLoading(false);
+    };
+    initializeUser();
+  }, [fetchUser]);
+
+  if (isLoading || user === undefined) {
+    return (
+      <div className="min-h-screen w-full flex justify-center">
+        <span className="loading loading-spinner loading-xl"></span>
+      </div>
+    );
+  }
   const router = createBrowserRouter([
     {
-      element: <RootLayout />,
+      // element: <RootLayout />,
+      index: true,
+      element: <Navigate to={user ? '/dashboard' : '/home'} replace />,
       errorElement: <Error />,
+    },
+    {
+      path: '/home',
+      element: <RootLayout />,
       children: [
         {
           index: true,
-          element: user ? <Navigate to="/dashboard" /> : <Home />,
+          element: <Home />,
         },
       ],
     },
@@ -39,14 +63,14 @@ function App() {
             </Protected>
           ),
         },
-        {
-          path: '/courses',
-          element: (
-            <Protected>
-              <Courses />
-            </Protected>
-          ),
-        },
+        // {
+        //   path: '/courses',
+        //   element: (
+        //     <Protected>
+        //       <Courses />
+        //     </Protected>
+        //   ),
+        // },
         {
           path: '/classes/:classId',
           loader: classDetailsLoader,
@@ -81,60 +105,9 @@ function App() {
       element: <Logout />,
     },
   ]);
+
   return (
     <>
-      {/* <Routes>
-        <Route path="*" element={<h1>Not Found</h1>} />
-        <Route element={<RootLayout />}>
-          <Route
-            index
-            element={user ? <Navigate to="/dashboard" /> : <Home />}
-          />
-        </Route>
-        <Route element={<AppLayout />}>
-          <Route
-            path="/dashboard"
-            element={
-              <Protected>
-                <Dashboard />
-              </Protected>
-            }
-          />
-          <Route
-            path="/courses"
-            element={
-              <Protected>
-                <Courses />
-              </Protected>
-            }
-          />
-          <Route path="/classes/:classId" element={<ClassDetails />} />
-          <Route
-            path="/my-profile"
-            element={
-              <Protected>
-                <Profile />
-              </Protected>
-            }
-          />
-        </Route>
-        <Route
-          path="/signup"
-          element={user ? <Navigate to={'/dashboard'} replace /> : <SignUp />}
-        />
-        <Route
-          path="/signin"
-          element={user ? <Navigate to={'/dashboard'} replace /> : <SignIn />}
-        />
-        <Route
-          path="/logout"
-          loader={async () => {
-            const response = await api.post('/auth/logout');
-            return response.data;
-          }}
-          element={<Logout />}
-        />
-      </Routes> */}
       <RouterProvider router={router}></RouterProvider>
     </>
   );
