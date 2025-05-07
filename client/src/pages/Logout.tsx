@@ -7,17 +7,15 @@ const Logout = () => {
   const { updateUser } = useStore();
   const navigate = useNavigate();
   useEffect(() => {
-    const logout = () => {
-      return api
-        .post('/auth/logout')
-        .then(() => {
-          updateUser(null);
-          navigate('/signin');
-        })
-        .catch((err) => {
-          console.log(err);
-          navigate('/');
-        });
+    const logout = async () => {
+      try {
+        await api.post('/auth/logout');
+        updateUser(null);
+        navigate('/signin');
+      } catch (error) {
+        console.log(error);
+        navigate('/');
+      }
     };
     logout();
   }, []);
