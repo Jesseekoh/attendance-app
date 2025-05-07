@@ -1,5 +1,6 @@
 import axios from 'axios';
 import { useStore } from '../stores/appStore';
+import { redirect } from 'react-router';
 
 export const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL + '/api/v1',
@@ -14,8 +15,9 @@ api.interceptors.response.use(
       const status = error.response?.status;
 
       if (status === 401) {
-        updateUser(null);
         // logout logic or redirect
+        updateUser(null);
+        redirect('/signin');
       }
       // else if (status === 500) {
       //   console.log('Server error');
