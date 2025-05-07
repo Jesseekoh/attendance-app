@@ -1,23 +1,29 @@
-import axios, { AxiosError } from 'axios';
+import { AxiosError } from 'axios';
+import toast from 'react-hot-toast';
 import { SignUpFormType } from '../../components/SignUpForm';
 import { AppState } from '../appStore';
 import { StateCreator } from 'zustand';
 import { api } from '../../api/axiosClient';
+import { redirect } from 'react-router';
 export const createAuthSlice: StateCreator<AppState> = (set) => ({
   user: null,
   signIn: async ({ email, password }: { email: string; password: string }) => {
     try {
-      const response = await axios.post(
-        'http://localhost:5000/api/v1/auth/login',
-        { email, password },
-        { withCredentials: true }
-      );
+      const response = await api.post('/auth/login', {
+        email: email.trim(),
+        password,
+      });
 
       if (response.status === 200) {
         set({ user: response.data.data.user });
-        // setAccessToken(response.data.data.accessToken);
+        toast.success('Log in successful');
         return true;
       } else {
+        if (response.status === 404) {
+          toast.error('User not found');
+        } else {
+          toast.error('Failed to log in');
+        }
         return false;
       }
     } catch (error) {
@@ -38,4 +44,16 @@ export const createAuthSlice: StateCreator<AppState> = (set) => ({
       }
     }
   },
+  fetchUser: async () => {
+    return api
+      .get('/users/me')
+      .then((resp) => {
+        console.log('Getting user');
+        set({ user: resp.data.data });
+      })
+      .catch(() => {
+        redirect('/signin');
+      });
+  },
+  updateUser: (user: AppState['user']) => set(() => ({ user })),
 });
