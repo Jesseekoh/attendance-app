@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../api/axiosClient';
 import ClassCard from './ClassCard';
+import { Link } from 'react-router';
 
 export interface ClassInfoType {
   id: string;
@@ -77,12 +78,15 @@ const RecentClasses = () => {
 
   return (
     <div className="pt-2 flex flex-col gap-2">
-      {recentClasses.data.length > 0 ? (
-        recentClasses.data.map((classInfo: ClassInfoType) => (
+      {recentClasses.data.rows.length > 0 ? (
+        recentClasses.data.rows.map((classInfo: ClassInfoType) => (
           <ClassCard classInfo={classInfo} key={classInfo.id} />
         ))
       ) : (
         <p>You have no recent classes</p>
+      )}
+      {recentClasses.data.rows.length >= 10 && (
+        <Link to="/attendance">View More</Link>
       )}
     </div>
   );
