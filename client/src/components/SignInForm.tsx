@@ -15,7 +15,6 @@ type SignInFormType = z.infer<typeof SignInSchema>;
 const SignInForm = () => {
   const location = useLocation();
   const previousUrl = location.state?.from || '/dashboard';
-  console.log(previousUrl);
   const {
     register,
     formState: { errors },
