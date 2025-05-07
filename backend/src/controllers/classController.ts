@@ -206,14 +206,20 @@ async function getOngoingClasses(req: Request, res: Response) {
 
 async function getRecentClasses(req: Request, res: Response) {
   const { id, role } = req.user;
+  const pageStr = req.query.page as string;
+  const page = isNaN(parseInt(pageStr)) ? 1 : parseInt(pageStr);
+
+  const pageSize = 10;
   try {
-    const recentClasses = await Class.findAll({
+    const recentClasses = await Class.findAndCountAll({
       where: {
         startTime: {
           [Op.lt]: new Date(),
         },
       },
       order: [['startTime', 'DESC']],
+      limit: pageSize,
+      offset: (page - 1) * pageSize,
       include: [
         { model: Venue },
         {
@@ -242,6 +248,7 @@ async function getRecentClasses(req: Request, res: Response) {
     });
     res.status(200).json({
       success: true,
+      page,
       message: 'Fetched classes successfully',
       data: recentClasses,
     });
