@@ -1,6 +1,5 @@
 import { SquareCheckBig } from 'lucide-react';
-import { Link, Navigate } from 'react-router';
-import { useStore } from '../stores/appStore';
+import { Link } from 'react-router';
 const Home = () => {
   return (
     <>
