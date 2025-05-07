@@ -1,28 +1,28 @@
 import {
   User,
   LayoutDashboard,
-  BookOpenText,
+  FileChartColumnIncreasing,
   BookTemplate,
   LogOut,
   SunMedium,
   ScanQrCode,
   Moon,
-  Presentation,
 } from 'lucide-react';
 import { Link } from 'react-router';
 // import { useStore } from '../stores/appStore';
 import { useState } from 'react';
 import Hamburger from 'hamburger-react';
+import { useStore } from '../stores/appStore';
 
 const NavBarMobile = () => {
   const [isOpen, setOpen] = useState(false);
-  // const { user } = useStore();
-
+  const { user } = useStore();
   const menuItems = [
     { label: 'Dashboard', component: LayoutDashboard, path: '/dashboard' },
-    { label: 'My Courses', component: BookOpenText, path: '/courses' },
+    // { label: 'My Courses', component: BookOpenText, path: '/courses' },
     { label: 'Attendance', component: BookTemplate, path: '/attendance' },
-    { label: 'Classes', component: Presentation, path: '/classes' },
+    { label: 'Report', component: FileChartColumnIncreasing, path: '/reports' },
+    // { label: 'Classes', component: Presentation, path: '/classes' },
   ];
   return (
     <>
@@ -55,7 +55,10 @@ const NavBarMobile = () => {
                 {/* Sidebar content here */}
                 {menuItems.map((item) => (
                   <li key={item.path} onClick={() => setOpen(!isOpen)}>
-                    <Link to={item.path}>
+                    <Link
+                      to={item.path}
+                      className="active:!bg-neutral/30 active:text-neutral-content"
+                    >
                       <item.component />
                       <span>{item.label}</span>
                     </Link>
@@ -75,7 +78,7 @@ const NavBarMobile = () => {
             <span>CheckIn</span>
           </Link>
         </div>
-        <div className="navbar-center hidden lg:flex">
+        {/* <div className="navbar-center hidden lg:flex">
           <ul className="menu menu-horizontal px-1">
             <li>
               <a>Item 1</a>
@@ -97,7 +100,7 @@ const NavBarMobile = () => {
               <a>Item 3</a>
             </li>
           </ul>
-        </div>
+        </div> */}
         <div className="navbar-end gap-2">
           <label className="swap swap-rotate">
             {/* this hidden checkbox controls the state */}
@@ -113,14 +116,16 @@ const NavBarMobile = () => {
             <ScanQrCode size={32} strokeWidth={1.75} absoluteStrokeWidth />
           </label>
 
-          <div className="flex items-center gap-2">
-            <Link to={'/my-profile'} className="avatar">
-              <div className="!flex items-center ring-primary ring-offset-base-100 w-10 rounded-full ring ring-offset-2">
-                <User size={20} className="mx-auto" />
-              </div>
-            </Link>
-            {/* <span>{user?.firstName}</span> */}
-          </div>
+          {user && (
+            <div className="flex items-center gap-2">
+              <Link to={'/my-profile'} className="avatar">
+                <div className="!flex items-center ring-primary ring-offset-base-100 w-10 rounded-full ring ring-offset-2">
+                  <User size={20} className="mx-auto" />
+                </div>
+              </Link>
+              {/* <span>{user?.firstName}</span> */}
+            </div>
+          )}
         </div>
       </nav>
     </>
