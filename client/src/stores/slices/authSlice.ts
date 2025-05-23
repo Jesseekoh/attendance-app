@@ -1,10 +1,9 @@
 import { AxiosError, isAxiosError } from 'axios';
 import toast from 'react-hot-toast';
 import { SignUpFormType } from '../../components/SignUpForm';
-import { AppState, useStore } from '../appStore';
+import { AppState } from '../appStore';
 import { StateCreator } from 'zustand';
 import { api } from '../../api/axiosClient';
-import { redirect } from 'react-router';
 export const createAuthSlice: StateCreator<AppState> = (set) => ({
   user: null,
   signIn: async ({ email, password }: { email: string; password: string }) => {

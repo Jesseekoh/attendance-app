@@ -6,7 +6,6 @@ import DashboardStats from '../components/DashboardStats';
 
 const Dashboard = () => {
   const [activeTab, setActiveTab] = useState('upcoming');
-  // const [attendancePercentage, setAttendancePercentage] = useState(0);
 
   return (
     <div className="py-4">
