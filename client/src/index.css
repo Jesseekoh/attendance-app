@@ -3,8 +3,7 @@
 @import "tailwindcss";
 
 @plugin "daisyui" {
-    /* themes: light --default, dark --prefersdark; */
-    themes: light --default;
+    themes: light --default, dark --prefersdark;
 }
 
 
@@ -27,11 +26,7 @@
 
 
 body {
-    /* margin: 0;
-    display: flex;
-    place-items: center;
-    min-width: 320px;
-    min-height: 100vh; */
+    overscroll-behavior: none;
 }
 
 
