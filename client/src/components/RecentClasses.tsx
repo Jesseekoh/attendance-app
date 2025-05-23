@@ -86,7 +86,12 @@ const RecentClasses = () => {
         <p>You have no recent classes</p>
       )}
       {recentClasses.data.rows.length >= 10 && (
-        <Link to="/attendance">View More</Link>
+        <Link
+          className="text-center bg-neutral text-neutral-content rounded-md py-2"
+          to="/attendance"
+        >
+          View More
+        </Link>
       )}
     </div>
   );

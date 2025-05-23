@@ -1,7 +1,6 @@
 import { Link, Outlet } from 'react-router';
 import { SquareCheckBig } from 'lucide-react';
 import { useStore } from '../stores/appStore';
-// import { useAuth } from '../hooks/useAuth';
 export const RootLayout = () => {
   const { user } = useStore();
   return (
