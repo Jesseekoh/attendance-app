@@ -23,9 +23,9 @@ export interface AppState {
   signIn: (credentials: {
     email: string;
     password: string;
-  }) => Promise<boolean>;
-  signUp: (credentials: SignUpFormType) => Promise<ApiResponseType>;
-  fetchUser: () => Promise<void>;
+  }) => Promise<UserType | null>;
+  signUp: (credentials: SignUpFormType) => Promise<UserType | null>;
+  fetchUser: () => Promise<UserType | null>;
   updateUser: (user: AppState['user']) => void;
 }
 

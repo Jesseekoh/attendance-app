@@ -1,25 +1,28 @@
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router';
+import { useEffect, useState } from 'react';
+import { Navigate } from 'react-router';
 import { api } from '../api/axiosClient';
 import { useStore } from '../stores/appStore';
 
 const Logout = () => {
   const { updateUser } = useStore();
-  const navigate = useNavigate();
+  const [isLoggedOut, setIsLoggedOut] = useState(false);
   useEffect(() => {
     const logout = async () => {
       try {
         await api.post('/auth/logout');
         updateUser(null);
-        navigate('/signin');
+        setIsLoggedOut(true);
       } catch (error) {
-        console.log(error);
-        navigate('/');
+        console.error('Logout failed:', error);
       }
     };
     logout();
-  }, []);
-  return <div>Logging Out</div>;
+  }, [updateUser]);
+
+  if (isLoggedOut) {
+    return <Navigate to="/signin" />;
+  }
+  return <div className="text-center mt-10">Logging out...</div>;
 };
 
 export default Logout;

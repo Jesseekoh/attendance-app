@@ -1,12 +1,6 @@
 import { SquareCheckBig } from 'lucide-react';
 import SignInForm from '../components/SignInForm';
-import { useStore } from '../stores/appStore';
-import { Navigate } from 'react-router';
-
 const SignIn = () => {
-  const { user } = useStore();
-
-  if (user) return <Navigate to="/dashboard" />;
   return (
     <div className="grid place-items-center content-center min-h-svh font-[Inter]">
       <div>
