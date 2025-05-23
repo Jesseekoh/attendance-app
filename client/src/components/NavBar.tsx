@@ -9,12 +9,11 @@ import {
   Moon,
 } from 'lucide-react';
 import { Link } from 'react-router';
-// import { useStore } from '../stores/appStore';
 import { useState } from 'react';
 import Hamburger from 'hamburger-react';
 import { useStore } from '../stores/appStore';
 
-const NavBarMobile = () => {
+const NavBar = () => {
   const [isOpen, setOpen] = useState(false);
   const { user } = useStore();
   const menuItems = [
@@ -26,7 +25,7 @@ const NavBarMobile = () => {
   ];
   return (
     <>
-      <nav className="navbar px-4 bg-base-100 shadow-sm justify-between fixed z-10">
+      <nav className="navbar px-4 bg-base-100 shadow-sm justify-between  z-10">
         <div className="navbar-start">
           <div className="drawer flex items-center static w-auto lg:hidden ">
             <div className="z-20 left-4">
@@ -65,7 +64,10 @@ const NavBarMobile = () => {
                   </li>
                 ))}
                 <li className="mt-auto">
-                  <Link to="/logout">
+                  <Link
+                    to="/logout"
+                    className="active:!bg-neutral/30 active:text-neutral-content"
+                  >
                     <LogOut />
                     <span>Log Out</span>
                   </Link>
@@ -104,7 +106,7 @@ const NavBarMobile = () => {
         <div className="navbar-end gap-2">
           <label className="swap swap-rotate">
             {/* this hidden checkbox controls the state */}
-            <input type="checkbox" />
+            <input type="checkbox" className="theme-controller" value="light" />
             <SunMedium
               className="swap-on w-8 h-8 fill-yellow-300"
               absoluteStrokeWidth
@@ -132,4 +134,4 @@ const NavBarMobile = () => {
   );
 };
 
-export default NavBarMobile;
+export default NavBar;
