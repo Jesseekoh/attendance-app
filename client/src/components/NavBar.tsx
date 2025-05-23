@@ -75,7 +75,10 @@ const NavBar = () => {
               </ul>
             </div>
           </div>
-          <Link to={'/'} className="font-[Inter] text-xl font-extrabold flex">
+          <Link
+            to={'/'}
+            className="font-[Inter] text-xl font-extrabold flex text-base-content lg:hidden"
+          >
             {/* <SquareCheckBig /> */}
             <span>CheckIn</span>
           </Link>
@@ -103,7 +106,7 @@ const NavBar = () => {
             </li>
           </ul>
         </div> */}
-        <div className="navbar-end gap-2">
+        <div className="navbar-end gap-2 text-base-content">
           <label className="swap swap-rotate">
             {/* this hidden checkbox controls the state */}
             <input type="checkbox" className="theme-controller" value="light" />

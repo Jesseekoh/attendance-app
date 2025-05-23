@@ -1,27 +1,56 @@
 import { Outlet } from 'react-router';
 import NavBar from '../components/NavBar';
-import SideNav from '../components/SideNav';
-import { useState } from 'react';
+import SideNav, { MenuItem } from '../components/SideNav';
+import { useEffect, useState } from 'react';
 import clsx from 'clsx';
-
+import { useStore } from '../stores/appStore';
+import { ROLES } from '../config/roles';
+import {
+  LayoutDashboard,
+  FileChartColumnIncreasing,
+  BookTemplate,
+  Presentation,
+  BookOpenText,
+} from 'lucide-react';
 const AppLayout = () => {
-  // const { user } = useStore();
+  const { user } = useStore();
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
+  const [sidebarMenuItems, setSidebarMenuItems] = useState([] as MenuItem[]);
+
+  useEffect(() => {
+    if (user?.role === ROLES.STUDENT) {
+      setSidebarMenuItems([
+        { label: 'Dashboard', component: LayoutDashboard, path: '/dashboard' },
+        { label: 'My Courses', component: BookOpenText, path: '/courses' },
+        { label: 'Attendance', component: BookTemplate, path: '/attendance' },
+        {
+          label: 'Report',
+          component: FileChartColumnIncreasing,
+          path: '/reports',
+        },
+        { label: 'Classes', component: Presentation, path: '/classes' },
+      ]);
+    }
+  }, [user]);
+
   return (
     <>
       <header
         className={clsx(
-          'fixed z-10 transition-all bg-neutral text-neutral-content',
+          'fixed z-10 transition-all bg-neutral text-neutral-content w-full',
           isSidebarExpanded
-            ? 'left-[205px] w-[calc(100%-205px)]'
-            : 'left-[64px] w-[calc(100%-64px)]'
+            ? 'lg:left-[205px] lg:w-[calc(100%-205px)]'
+            : 'lg:left-[64px] lg:w-[calc(100%-64px)]'
         )}
       >
         <NavBar />
       </header>
 
       <div className="flex">
-        <SideNav onToggle={(isExpanded) => setIsSidebarExpanded(isExpanded)} />
+        <SideNav
+          onToggle={(isExpanded) => setIsSidebarExpanded(isExpanded)}
+          menuItems={sidebarMenuItems}
+        />
         <div
           className={clsx(
             'flex flex-col min-h-dvh w-full overflow-auto ml-0 transition-all',

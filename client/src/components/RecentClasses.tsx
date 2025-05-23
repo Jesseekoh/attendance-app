@@ -52,7 +52,6 @@ const RecentClasses = () => {
     queryKey: ['RecentClasses'],
     queryFn: async () => {
       const response = await api.get('/classes/recent');
-      console.log(response.data);
       return response.data;
     },
   });

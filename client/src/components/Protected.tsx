@@ -9,12 +9,13 @@ const Protected = ({
   const { user } = useStore();
   const location = useLocation();
   const navigate = useNavigate();
-  console.log(location);
   useEffect(() => {
     if (!user) navigate('/signin', { replace: true });
   }, [user, navigate]);
 
-  const isAuthenticated = allowedRoles.includes(user?.role);
+  const isAuthenticated = user?.role
+    ? allowedRoles.includes(user?.role)
+    : false;
 
   if (!isAuthenticated) {
     return <Navigate to="/signin" state={{ from: location }} replace />;

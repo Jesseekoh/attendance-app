@@ -1,26 +1,30 @@
 import { useRef, useState } from 'react';
-import {
-  LayoutDashboard,
-  FileChartColumnIncreasing,
-  BookTemplate,
-  ChevronRight,
-  ChevronLeft,
-  LogOut,
-  Presentation,
-  BookOpenText,
-} from 'lucide-react';
+import { ChevronRight, ChevronLeft, LogOut } from 'lucide-react';
 import clsx from 'clsx';
 import { NavLink, Link } from 'react-router';
-const SideNav = ({ onToggle }: { onToggle: (isExpanded: boolean) => void }) => {
+
+export type MenuItem = {
+  label: string;
+  component: React.ComponentType;
+  path: string;
+};
+const SideNav = ({
+  onToggle,
+  menuItems,
+}: {
+  onToggle: (isExpanded: boolean) => void;
+  menuItems: MenuItem[];
+}) => {
   const sideNavRef = useRef<HTMLDivElement>(null);
   const [isExpanded, setIsExpanded] = useState(false);
-  const menuItems = [
-    { label: 'Dashboard', component: LayoutDashboard, path: '/dashboard' },
-    { label: 'My Courses', component: BookOpenText, path: '/courses' },
-    { label: 'Attendance', component: BookTemplate, path: '/attendance' },
-    { label: 'Report', component: FileChartColumnIncreasing, path: '/reports' },
-    { label: 'Classes', component: Presentation, path: '/classes' },
-  ];
+
+  // const menuItems = [
+  //   { label: 'Dashboard', component: LayoutDashboard, path: '/dashboard' },
+  //   { label: 'My Courses', component: BookOpenText, path: '/courses' },
+  //   { label: 'Attendance', component: BookTemplate, path: '/attendance' },
+  //   { label: 'Report', component: FileChartColumnIncreasing, path: '/reports' },
+  //   { label: 'Classes', component: Presentation, path: '/classes' },
+  // ];
 
   // TODO: Fix rendering error caused by bad setstate
   const toggleSidebar = () => {
@@ -34,13 +38,20 @@ const SideNav = ({ onToggle }: { onToggle: (isExpanded: boolean) => void }) => {
   return (
     <aside
       className={clsx(
-        'min-h-screen top-0 bottom-0 left-0 hidden lg:block bg-primary transition-all fixed z-10 rounded-e-md overflow-auto',
+        'min-h-screen top-0 bottom-0 left-0 hidden lg:block bg-primary transition-all fixed z-10 rounded-e-md overflow-y-auto overflow-x-hidden',
         isExpanded ? 'w-[200px]' : 'w-[64px]'
       )}
       ref={sideNavRef}
     >
       <nav className="h-full flex relative">
-        <ul className="h-full w-full pt-20 flex flex-col  px-2 gap-3">
+        <ul className="h-full w-full flex flex-col  px-2 pt-5 pb-2 gap-3">
+          <Link
+            to={'/'}
+            className="font-[Inter] text-xl font-extrabold flex text-base-content"
+          >
+            {/* <SquareCheckBig /> */}
+            <span>CheckIn</span>
+          </Link>
           <button type="button" onClick={toggleSidebar}>
             {isExpanded ? <ChevronLeft /> : <ChevronRight />}
           </button>
@@ -70,7 +81,7 @@ const SideNav = ({ onToggle }: { onToggle: (isExpanded: boolean) => void }) => {
           <li className="mt-auto">
             <Link
               to="/logout"
-              className="active:!bg-neutral/30 active:text-neutral-content px-2 py-2 flex items-center gap-2"
+              className="px-2 py-2 flex items-center gap-2 active:!bg-neutral/30 active:text-neutral-content"
             >
               <LogOut />
               {
