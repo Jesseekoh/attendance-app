@@ -16,6 +16,10 @@ const UpcomingClasses = () => {
     },
   });
 
+  if (isError) {
+    return <p>An error occurred getting classes</p>;
+  }
+
   if (isLoading) {
     return (
       <div className="flex flex-col gap-4">
@@ -25,10 +29,6 @@ const UpcomingClasses = () => {
         <div className="skeleton h-4 w-full"></div>
       </div>
     );
-  }
-
-  if (isError) {
-    return <p>An error occurred getting classes</p>;
   }
 
   return (

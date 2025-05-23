@@ -2,7 +2,6 @@ import { Link, useLocation, useNavigate } from 'react-router';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-// import { signIn } from '../utils/auth';
 import { useStore } from '../stores/appStore';
 
 const SignInSchema = z.object({
@@ -14,7 +13,7 @@ type SignInFormType = z.infer<typeof SignInSchema>;
 
 const SignInForm = () => {
   const location = useLocation();
-  const previousUrl = location.state?.from || '/dashboard';
+  const previousUrl = location.state?.from.pathname || '/dashboard';
   const {
     register,
     formState: { errors },
@@ -22,16 +21,19 @@ const SignInForm = () => {
   } = useForm<SignInFormType>({ resolver: zodResolver(SignInSchema) });
 
   const navigate = useNavigate();
-  const { signIn } = useStore();
+  const { signIn, updateUser } = useStore();
   const onSubmit = async ({ email, password }: SignInFormType) => {
-    const loggedIn = await signIn({ email, password });
-    if (loggedIn) {
+    const userData = await signIn({ email, password });
+    if (userData) {
+      updateUser(userData);
       navigate(previousUrl, { replace: true });
     }
+
+    //TODO: handle signin errors
   };
   return (
     <>
-      <div className="max-w-sm w-full px-4 py-8 rounded-md font-[Inter]">
+      <div className="max-w-sm w-full px-8 py-6 rounded-md font-[Inter]">
         <h1 className="text-xl font-semibold mb-3 text-center">
           Sign In to your account
         </h1>
