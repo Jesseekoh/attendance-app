@@ -26,9 +26,9 @@ const ClassDetails = () => {
           .then(() => toast.success('Marked attendance successfully'))
           .catch((error: AxiosError) => {
             toast.error(error.response!.statusText);
-            console.log(error);
+            // console.log(error);
           });
-        console.log(pos);
+        // console.log(pos);
         toast.success(
           'latitude: ' +
             pos.coords.latitude +

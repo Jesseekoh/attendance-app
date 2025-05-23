@@ -10,7 +10,7 @@ const Profile = () => {
     queryKey: ['profile'],
     queryFn: async () => {
       const response = await api.get('/users/me');
-      console.log(response.data);
+      // console.log(response.data);
       return response.data;
     },
     refetchOnWindowFocus: false,

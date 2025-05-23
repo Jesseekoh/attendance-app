@@ -76,7 +76,6 @@ app.use(
     credentials: true,
     origin: [
       'http://localhost:5173',
-      'http://192.168.0.2:5173',
       'https://attendance-app-frontend-09ja.onrender.com',
     ],
   })
