@@ -5,7 +5,7 @@ import { NavLink, Link } from 'react-router';
 
 export type MenuItem = {
   label: string;
-  component: React.ComponentType;
+  component: React.FC<{ className?: string }>;
   path: string;
 };
 const SideNav = ({

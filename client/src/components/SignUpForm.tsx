@@ -83,12 +83,12 @@ const SignUpForm = () => {
       level,
     });
 
-    if (response.success) {
+    if (response?.success) {
       toast.success('Account created successfully');
       navigate('/signin');
       return;
     } else {
-      toast.error(response.message);
+      toast.error(response?.message || 'An unexpected error occurred');
     }
   };
   return (
