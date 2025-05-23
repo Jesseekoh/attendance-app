@@ -9,7 +9,14 @@ const AppLayout = () => {
   const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
   return (
     <>
-      <header className="fixed w-full z-10">
+      <header
+        className={clsx(
+          'fixed z-10 transition-all bg-neutral text-neutral-content',
+          isSidebarExpanded
+            ? 'left-[205px] w-[calc(100%-205px)]'
+            : 'left-[64px] w-[calc(100%-64px)]'
+        )}
+      >
         <NavBar />
       </header>
 
@@ -17,7 +24,7 @@ const AppLayout = () => {
         <SideNav onToggle={(isExpanded) => setIsSidebarExpanded(isExpanded)} />
         <div
           className={clsx(
-            'flex flex-col min-h-dvh w-full overflow-auto ml-0',
+            'flex flex-col min-h-dvh w-full overflow-auto ml-0 transition-all',
             isSidebarExpanded ? 'lg:ml-[200px]' : 'lg:ml-[64px]'
           )}
         >
