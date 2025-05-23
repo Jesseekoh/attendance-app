@@ -18,15 +18,15 @@ const ClassCard: React.FC<ClassCardProps> = ({ classInfo }) => {
       <div className="flex flex-col gap-1.5 mb-4">
         {/* <p>{data.data.course.desc}</p> */}
         <div className="flex gap-2">
-          <BookOpen className="text-neutral/40" />
+          <BookOpen className="text-base-content/60" />
           <p>{classInfo.course.code}</p>
         </div>
         <div className="flex gap-2">
-          <MapPin className="text-neutral/40" />
+          <MapPin className="text-base-content/60" />
           <p>{classInfo.Venue.name}</p>
         </div>
         <div className="flex gap-2">
-          <Calendar className="text-neutral/40" />
+          <Calendar className="text-base-content/60" />
           <p>
             {new Date(classInfo.startTime).toLocaleDateString([], {
               weekday: 'long',
@@ -36,14 +36,14 @@ const ClassCard: React.FC<ClassCardProps> = ({ classInfo }) => {
           </p>
         </div>
         <div className="flex gap-2">
-          <Clock className="text-neutral/40" />
+          <Clock className="text-base-content/60" />
           <p>
             {new Date(classInfo.startTime).toLocaleTimeString([], {})} -{' '}
             {new Date(classInfo.endTime).toLocaleTimeString()}
           </p>
         </div>
         <div className="flex gap-2">
-          <User className="text-neutral/40" />
+          <User className="text-base-content/60" />
           <p>
             {classInfo.Teacher.User.firstName +
               ' ' +

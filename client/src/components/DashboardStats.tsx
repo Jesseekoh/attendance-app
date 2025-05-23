@@ -32,7 +32,7 @@ const DashboardStats = () => {
     <div className="flex shadow-md border-2 border-neutral/10 rounded-md items-center divide-x-3 divide-neutral/20">
       <div className="px-4">
         <div
-          className="radial-progress text-neutral flex-1"
+          className="radial-progress  text-base-content flex-1"
           style={
             {
               '--value': studentStatsIsError ? 0 : attendancePercentage,
@@ -46,10 +46,14 @@ const DashboardStats = () => {
       </div>
       <div className="stat flex-1">
         <h3 className="stat-title">Classes attendend</h3>
-        <h1 className="stat-value">{studentStats.data.attendedClasses}</h1>
-        <h3 className="stat-title">
-          of {studentStats.data.totalClasses} classes
-        </h3>
+        {studentStats && (
+          <>
+            <h1 className="stat-value">{studentStats.data.attendedClasses}</h1>
+            <h3 className="stat-title">
+              of {studentStats.data.totalClasses} classes
+            </h3>
+          </>
+        )}
       </div>
     </div>
   );
