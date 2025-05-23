@@ -22,7 +22,7 @@ import swaggerUi from 'swagger-ui-express';
 const app = express();
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  limit: 100,
+  limit: 200,
   standardHeaders: 'draft-8',
   legacyHeaders: false,
 });
@@ -76,6 +76,7 @@ app.use(
     credentials: true,
     origin: [
       'http://localhost:5173',
+      'http://192.168.0.2:5173',
       'https://attendance-app-frontend-09ja.onrender.com',
     ],
   })
