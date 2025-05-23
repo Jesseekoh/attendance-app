@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { ChevronRight, ChevronLeft, LogOut } from 'lucide-react';
+import { ChevronRight, ChevronLeft, LogOut, CheckCheck } from 'lucide-react';
 import clsx from 'clsx';
 import { NavLink, Link } from 'react-router';
 
@@ -47,10 +47,18 @@ const SideNav = ({
         <ul className="h-full w-full flex flex-col  px-2 pt-5 pb-2 gap-3">
           <Link
             to={'/'}
-            className="font-[Inter] text-xl font-extrabold flex text-base-content"
+            className="font-[Inter] text-xl font-extrabold flex text-base-content gap-2"
           >
             {/* <SquareCheckBig /> */}
-            <span>CheckIn</span>
+            <CheckCheck className="shrink-0" />
+            <span
+              className={clsx(
+                'transition-all origin-left whitespace-nowrap',
+                isExpanded ? 'opacity-100 scale-100' : 'opacity-0 scale-0'
+              )}
+            >
+              CheckIn
+            </span>
           </Link>
           <button type="button" onClick={toggleSidebar}>
             {isExpanded ? <ChevronLeft /> : <ChevronRight />}
@@ -83,14 +91,12 @@ const SideNav = ({
               to="/logout"
               className="px-2 py-2 flex items-center gap-2 active:!bg-neutral/30 active:text-neutral-content"
             >
-              <LogOut />
+              <LogOut className="shrink-0" />
               {
                 <span
                   className={clsx(
                     'transition-all origin-left whitespace-nowrap',
-                    isExpanded
-                      ? 'opacity-100 relative scale-100'
-                      : 'opacity-0 scale-0 absolute'
+                    isExpanded ? 'opacity-100 scale-100' : 'opacity-0 scale-0'
                   )}
                 >
                   Log Out
