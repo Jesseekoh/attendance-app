@@ -11,7 +11,7 @@ const Attendance = () => {
   const { data, isLoading, isError } = useQuery({
     queryKey: ['attendance-data'],
     queryFn: async () => {
-      const resp = await api.get('http://localhost:5000/api/v1/classes/recent');
+      const resp = await api.get('/classes/recent');
       return resp.data.data.rows;
     },
   });
