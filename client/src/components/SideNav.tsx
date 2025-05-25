@@ -18,14 +18,6 @@ const SideNav = ({
   const sideNavRef = useRef<HTMLDivElement>(null);
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // const menuItems = [
-  //   { label: 'Dashboard', component: LayoutDashboard, path: '/dashboard' },
-  //   { label: 'My Courses', component: BookOpenText, path: '/courses' },
-  //   { label: 'Attendance', component: BookTemplate, path: '/attendance' },
-  //   { label: 'Report', component: FileChartColumnIncreasing, path: '/reports' },
-  //   { label: 'Classes', component: Presentation, path: '/classes' },
-  // ];
-
   // TODO: Fix rendering error caused by bad setstate
   const toggleSidebar = () => {
     setIsExpanded((prev) => {
@@ -38,7 +30,7 @@ const SideNav = ({
   return (
     <aside
       className={clsx(
-        'min-h-screen top-0 bottom-0 left-0 hidden lg:block bg-primary transition-all fixed z-10 rounded-e-md overflow-y-auto overflow-x-hidden',
+        'min-h-screen h-dvh top-0 bottom-0 left-0 hidden lg:block bg-accent transition-all sticky z-10 rounded-e-md overflow-y-auto overflow-x-hidden',
         isExpanded ? 'w-[200px]' : 'w-[64px]'
       )}
       ref={sideNavRef}
@@ -49,7 +41,6 @@ const SideNav = ({
             to={'/'}
             className="font-[Inter] text-xl font-extrabold flex text-base-content gap-2"
           >
-            {/* <SquareCheckBig /> */}
             <CheckCheck className="shrink-0" />
             <span
               className={clsx(
@@ -60,14 +51,14 @@ const SideNav = ({
               CheckIn
             </span>
           </Link>
-          <button type="button" onClick={toggleSidebar}>
+          <button type="button" className="w-max" onClick={toggleSidebar}>
             {isExpanded ? <ChevronLeft /> : <ChevronRight />}
           </button>
           {menuItems.map((item) => (
             <li key={item.path} className="">
               <NavLink
                 to={item.path}
-                className="px-2 py-2 flex items-center gap-2"
+                className={clsx('px-2 py-2 flex w-full items-center gap-2')}
               >
                 <item.component className="shrink-0" />
 
@@ -77,7 +68,7 @@ const SideNav = ({
                       'transition-all origin-left whitespace-nowrap',
                       isExpanded
                         ? 'opacity-100 scale-100 relative'
-                        : 'opacity-0  scale-0'
+                        : 'opacity-0 scale-0 '
                     )}
                   >
                     {item.label}
@@ -96,7 +87,9 @@ const SideNav = ({
                 <span
                   className={clsx(
                     'transition-all origin-left whitespace-nowrap',
-                    isExpanded ? 'opacity-100 scale-100' : 'opacity-0 scale-0'
+                    isExpanded
+                      ? 'opacity-100 scale-100 relative'
+                      : 'opacity-0 scale-0 absolute left-[24px]'
                   )}
                 >
                   Log Out
