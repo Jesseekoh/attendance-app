@@ -35,29 +35,22 @@ const AppLayout = () => {
 
   return (
     <>
-      <header
-        className={clsx(
-          'fixed z-10 transition-all bg-neutral text-neutral-content w-full',
-          isSidebarExpanded
-            ? 'lg:left-[205px] lg:w-[calc(100%-205px)]'
-            : 'lg:left-[64px] lg:w-[calc(100%-64px)]'
-        )}
-      >
-        <NavBar />
-      </header>
-
       <div className="flex">
         <SideNav
           onToggle={(isExpanded) => setIsSidebarExpanded(isExpanded)}
           menuItems={sidebarMenuItems}
         />
         <div
-          className={clsx(
-            'flex flex-col min-h-dvh w-full overflow-auto ml-0 transition-all',
-            isSidebarExpanded ? 'lg:ml-[200px]' : 'lg:ml-[64px]'
-          )}
+          className={clsx('flex flex-col min-h-dvh w-full ml-0 transition-all')}
         >
-          <main className="pt-16 px-4 pb-10">
+          <header
+            className={clsx(
+              'sticky z-10 top-0 transition-all bg-neutral text-neutral-content w-full'
+            )}
+          >
+            <NavBar />
+          </header>
+          <main className="px-4 pb-4">
             <Outlet />
           </main>
           <footer className="footer sm:footer-horizontal bg-neutral text-neutral-content items-center p-4 mt-auto">
