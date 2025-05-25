@@ -55,15 +55,15 @@ const ClassDetails = () => {
         <div className="flex flex-col gap-3 mb-8">
           {/* <p>{data.data.course.desc}</p> */}
           <div className="flex gap-2">
-            <BookOpen className="text-neutral/40" />
+            <BookOpen className="text-base-content/60" />
             <p>{classData.data.course.code}</p>
           </div>
           <div className="flex gap-2">
-            <MapPin className="text-neutral/40" />
+            <MapPin className="text-base-content/60" />
             <p>{classData.data.Venue.name}</p>
           </div>
           <div className="flex gap-2">
-            <Calendar className="text-neutral/40" />
+            <Calendar className="text-base-content/60" />
             <p>
               {startTime.toLocaleDateString([], {
                 weekday: 'long',
@@ -73,14 +73,14 @@ const ClassDetails = () => {
             </p>
           </div>
           <div className="flex gap-2">
-            <Clock className="text-neutral/40" />
+            <Clock className="text-base-content/60" />
             <p>
               {startTime.toLocaleTimeString([], {})} -{' '}
               {endTime.toLocaleTimeString()}
             </p>
           </div>
           <div className="flex gap-2">
-            <User className="text-neutral/40" />
+            <User className="text-base-content/60" />
             <p>
               {classData.data.Teacher.User.firstName +
                 ' ' +
