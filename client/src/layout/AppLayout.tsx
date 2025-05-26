@@ -14,7 +14,6 @@ import {
 } from 'lucide-react';
 const AppLayout = () => {
   const { user } = useStore();
-  const [isSidebarExpanded, setIsSidebarExpanded] = useState(false);
   const [sidebarMenuItems, setSidebarMenuItems] = useState([] as MenuItem[]);
 
   useEffect(() => {
@@ -36,10 +35,7 @@ const AppLayout = () => {
   return (
     <>
       <div className="flex">
-        <SideNav
-          onToggle={(isExpanded) => setIsSidebarExpanded(isExpanded)}
-          menuItems={sidebarMenuItems}
-        />
+        <SideNav menuItems={sidebarMenuItems} />
         <div
           className={clsx('flex flex-col min-h-dvh w-full ml-0 transition-all')}
         >

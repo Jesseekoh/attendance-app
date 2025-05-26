@@ -1,5 +1,5 @@
 import { useRef, useState } from 'react';
-import { ChevronRight, ChevronLeft, LogOut, CheckCheck } from 'lucide-react';
+import { ChevronsRight, ChevronsLeft, LogOut } from 'lucide-react';
 import clsx from 'clsx';
 import { NavLink, Link } from 'react-router';
 
@@ -8,13 +8,7 @@ export type MenuItem = {
   component: React.FC<{ className?: string }>;
   path: string;
 };
-const SideNav = ({
-  onToggle,
-  menuItems,
-}: {
-  onToggle: (isExpanded: boolean) => void;
-  menuItems: MenuItem[];
-}) => {
+const SideNav = ({ menuItems }: { menuItems: MenuItem[] }) => {
   const sideNavRef = useRef<HTMLDivElement>(null);
   const [isExpanded, setIsExpanded] = useState(false);
 
@@ -22,7 +16,6 @@ const SideNav = ({
   const toggleSidebar = () => {
     setIsExpanded((prev) => {
       const newState = !prev;
-      onToggle(newState);
       return newState;
     });
   };
@@ -30,45 +23,53 @@ const SideNav = ({
   return (
     <aside
       className={clsx(
-        'min-h-screen h-dvh top-0 bottom-0 left-0 hidden lg:block bg-accent transition-all sticky z-10 rounded-e-md overflow-y-auto overflow-x-hidden',
+        'h-dvh top-0 bottom-0 left-0 hidden lg:block bg-base-300 transition-all sticky z-10 rounded-e-md overflow-y-auto shrink-0 overflow-x-hidden',
         isExpanded ? 'w-[200px]' : 'w-[64px]'
       )}
       ref={sideNavRef}
     >
-      <nav className="h-full flex relative">
-        <ul className="h-full w-full flex flex-col  px-2 pt-5 pb-2 gap-3">
-          <Link
-            to={'/'}
-            className="font-[Inter] text-xl font-extrabold flex text-base-content gap-2"
-          >
-            <CheckCheck className="shrink-0" />
-            <span
-              className={clsx(
-                'transition-all origin-left whitespace-nowrap',
-                isExpanded ? 'opacity-100 scale-100' : 'opacity-0 scale-0'
-              )}
+      <nav className="h-full w-full">
+        <ul className="h-full w-full menu  pt-5 pb-2 gap-3">
+          <div className="flex gap-2 w-full justify-between items-center">
+            {isExpanded && (
+              <Link
+                to={'/'}
+                className={clsx(
+                  'transition-all origin-right whitespace-nowrap font-[Inter] text-xl font-extrabold flex text-base-content gap-2',
+                  isExpanded
+                    ? 'opacity-100 scale-100 ml-3'
+                    : 'opacity-0 scale-0'
+                )}
+              >
+                CheckIn
+              </Link>
+            )}
+            <button
+              type="button"
+              className="w-max px-3 py-1.5"
+              onClick={toggleSidebar}
             >
-              CheckIn
-            </span>
-          </Link>
-          <button type="button" className="w-max" onClick={toggleSidebar}>
-            {isExpanded ? <ChevronLeft /> : <ChevronRight />}
-          </button>
+              {isExpanded ? <ChevronsLeft /> : <ChevronsRight />}
+            </button>
+          </div>
+
           {menuItems.map((item) => (
-            <li key={item.path} className="">
+            <li
+              key={item.path}
+              className="w-full"
+              data-tooltip-id="my-tooltip"
+              data-tooltip-content={item.label}
+            >
               <NavLink
                 to={item.path}
-                className={clsx('px-2 py-2 flex w-full items-center gap-2')}
+                className={clsx('flex w-full items-center mx-auto')}
               >
                 <item.component className="shrink-0" />
-
                 {
                   <span
                     className={clsx(
                       'transition-all origin-left whitespace-nowrap',
-                      isExpanded
-                        ? 'opacity-100 scale-100 relative'
-                        : 'opacity-0 scale-0 '
+                      isExpanded ? 'opacity-100 scale-100' : 'opacity-0 scale-0'
                     )}
                   >
                     {item.label}
@@ -77,24 +78,22 @@ const SideNav = ({
               </NavLink>
             </li>
           ))}
-          <li className="mt-auto">
+          <li className="mt-auto w-full">
             <Link
               to="/logout"
-              className="px-2 py-2 flex items-center gap-2 active:!bg-neutral/30 active:text-neutral-content"
+              className="flex w-full items-center mx-auto active:!bg-neutral/30 active:text-neutral-content"
             >
               <LogOut className="shrink-0" />
-              {
+              {isExpanded && (
                 <span
                   className={clsx(
                     'transition-all origin-left whitespace-nowrap',
-                    isExpanded
-                      ? 'opacity-100 scale-100 relative'
-                      : 'opacity-0 scale-0 absolute left-[24px]'
+                    isExpanded ? 'opacity-100 scale-100' : 'opacity-0 scale-0'
                   )}
                 >
                   Log Out
                 </span>
-              }
+              )}
             </Link>
           </li>
         </ul>
