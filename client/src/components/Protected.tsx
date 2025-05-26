@@ -18,7 +18,7 @@ const Protected = ({
     : false;
 
   if (!isAuthenticated) {
-    return <Navigate to="/signin" state={{ from: location }} replace />;
+    return <Navigate to="/forbidden" state={{ from: location }} replace />;
   }
 
   return children;
