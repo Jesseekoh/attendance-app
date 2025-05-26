@@ -71,6 +71,10 @@ function App() {
           ),
         },
         {
+          path: '/forbidden',
+          element: <h1>Forbidden bruh</h1>,
+        },
+        {
           path: '/attendance',
           element: (
             <Protected allowedRoles={[ROLES.STUDENT]}>
@@ -99,6 +103,10 @@ function App() {
               <Profile />
             </Protected>
           ),
+        },
+        {
+          path: '*',
+          element: <h1>Not found</h1>,
         },
       ],
       errorElement: <Error />,
