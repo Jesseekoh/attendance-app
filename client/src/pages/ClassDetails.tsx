@@ -1,5 +1,5 @@
 import { useLoaderData, useParams } from 'react-router';
-import { api } from '../api/axiosClient';
+import { api } from '../lib/axiosClient';
 import { BookOpen, Calendar, Clock, MapPin, User } from 'lucide-react';
 import toast from 'react-hot-toast';
 import { AxiosError } from 'axios';

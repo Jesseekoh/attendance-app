@@ -1,55 +1,25 @@
-import { useState } from 'react';
-import clsx from 'clsx';
-import UpcomingClasses from '../components/UpcomingClasses';
-import RecentClasses from '../components/RecentClasses';
-import DashboardStats from '../components/DashboardStats';
-
+import { ROLES } from '../config/roles';
+import StudentDashboard from '../components/StudentDashboard';
+import AdminDashboard from '../components/AdminDashboard';
+import TeacherDashboard from '../components/TeacherDashboard';
+import { Navigate } from 'react-router';
+import { useAuth } from '../contexts/AuthContext';
 const Dashboard = () => {
-  const [activeTab, setActiveTab] = useState('upcoming');
+  const { user } = useAuth();
 
-  return (
-    <div className="py-4">
-      <DashboardStats />
-      <div className="card !px-4">
-        <div className="card-title">Ongoing classes</div>
-        <div className="card-body px-0">
-          <p>You have no ongoing classes...</p>
-        </div>
-      </div>
+  // authClient.
+  if (user?.role === ROLES.STUDENT) {
+    return <StudentDashboard />;
+  }
+  if (user?.role === ROLES.ADMIN) {
+    return <AdminDashboard />;
+  }
 
-      <div role="tablist" className="tabs tabs-lift mt-6">
-        <button
-          role="tab"
-          className={clsx(
-            'tab flex-1/2',
-            activeTab === 'upcoming' && 'tab-active'
-          )}
-          onClick={(e) => {
-            e.preventDefault();
-            setActiveTab('upcoming');
-          }}
-        >
-          Upcoming classes
-        </button>
+  if (user?.role === ROLES.TEACHER) {
+    return <TeacherDashboard />;
+  }
 
-        <button
-          role="tab"
-          className={clsx(
-            'tab flex-1/2',
-            activeTab === 'recent' && 'tab-active'
-          )}
-          onClick={(e) => {
-            e.preventDefault();
-            setActiveTab('recent');
-          }}
-        >
-          Recent Classes
-        </button>
-      </div>
-      <div>{activeTab === 'upcoming' && <UpcomingClasses />}</div>
-      <div>{activeTab === 'recent' && <RecentClasses />}</div>
-    </div>
-  );
+  return <Navigate to="/unauthorized" />;
 };
 
 export default Dashboard;
