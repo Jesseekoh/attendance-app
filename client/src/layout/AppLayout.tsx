@@ -1,9 +1,8 @@
-import { Outlet } from 'react-router';
+import { Navigate, Outlet } from 'react-router';
 import NavBar from '../components/NavBar';
 import SideNav, { MenuItem } from '../components/SideNav';
 import { useEffect, useState } from 'react';
 import clsx from 'clsx';
-import { useStore } from '../stores/appStore';
 import { ROLES } from '../config/roles';
 import {
   LayoutDashboard,
@@ -12,8 +11,9 @@ import {
   Presentation,
   BookOpenText,
 } from 'lucide-react';
+import { useAuth } from '../contexts/AuthContext';
 const AppLayout = () => {
-  const { user } = useStore();
+  const { user } = useAuth();
   const [sidebarMenuItems, setSidebarMenuItems] = useState([] as MenuItem[]);
 
   useEffect(() => {
@@ -31,6 +31,8 @@ const AppLayout = () => {
       ]);
     }
   }, [user]);
+
+  if (!user) return <Navigate to="/signin" />;
 
   return (
     <>
