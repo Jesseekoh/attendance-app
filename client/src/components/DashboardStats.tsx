@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { api } from '../api/axiosClient';
+import { api } from '../lib/axiosClient';
 const DashboardStats = () => {
   const {
     data: studentStats,
