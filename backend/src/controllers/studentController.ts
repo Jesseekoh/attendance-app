@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { Class, Course, Enrollment, sequelize, Student, User } from '../models';
+import { prisma } from '../config/db';
 import logger from '../utils/logger';
 
 /**
@@ -92,8 +93,10 @@ async function getStudentStats(req: Request, res: Response) {
   const { id, role } = req.user;
   try {
     const [totalClasses, attendedClasses] = await Promise.all([
-      Class.count(),
-      sequelize.models.attendance.count({ where: { StudentId: id } }),
+      // Class.count(),
+      prisma.class.count(),
+      prisma.attendance.count({ where: { studentId: id } }),
+      // sequelize.models.attendance.count({ where: { StudentId: id } }),
     ]);
     res.status(200).json({
       success: true,

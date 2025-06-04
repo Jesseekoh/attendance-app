@@ -5,53 +5,18 @@ import {
   verifyAccessToken,
   verifyRefreshToken,
 } from '../utils/helper';
+import { auth } from '../utils/auth';
+import { fromNodeHeaders } from 'better-auth/node';
 
-export const authenticateToken = (
+export const authenticateToken = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET!;
-  const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET!;
-  const { accessToken, refreshToken } = req.cookies;
+  const session = await auth.api.getSession({
+    headers: fromNodeHeaders(req.headers),
+  });
 
-  if (!accessToken && !refreshToken) {
-    res.status(401).json({
-      success: false,
-      message: 'Unauthorized. Please log in',
-    });
-    return;
-  }
-
-  let user = verifyAccessToken(accessToken);
-
-  if (user) {
-    req.user = user;
-    next();
-  } else {
-    const decodedRefreshToken = verifyRefreshToken(refreshToken);
-
-    if (!decodedRefreshToken) {
-      res.clearCookie('accessToken');
-      res.clearCookie('refreshToken');
-      res.status(401).json({
-        success: false,
-        message: 'Unauthorized. Please log in',
-      });
-      return;
-    }
-
-    user = decodedRefreshToken as JwtPayload;
-
-    const newToken = generateAccessToken({ role: user.role, id: user.id });
-    res.cookie('accessToken', newToken, {
-      httpOnly: true,
-      secure: true,
-      sameSite: 'none',
-      maxAge: 15 * 60 * 1000,
-    });
-
-    req.user = user;
-    next();
-  }
+  req.user = session?.user;
+  next();
 };
