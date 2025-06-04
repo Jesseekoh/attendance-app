@@ -23,7 +23,7 @@ const SignInForm = () => {
   } = useForm<SignInFormType>({ resolver: zodResolver(SignInSchema) });
 
   const onSubmit = async ({ email, password }: SignInFormType) => {
-    const { data, error } = await authClient.signIn.email(
+    await authClient.signIn.email(
       {
         email,
         password,

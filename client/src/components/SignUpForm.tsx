@@ -62,7 +62,7 @@ const SignUpForm = () => {
   const role = watch('role');
   const navigate = useNavigate();
   const onSubmit = async () => {
-    const { data, error } = await authClient.signUp.email(
+    await authClient.signUp.email(
       {
         email: 'jesseekoh@gmail.com',
         password: 'password',

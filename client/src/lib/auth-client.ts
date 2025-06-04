@@ -1,9 +1,17 @@
 import { createAuthClient } from 'better-auth/react';
-// import { inferAdditionalFields } from 'better-auth/client/plugins';
-// import type { auth } from '../../../backend/src/utils/auth';
+import { inferAdditionalFields } from 'better-auth/client/plugins';
 export const authClient = createAuthClient({
   baseURL: 'http://localhost:5000',
-  // plugins: [inferAdditionalFields<typeof auth>()],
+  plugins: [
+    inferAdditionalFields({
+      user: {
+        role: {
+          type: 'string',
+          required: true,
+        },
+      },
+    }),
+  ],
 });
 
 export type User = typeof authClient.$Infer.Session.user;
