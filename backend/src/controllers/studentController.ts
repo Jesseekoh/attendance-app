@@ -1,5 +1,4 @@
 import { Request, Response } from 'express';
-import { Class, Course, Enrollment, sequelize, Student, User } from '../models';
 import { prisma } from '../config/db';
 import logger from '../utils/logger';
 
@@ -10,15 +9,15 @@ async function enrollCourses(req: Request, res: Response) {
   const { id } = req.user;
   const { courses } = req.body;
   try {
-    const user = await Student.findOne({ where: { id } });
+    const user = await prisma.student.findUnique({ where: { userId: id } });
     if (user) {
       const enrollments = courses.map((courseId: string) => ({
         CourseId: courseId,
         StudentId: id,
       }));
-      await Enrollment.bulkCreate(enrollments, {
-        updateOnDuplicate: ['CourseId', 'StudentId'],
-      });
+      // await Enrollment.bulkCreate(enrollments, {
+      //   updateOnDuplicate: ['CourseId', 'StudentId'],
+      // });
 
       res.status(200).json({
         success: true,
@@ -44,20 +43,19 @@ async function getStudentCourses(req: Request, res: Response) {
   const { id } = req.user;
 
   try {
-    const student = await Student.findOne({ where: { id } });
+    const student = await prisma.student.findUnique({ where: { userId: id } });
 
     if (student) {
       // get all courses a student is enrolled in
-      const data = await Student.findOne({
-        where: { id },
+      const data = await prisma.student.findFirst({
+        where: { userId: id },
         include: {
-          model: Course,
-          attributes: ['id', 'code', 'title'],
-          through: { attributes: [] },
+          Enrollments: true,
         },
       });
 
-      const courses: Course[] = data!.Courses;
+      // const courses: Course[] = data!.Courses;
+      const courses = [1];
       console.log('Courses', courses);
 
       if (courses.length !== 0) {

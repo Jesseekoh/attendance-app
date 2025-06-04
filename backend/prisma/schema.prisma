@@ -9,7 +9,7 @@ datasource db {
 }
 
 model Class {
-  id         String       @id @db.Uuid
+  id         String       @id @default(uuid()) @db.Uuid
   teacherId  String?
   courseId   String?      @db.Uuid
   venueId    String       @db.Uuid
@@ -111,8 +111,8 @@ model User {
   sessions      Session[]
   accounts      Account[]
   role          String
-  Students      Student?
-  Teachers      Teacher?
+  student       Student?
+  teacher       Teacher?
 
   @@unique([email])
   @@map("user")

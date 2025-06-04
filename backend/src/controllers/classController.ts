@@ -1,9 +1,7 @@
 import { Request, Response } from 'express';
-import { Class, Course, sequelize, Teacher, User, Venue } from '../models';
 import logger from '../utils/logger';
 import { ClassSchema } from '../schemas';
 import { z } from 'zod';
-import { literal, Op } from 'sequelize';
 import { prisma } from '../config/db';
 
 async function createClass(req: Request, res: Response) {
@@ -20,20 +18,22 @@ async function createClass(req: Request, res: Response) {
   const { startTime, endTime, venueId, courseId } = req.body;
 
   try {
-    const user = await User.findOne({ where: { id } });
-    if (user?.getDataValue('role') !== 'teacher') {
+    const user = await prisma.user.findUnique({ where: { id } });
+    if (user?.role !== 'teacher') {
       res.status(403).json({
         success: false,
         message: 'Only teachers can access this route',
       });
       return;
     }
-    const newClass = await Class.create({
-      teacherId: id,
-      courseId,
-      venueId,
-      startTime,
-      endTime,
+    const newClass = await prisma.class.create({
+      data: {
+        endTime,
+        startTime,
+        venueId,
+        courseId,
+        teacherId: id,
+      },
     });
 
     res.status(200).json({
@@ -76,17 +76,22 @@ async function getClass(req: Request, res: Response) {
   }
 
   try {
-    const classData = await Class.findByPk(classId, {
-      include: [
-        { model: Venue },
-        {
-          model: Teacher,
-          include: [
-            { model: User, attributes: ['firstName', 'lastName', 'email'] },
-          ],
-        },
-        { model: Course, attributes: ['title', 'desc', 'code'], as: 'course' },
-      ],
+    const classData = await prisma.class.findUnique({
+      where: { id: classId },
+      include: {
+        teacher: true,
+        course: true,
+      },
+      // [
+
+      //   {
+      //     model: Teacher,
+      //     include: [
+      //       { model: User, attributes: ['firstName', 'lastName', 'email'] },
+      //     ],
+      //   },
+      //   { model: Course, attributes: ['title', 'desc', 'code'], as: 'course' },
+      // ],
     });
     if (classData) {
       res.status(200).json({
@@ -118,9 +123,9 @@ async function updateClassDetails(req: Request, res: Response) {
   const { courseId, classVenue, startTime, endTime } = req.body;
 
   try {
-    const user = await User.findOne({ where: { id } });
-    if (user?.getDataValue('role') === 'teacher') {
-      const classData = await Class.findOne({
+    const user = await prisma.user.findUnique({ where: { id } });
+    if (user?.role === 'teacher') {
+      const classData = await prisma.class.findUnique({
         where: {
           id: classId,
         },
@@ -134,7 +139,7 @@ async function updateClassDetails(req: Request, res: Response) {
         return;
       }
 
-      if (id !== classData?.getDataValue('teacherId')) {
+      if (id !== classData?.teacherId) {
         res.status(403).json({
           success: false,
           message: "You're not authorized to update this class",
@@ -147,7 +152,7 @@ async function updateClassDetails(req: Request, res: Response) {
       if (classVenue) updateData.classVenue = classVenue;
       if (startTime) updateData.startTime = startTime;
       if (endTime) updateData.endTime = endTime;
-      await classData?.update(updateData);
+      await prisma.class.update({ where: { id: classId }, data: updateData });
 
       res.status(200).json({
         success: true,
@@ -173,26 +178,28 @@ async function getOngoingClasses(req: Request, res: Response) {
 
   try {
     const currentTime = new Date();
-    const ongoingClasses = await Class.findAll({
+    const ongoingClasses = await prisma.class.findMany({
       where: {
         startTime: {
-          [Op.lt]: currentTime,
+          lt: currentTime,
         },
         endTime: {
-          [Op.gt]: currentTime,
+          gt: currentTime,
         },
       },
-      order: [['startTime', 'ASC']],
-      include: [
-        { model: Venue },
-        {
-          model: Teacher,
-          include: [
-            { model: User, attributes: ['firstName', 'lastName', 'email'] },
-          ],
-        },
-        { model: Course, attributes: ['title', 'desc', 'code'], as: 'course' },
-      ],
+      orderBy: { startTime: 'asc' },
+      include: {
+        venue: true,
+        teacher: true,
+      },
+      // { model: Venue },
+      // {
+      //   model: Teacher,
+      //   include: [
+      //     { model: User, attributes: ['firstName', 'lastName', 'email'] },
+      //   ],
+      // },
+      // { model: Course, attributes: ['title', 'desc', 'code'], as: 'course' },
     });
     res.status(200).json({
       success: true,
@@ -316,8 +323,9 @@ async function markAttendance(req: Request, res: Response) {
   const { studentLocation } = req.body;
   const { classId } = req.params;
   try {
-    const classData = await Class.findByPk(classId, {
-      include: { model: Venue },
+    const classData = await prisma.class.findUnique({
+      where: { id: classId },
+      include: { venue: true },
     });
     if (!classData) {
       res.status(404).json({
@@ -326,14 +334,14 @@ async function markAttendance(req: Request, res: Response) {
       });
       return;
     }
-    const user = await User.findByPk(id);
-    if (user?.getDataValue('role') === 'student') {
+    const user = await prisma.user.findUnique({ where: { id } });
+    if (user?.role === 'student') {
       const currentTime = new Date();
 
       // checks if the attendance is too early or too late
       if (
-        currentTime < classData.getDataValue('startTime') ||
-        currentTime > classData.getDataValue('endTime')
+        currentTime < classData.startTime! ||
+        currentTime > classData?.endTime
       ) {
         res.status(400).json({
           success: false,
@@ -345,21 +353,21 @@ async function markAttendance(req: Request, res: Response) {
       // TODO: Check if user's location matxhes the venue of the class
 
       if (
-        studentLocation.latitude ===
-          parseFloat(classData.getDataValue('Venue').latitude) &&
-        studentLocation.longitude ===
-          parseFloat(classData.getDataValue('Venue').longitude)
+        studentLocation.latitude === classData?.venue.latitude &&
+        studentLocation.longitude === classData?.venue.longitude
       ) {
-        await sequelize.models.attendance.create({
-          StudentId: id,
-          ClassId: classData.getDataValue('id'),
+        await prisma.attendance.create({
+          data: {
+            studentId: id,
+            classId: classData?.id,
+          },
         });
         res.status(200).json({
           success: true,
           message: 'Attendance marked successfully',
           data: {
             studentLocation,
-            location: typeof classData.getDataValue('Venue').latitude,
+            location: typeof classData?.venue.latitude,
           },
         });
         return;

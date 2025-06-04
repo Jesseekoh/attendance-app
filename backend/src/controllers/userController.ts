@@ -1,6 +1,5 @@
 import { prisma } from '../config/db';
 import { Request, Response } from 'express';
-import { User, Student, Teacher, sequelize } from '../models';
 import logger from '../utils/logger';
 import { Prisma } from '../../generated/prisma';
 
@@ -92,34 +91,35 @@ export const getMyProfile = async (
   try {
     let user;
     if (role === 'student') {
-      user = await User.findOne({
+      user = await prisma.user.findUnique({
         where: { id },
-        include: [
-          {
-            model: Student,
-            attributes: ['matricNumber', 'department', 'level'],
-          },
-        ],
+        include: {
+          student: true,
+        },
       });
+      // user = await User.findOne({
+      //   where: { id },
+      //   include: [
+      //     {
+      //       model: Student,
+      //       attributes: ['matricNumber', 'department', 'level'],
+      //     },
+      //   ],
+      // });
     }
     if (role === 'teacher') {
-      user = await User.findOne({
-        where: { id },
-        include: [
-          {
-            model: Teacher,
-            attributes: ['department'],
-          },
-        ],
+      user = await prisma.user.findUnique({
+        where: id,
+        include: {
+          teacher: true,
+        },
       });
     }
     if (user) {
-      const { passwordHash, createdAt, updatedAt, ...userWithoutPasswordHash } =
-        user.dataValues;
       res.status(200).json({
         success: true,
         message: 'Successfully returned user data',
-        data: userWithoutPasswordHash,
+        data: user,
       });
     } else {
       res.status(404).json({ success: false, message: 'User not found' });
