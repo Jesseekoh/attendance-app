@@ -24,9 +24,12 @@ const DashboardStats = () => {
 
   let attendancePercentage;
   if (studentStats) {
-    attendancePercentage =
-      (studentStats.data.attendedClasses / studentStats.data.totalClasses) *
-      100;
+    const { attendedClasses, totalClasses } = studentStats.data;
+    if (attendedClasses === 0) {
+      attendancePercentage = 0;
+    } else {
+      attendancePercentage = (attendedClasses / totalClasses) * 100;
+    }
   }
   return (
     <div className="flex shadow-md border-2 border-neutral/10 rounded-md items-center divide-x-3 divide-neutral/20">

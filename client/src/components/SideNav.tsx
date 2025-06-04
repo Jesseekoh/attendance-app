@@ -12,7 +12,6 @@ const SideNav = ({ menuItems }: { menuItems: MenuItem[] }) => {
   const sideNavRef = useRef<HTMLDivElement>(null);
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // TODO: Fix rendering error caused by bad setstate
   const toggleSidebar = () => {
     setIsExpanded((prev) => {
       const newState = !prev;
@@ -29,7 +28,7 @@ const SideNav = ({ menuItems }: { menuItems: MenuItem[] }) => {
       ref={sideNavRef}
     >
       <nav className="h-full w-full">
-        <ul className="h-full w-full menu  pt-5 pb-2 gap-3">
+        <ul className="h-full w-full menu  pt-5 pb-2 gap-3 flex-nowrap">
           <div className="flex gap-2 w-full justify-between items-center">
             {isExpanded && (
               <Link
@@ -46,7 +45,7 @@ const SideNav = ({ menuItems }: { menuItems: MenuItem[] }) => {
             )}
             <button
               type="button"
-              className="w-max px-3 py-1.5"
+              className="w-max px-3 py-1.5 rounded-md"
               onClick={toggleSidebar}
             >
               {isExpanded ? <ChevronsLeft /> : <ChevronsRight />}
@@ -78,7 +77,11 @@ const SideNav = ({ menuItems }: { menuItems: MenuItem[] }) => {
               </NavLink>
             </li>
           ))}
-          <li className="mt-auto w-full">
+          <li
+            className="mt-auto w-full"
+            data-tooltip-id="my-tooltip"
+            data-tooltip-content="Log Out"
+          >
             <Link
               to="/logout"
               className="flex w-full items-center mx-auto active:!bg-neutral/30 active:text-neutral-content"

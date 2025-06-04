@@ -11,11 +11,11 @@ import {
 import { Link } from 'react-router';
 import { useState } from 'react';
 import Hamburger from 'hamburger-react';
-import { useStore } from '../stores/appStore';
+import { useAuth } from '../contexts/AuthContext';
 
 const NavBar = () => {
   const [isOpen, setOpen] = useState(false);
-  const { user } = useStore();
+  const { user } = useAuth();
   const menuItems = [
     { label: 'Dashboard', component: LayoutDashboard, path: '/dashboard' },
     // { label: 'My Courses', component: BookOpenText, path: '/courses' },

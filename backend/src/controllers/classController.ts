@@ -4,6 +4,7 @@ import logger from '../utils/logger';
 import { ClassSchema } from '../schemas';
 import { z } from 'zod';
 import { literal, Op } from 'sequelize';
+import { prisma } from '../config/db';
 
 async function createClass(req: Request, res: Response) {
   const isValidRequest = ClassSchema.safeParse(req.body);
@@ -211,46 +212,53 @@ async function getRecentClasses(req: Request, res: Response) {
 
   const pageSize = 10;
   try {
-    const recentClasses = await Class.findAndCountAll({
-      where: {
-        startTime: {
-          [Op.lt]: new Date(),
-        },
-      },
-      order: [['startTime', 'DESC']],
-      limit: pageSize,
-      offset: (page - 1) * pageSize,
-      include: [
-        { model: Venue },
-        {
-          model: Teacher,
-          include: [
-            { model: User, attributes: ['firstName', 'lastName', 'email'] },
-          ],
-        },
-        { model: Course, attributes: ['title', 'desc', 'code'], as: 'course' },
-      ],
-      attributes: {
-        include: [
-          [
-            literal(`
-          EXISTS (
-            SELECT 1
-            FROM attendance
-            WHERE attendance."ClassId" = "Class"."id"
-            AND attendance."StudentId" = '${id}'
-          )
-        `),
-            'attended',
-          ],
-        ],
+    const totalClasses = await prisma.class.count();
+    const recentClasses = await prisma.class.findMany({
+      include: {
+        teacher: true,
+        venue: true,
       },
     });
+    // const recentClasses = await Class.findAndCountAll({
+    //   where: {
+    //     startTime: {
+    //       [Op.lt]: new Date(),
+    //     },
+    //   },
+    //   order: [['startTime', 'DESC']],
+    //   limit: pageSize,
+    //   offset: (page - 1) * pageSize,
+    //   include: [
+    //     { model: Venue },
+    //     {
+    //       model: Teacher,
+    //       include: [
+    //         { model: User, attributes: ['firstName', 'lastName', 'email'] },
+    //       ],
+    //     },
+    //     { model: Course, attributes: ['title', 'desc', 'code'], as: 'course' },
+    //   ],
+    //   attributes: {
+    //     include: [
+    //       [
+    //         literal(`
+    //       EXISTS (
+    //         SELECT 1
+    //         FROM attendance
+    //         WHERE attendance."ClassId" = "Class"."id"
+    //         AND attendance."StudentId" = '${id}'
+    //       )
+    //     `),
+    //         'attended',
+    //       ],
+    //     ],
+    //   },
+    // });
     res.status(200).json({
       success: true,
       page,
       message: 'Fetched classes successfully',
-      data: recentClasses,
+      data: { recentClasses, totalClasses },
     });
     return;
   } catch (error) {
@@ -262,24 +270,34 @@ async function getRecentClasses(req: Request, res: Response) {
 async function getUpcomingClasses(req: Request, res: Response) {
   const { id, role } = req.user;
   try {
-    const upcomingClasses = await Class.findAll({
+    const upcomingClasses = await prisma.class.findMany({
       where: {
-        startTime: {
-          [Op.gt]: new Date(),
-        },
+        startTime: { gt: new Date() },
       },
-      order: [['startTime', 'ASC']],
-      include: [
-        { model: Venue },
-        {
-          model: Teacher,
-          include: [
-            { model: User, attributes: ['firstName', 'lastName', 'email'] },
-          ],
-        },
-        { model: Course, attributes: ['title', 'desc', 'code'], as: 'course' },
-      ],
+      include: {
+        venue: true,
+        teacher: true,
+        course: true,
+      },
     });
+    // const upcomingClasses = await Class.findAll({
+    //   where: {
+    //     startTime: {
+    //       [Op.gt]: new Date(),
+    //     },
+    //   },
+    //   order: [['startTime', 'ASC']],
+    //   include: [
+    //     { model: Venue },
+    //     {
+    //       model: Teacher,
+    //       include: [
+    //         { model: User, attributes: ['firstName', 'lastName', 'email'] },
+    //       ],
+    //     },
+    //     { model: Course, attributes: ['title', 'desc', 'code'], as: 'course' },
+    //   ],
+    // });
 
     res.status(200).json({
       success: true,
