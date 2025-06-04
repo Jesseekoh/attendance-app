@@ -10,23 +10,6 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   const { data, isPending, error } = authClient.useSession();
 
-  const logout = async () => {
-    try {
-      await authClient.signOut({
-        fetchOptions: {
-          onSuccess: () => {
-            setUser(null);
-            setSession(null);
-          },
-          onError: () => {
-            console.log('Logout failed');
-          },
-        },
-      });
-    } catch (error) {
-      console.error('Logout failed:', error);
-    }
-  };
   useEffect(() => {
     setSession(data?.session ?? null);
     setUser(data?.user ?? null);
@@ -40,9 +23,7 @@ const AuthProvider = ({ children }: { children: ReactNode }) => {
     );
   }
   return (
-    <AuthContext.Provider
-      value={{ user, session, isLoading, logout, setUser, setSession }}
-    >
+    <AuthContext.Provider value={{ user, session, isLoading }}>
       {children}
     </AuthContext.Provider>
   );
