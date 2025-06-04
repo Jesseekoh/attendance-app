@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { api } from '../api/axiosClient';
+import { api } from '../lib/axiosClient';
 import { User2 } from 'lucide-react';
 const Profile = () => {
   const {
@@ -10,7 +10,6 @@ const Profile = () => {
     queryKey: ['profile'],
     queryFn: async () => {
       const response = await api.get('/users/me');
-      // console.log(response.data);
       return response.data;
     },
     refetchOnWindowFocus: false,

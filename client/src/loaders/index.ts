@@ -1,7 +1,6 @@
 import axios from 'axios';
-import { api } from '../api/axiosClient';
+import { api } from '../lib/axiosClient';
 import { LoaderFunctionArgs, redirect } from 'react-router';
-import { useStore } from '../stores/appStore';
 
 export async function classDetailsLoader({ params }: LoaderFunctionArgs) {
   const { classId } = params;
@@ -19,18 +18,4 @@ export async function classDetailsLoader({ params }: LoaderFunctionArgs) {
       throw new Response(message, { status, statusText: message });
     }
   }
-}
-
-export async function logOutLoader() {
-  return api
-    .post('/auth/logout')
-    .then((resp) => {
-      const { updateUser } = useStore.getState();
-      updateUser(null);
-      // return redirect('/signup');
-      return resp.data;
-    })
-    .catch(() => {
-      throw new Error('Log out failed');
-    });
 }

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import InfiniteScroll from 'react-infinite-scroll-component';
-import { api } from '../api/axiosClient';
+import { api } from '../lib/axiosClient';
 import ClassCard from '../components/ClassCard';
 import { ClassInfoType } from '../components/RecentClasses';
 import { useQuery } from '@tanstack/react-query';

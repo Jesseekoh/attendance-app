@@ -1,8 +1,8 @@
 import { Link, Outlet } from 'react-router';
 import { SquareCheckBig } from 'lucide-react';
-import { useStore } from '../stores/appStore';
+import { useAuth } from '../contexts/AuthContext';
 export const RootLayout = () => {
-  const { user } = useStore();
+  const { user } = useAuth();
   return (
     <>
       <header>
@@ -13,7 +13,7 @@ export const RootLayout = () => {
           </Link>
           <div className="flex gap-6 items-center">
             {user ? (
-              <h1>{user.firstName}</h1>
+              <h1>{user.name}</h1>
             ) : (
               <>
                 <Link to={'/signin'}>
