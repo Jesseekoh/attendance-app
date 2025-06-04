@@ -2,7 +2,8 @@ import { Link, useLocation, useNavigate } from 'react-router';
 import { z } from 'zod';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useStore } from '../stores/appStore';
+import { authClient } from '../lib/auth-client';
+import toast from 'react-hot-toast';
 
 const SignInSchema = z.object({
   email: z.string().email('Enter a valid email'),
@@ -13,6 +14,7 @@ type SignInFormType = z.infer<typeof SignInSchema>;
 
 const SignInForm = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const previousUrl = location.state?.from.pathname || '/dashboard';
   const {
     register,
@@ -20,16 +22,23 @@ const SignInForm = () => {
     handleSubmit,
   } = useForm<SignInFormType>({ resolver: zodResolver(SignInSchema) });
 
-  const navigate = useNavigate();
-  const { signIn, updateUser } = useStore();
   const onSubmit = async ({ email, password }: SignInFormType) => {
-    const userData = await signIn({ email, password });
-    if (userData) {
-      updateUser(userData);
-      navigate(previousUrl, { replace: true });
-    }
-
-    //TODO: handle signin errors
+    const { data, error } = await authClient.signIn.email(
+      {
+        email,
+        password,
+        // callbackURL: previousUrl,
+      },
+      {
+        onError: (ctx) => {
+          toast.error(ctx.error.message);
+        },
+        onSuccess: (ctx) => {
+          toast.success(ctx.response.statusText);
+          navigate(previousUrl, { replace: true });
+        },
+      }
+    );
   };
   return (
     <>

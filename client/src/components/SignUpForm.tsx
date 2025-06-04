@@ -3,7 +3,7 @@ import toast from 'react-hot-toast';
 import { z } from 'zod';
 import { Controller, useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useStore } from '../stores/appStore';
+import { authClient } from '../lib/auth-client';
 const SignUpSchema = z
   .object({
     firstName: z.string().min(3, 'First name must be at least 3 characters'),
@@ -58,45 +58,65 @@ const SignUpForm = () => {
       role: 'student',
     },
   });
+
   const role = watch('role');
   const navigate = useNavigate();
-  const signUp = useStore((state) => state.signUp);
-
-  const onSubmit = async ({
-    email,
-    password,
-    firstName,
-    lastName,
-    role,
-    matricNumber,
-    department,
-    level,
-  }: SignUpFormType) => {
-    const response = await signUp({
-      email,
-      password,
-      firstName,
-      lastName,
-      role,
-      matricNumber,
-      department,
-      level,
-    });
-
-    if (response?.success) {
-      toast.success('Account created successfully');
-      navigate('/signin');
-      return;
-    } else {
-      toast.error(response?.message || 'An unexpected error occurred');
-    }
+  const onSubmit = async () => {
+    const { data, error } = await authClient.signUp.email(
+      {
+        email: 'jesseekoh@gmail.com',
+        password: 'password',
+        role: 'student',
+        name: 'Jesse',
+      },
+      {
+        onSuccess: (ctx) => {
+          toast.success(ctx.response.statusText);
+          navigate('/signin', { replace: true });
+        },
+        onError: (ctx) => {
+          toast.error(ctx.error.message);
+        },
+      }
+    );
   };
+
+  // const onSubmit = async ({
+  //   email,
+  //   password,
+  //   firstName,
+  //   lastName,
+  //   role,
+  //   matricNumber,
+  //   department,
+  //   level,
+  // }: SignUpFormType) => {
+  //   const response = await signUp({
+  //     email,
+  //     password,
+  //     firstName,
+  //     lastName,
+  //     role,
+  //     matricNumber,
+  //     department,
+  //     level,
+  //   });
+
+  //   if (response?.success) {
+  //     toast.success('Account created successfully');
+  //     navigate('/signin');
+  //     return;
+  //   } else {
+  //     toast.error(response?.message || 'An unexpected error occurred');
+  //   }
+  // };
   return (
     <>
       <div className="max-w-sm w-full px-8 py-6 rounded-md font-[Inter]">
         <h1 className="text-xl font-semibold mb-3 text-center">
           Sign up for an account
         </h1>
+        {/* <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}> */}
         <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
           <div>
             <label htmlFor="firstName" className="text-sm block">
