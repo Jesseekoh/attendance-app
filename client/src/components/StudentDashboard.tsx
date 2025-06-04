@@ -3,6 +3,7 @@ import clsx from 'clsx';
 import UpcomingClasses from '../components/UpcomingClasses';
 import RecentClasses from '../components/RecentClasses';
 import DashboardStats from '../components/DashboardStats';
+
 const StudentDashboard = () => {
   const [activeTab, setActiveTab] = useState('upcoming');
   return (
