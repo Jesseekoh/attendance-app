@@ -1,0 +1,164 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Class {
+  id         String       @id @db.Uuid
+  teacherId  String?
+  courseId   String?      @db.Uuid
+  venueId    String       @db.Uuid
+  startTime  DateTime?    @db.Timestamptz(6)
+  endTime    DateTime     @db.Timestamptz(6)
+  createdAt  DateTime     @default(now()) @db.Timestamptz(6)
+  updatedAt  DateTime     @updatedAt @db.Timestamptz(6)
+  course     Course?      @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  teacher    Teacher?     @relation(fields: [teacherId], references: [userId], onDelete: Cascade)
+  venue      Venue        @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  attendance attendance[]
+
+  @@unique([startTime, endTime, venueId, courseId], map: "classes_start_time_end_time_venue_id_course_id")
+}
+
+model Course {
+  id             String           @id @db.Uuid
+  code           String           @unique @db.VarChar(255)
+  title          String           @unique @db.VarChar(255)
+  desc           String?
+  classes        Class[]
+  Enrollments    Enrollments[]
+  taught_courses taught_courses[]
+}
+
+model Enrollments {
+  CourseId  String  @db.Uuid
+  StudentId String
+  grade     Int?
+  Courses   Course  @relation(fields: [CourseId], references: [id], onDelete: Cascade)
+  Student   Student @relation(fields: [StudentId], references: [userId], onDelete: Cascade)
+
+  @@id([CourseId, StudentId])
+}
+
+model Student {
+  userId       String        @id
+  matricNumber String        @unique @db.VarChar(255)
+  level        Int           @db.SmallInt
+  department   String        @db.VarChar(255)
+  Enrollments  Enrollments[]
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  attendance   attendance[]
+}
+
+model Teacher {
+  userId         String           @id
+  department     String           @db.VarChar(255)
+  Classes        Class[]
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  taught_courses taught_courses[]
+}
+
+model attendance {
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @db.Timestamptz(6)
+  studentId String
+  classId   String   @db.Uuid
+  class     Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
+  Student   Student  @relation(fields: [studentId], references: [userId], onDelete: Cascade)
+
+  @@id([studentId, classId])
+}
+
+model departments {
+  id   String @id @default(uuid()) @db.Uuid
+  name String @db.VarChar(255)
+}
+
+model taught_courses {
+  createdAt DateTime @default(now()) @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @db.Timestamptz(6)
+  TeacherId String
+  CourseId  String   @db.Uuid
+  course    Course   @relation(fields: [CourseId], references: [id], onDelete: Cascade)
+  teacher   Teacher  @relation(fields: [TeacherId], references: [userId], onDelete: Cascade)
+
+  @@id([TeacherId, CourseId])
+}
+
+model Venue {
+  id        String   @id @db.Uuid
+  name      String   @unique @db.VarChar(255)
+  latitude  Decimal  @db.Decimal(10, 8)
+  longitude Decimal? @db.Decimal(10, 8)
+  Classes   Class[]
+
+  @@unique([latitude, longitude], map: "venues_latitude_longitude")
+}
+
+model User {
+  id            String    @id
+  name          String
+  email         String
+  emailVerified Boolean
+  image         String?
+  createdAt     DateTime
+  updatedAt     DateTime
+  sessions      Session[]
+  accounts      Account[]
+  role          String
+  Students      Student?
+  Teachers      Teacher?
+
+  @@unique([email])
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime
+  updatedAt DateTime
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime
+  updatedAt             DateTime
+
+  @@map("account")
+}
+
+model Verification {
+  id         String    @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime?
+  updatedAt  DateTime?
+
+  @@map("verification")
+}

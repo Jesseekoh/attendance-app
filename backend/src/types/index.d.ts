@@ -1,4 +1,6 @@
 export interface ITokenPayload {
-    id: string;
-    role: 'student' | 'teacher';
+  id: string;
+  role: Role;
 }
+
+export type Role = 'student' | 'teacher' | 'admin';
