@@ -70,11 +70,9 @@ export const auth = betterAuth({
       if (ctx.path !== '/sign-up/email') return;
 
       const { role, matricNumber, department, level } = ctx.body;
-      console.log('After Hook bro....');
       const returned = ctx.context.returned as AuthReturnType;
       if (returned.user) {
         if (role === 'student') {
-          console.log('blublu', ctx.context.returned);
           const newStudent = await prisma.student.create({
             data: {
               userId: returned.user?.id,

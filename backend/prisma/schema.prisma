@@ -20,7 +20,7 @@ model Class {
   course     Course?      @relation(fields: [courseId], references: [id], onDelete: Cascade)
   teacher    Teacher?     @relation(fields: [teacherId], references: [userId], onDelete: Cascade)
   venue      Venue        @relation(fields: [venueId], references: [id], onDelete: Cascade)
-  attendance attendance[]
+  attendance Attendance[]
 
   @@unique([startTime, endTime, venueId, courseId], map: "classes_start_time_end_time_venue_id_course_id")
 }
@@ -52,7 +52,7 @@ model Student {
   department   String        @db.VarChar(255)
   Enrollments  Enrollments[]
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  attendance   attendance[]
+  attendance   Attendance[]
 }
 
 model Teacher {
@@ -63,7 +63,7 @@ model Teacher {
   taught_courses taught_courses[]
 }
 
-model attendance {
+model Attendance {
   createdAt DateTime @default(now()) @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @db.Timestamptz(6)
   studentId String
@@ -74,7 +74,7 @@ model attendance {
   @@id([studentId, classId])
 }
 
-model departments {
+model Department {
   id   String @id @default(uuid()) @db.Uuid
   name String @db.VarChar(255)
 }

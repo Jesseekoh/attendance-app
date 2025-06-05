@@ -61,13 +61,26 @@ const SignUpForm = () => {
 
   const role = watch('role');
   const navigate = useNavigate();
-  const onSubmit = async () => {
+  const onSubmit = async ({
+    email,
+    password,
+    firstName,
+    lastName,
+    role,
+    matricNumber,
+    department,
+    level,
+  }: SignUpFormType) => {
+    const fullName = firstName + lastName;
     await authClient.signUp.email(
       {
-        email: 'jesseekoh@gmail.com',
-        password: 'password',
-        role: 'student',
-        name: 'Jesse',
+        email,
+        password,
+        role,
+        name: fullName,
+        matricNumber,
+        department,
+        level,
       },
       {
         onSuccess: (ctx) => {

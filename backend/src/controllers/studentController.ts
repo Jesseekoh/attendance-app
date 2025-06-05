@@ -56,7 +56,6 @@ async function getStudentCourses(req: Request, res: Response) {
 
       // const courses: Course[] = data!.Courses;
       const courses = [1];
-      console.log('Courses', courses);
 
       if (courses.length !== 0) {
         res.status(200).json({
