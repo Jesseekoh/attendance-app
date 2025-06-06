@@ -1,17 +1,12 @@
 import { Link, useLocation, useNavigate } from 'react-router';
-import { z } from 'zod';
 import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { authClient } from '../lib/auth-client';
-import toast from 'react-hot-toast';
+import { toast } from 'react-hot-toast';
 
-const SignInSchema = z.object({
-  email: z.string().email('Enter a valid email'),
-  password: z.string().min(6, 'password must be at least 6 characters'),
-});
-
-type SignInFormType = z.infer<typeof SignInSchema>;
-
+type SignInFormInput = {
+  email: string;
+  password: string;
+};
 const SignInForm = () => {
   const location = useLocation();
   const navigate = useNavigate();
@@ -20,14 +15,13 @@ const SignInForm = () => {
     register,
     formState: { errors },
     handleSubmit,
-  } = useForm<SignInFormType>({ resolver: zodResolver(SignInSchema) });
+  } = useForm({ defaultValues: { email: '', password: '' } });
 
-  const onSubmit = async ({ email, password }: SignInFormType) => {
+  const onSubmit = async ({ email, password }: SignInFormInput) => {
     await authClient.signIn.email(
       {
         email,
         password,
-        // callbackURL: previousUrl,
       },
       {
         onError: (ctx) => {
@@ -54,7 +48,11 @@ const SignInForm = () => {
             <input
               className="block w-full outline-2 outline-neutral-content aria-[invalid=true]:outline-error focus:outline-accent focus:bg-base-200 py-2 bg-base-300 rounded-md px-4"
               placeholder="Email"
-              {...register('email', { required: true })}
+              {...register('email', {
+                required: 'Enter your email',
+                pattern:
+                  /^(?!\.)(?!.*\.\.)([a-z0-9_'+\-.]*)[a-z0-9_+-]@([a-z0-9][a-z0-9-]*\.)+[a-z]{2,}$/i,
+              })}
               aria-invalid={errors.email ? 'true' : 'false'}
             />
             {errors.email && (

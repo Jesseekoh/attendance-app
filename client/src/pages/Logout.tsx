@@ -1,17 +1,22 @@
 import { useEffect } from 'react';
-import { Navigate } from 'react-router';
+import { Navigate, useNavigate } from 'react-router';
 import { authClient } from '../lib/auth-client';
 import { useAuth } from '../contexts/AuthContext';
-
+import { toast } from 'react-hot-toast';
 const Logout = () => {
   const { session } = useAuth();
-
+  const navigate = useNavigate();
   useEffect(() => {
+    console.log('bulaba');
     const logout = async () => {
       await authClient.signOut({
         fetchOptions: {
           onError: () => {
-            console.log('Logout failed');
+            toast.error('Log out attempt failed');
+            navigate('/', { replace: true });
+          },
+          onSuccess: () => {
+            toast.success('Logged out successful');
           },
         },
       });
