@@ -9,7 +9,7 @@ export const authClient = createAuthClient({
           type: 'string',
           required: true,
         },
-        matricNumber: { type: 'string' },
+        matricNumber: { type: 'string', required: false },
         level: { type: 'string', required: false },
         department: { type: 'string', required: true },
       },
