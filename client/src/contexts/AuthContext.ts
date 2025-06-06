@@ -1,9 +1,8 @@
 import { createContext, useContext } from 'react';
-import { User, Session } from '../lib/auth-client';
 
 interface AuthContextType {
-  user: User;
-  session: Session;
+  user: any;
+  session: any;
   isLoading: boolean;
 }
 export const AuthContext = createContext<AuthContextType>(
