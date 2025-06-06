@@ -1,50 +1,18 @@
 import { Link, useNavigate } from 'react-router';
 import toast from 'react-hot-toast';
-import { z } from 'zod';
 import { Controller, useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
 import { authClient } from '../lib/auth-client';
-const SignUpSchema = z
-  .object({
-    firstName: z.string().min(3, 'First name must be at least 3 characters'),
-    lastName: z.string().min(3, 'Last name must be at least 3 characters'),
-    email: z.string().email('Enter a valid email'),
-    role: z.enum(['student', 'teacher']),
-    password: z.string().min(6, 'password must be at least 6 characters'),
-    matricNumber: z
-      .string()
-      .regex(/^\d{2}\/\d{5}$/, 'Only numbers, and / are allowed'),
-    level: z.enum(['100', '200', '300', '400', '500']).optional(),
-    department: z.string().min(5),
-  })
-  .refine(
-    (data) => {
-      if (
-        data.role === 'student' &&
-        !(data.matricNumber && data.level && data.department)
-      ) {
-        return false;
-      }
 
-      return true;
-    },
-    {
-      message: 'Matric Number, Level and Department is required for students',
-      path: ['matricNumber', 'level', 'department'],
-    }
-  )
-  .refine(
-    (data) => {
-      if (data.role === 'teacher' && !data.department) {
-        return false;
-      }
-      return true;
-    },
-    { message: 'Department is required for teachers' }
-  );
-
-export type SignUpFormType = z.infer<typeof SignUpSchema>;
-
+type SignUpFormInput = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: string;
+  department: string;
+  password: string;
+  matricNumber?: string;
+  level?: string;
+};
 const SignUpForm = () => {
   const {
     register,
@@ -52,35 +20,28 @@ const SignUpForm = () => {
     watch,
     handleSubmit,
     formState: { errors },
-  } = useForm<SignUpFormType>({
-    resolver: zodResolver(SignUpSchema),
+  } = useForm({
     defaultValues: {
+      firstName: '',
+      lastName: '',
+      email: '',
+      department: '',
+      password: '',
+      matricNumber: '',
+      level: '',
       role: 'student',
     },
   });
 
   const role = watch('role');
   const navigate = useNavigate();
-  const onSubmit = async ({
-    email,
-    password,
-    firstName,
-    lastName,
-    role,
-    matricNumber,
-    department,
-    level,
-  }: SignUpFormType) => {
+  const onSubmit = async (data: SignUpFormInput) => {
+    const { firstName, lastName, ...rest } = data;
     const fullName = firstName + lastName;
     await authClient.signUp.email(
       {
-        email,
-        password,
-        role,
+        ...rest,
         name: fullName,
-        matricNumber,
-        department,
-        level,
       },
       {
         onSuccess: (ctx) => {
@@ -94,35 +55,6 @@ const SignUpForm = () => {
     );
   };
 
-  // const onSubmit = async ({
-  //   email,
-  //   password,
-  //   firstName,
-  //   lastName,
-  //   role,
-  //   matricNumber,
-  //   department,
-  //   level,
-  // }: SignUpFormType) => {
-  //   const response = await signUp({
-  //     email,
-  //     password,
-  //     firstName,
-  //     lastName,
-  //     role,
-  //     matricNumber,
-  //     department,
-  //     level,
-  //   });
-
-  //   if (response?.success) {
-  //     toast.success('Account created successfully');
-  //     navigate('/signin');
-  //     return;
-  //   } else {
-  //     toast.error(response?.message || 'An unexpected error occurred');
-  //   }
-  // };
   return (
     <>
       <div className="max-w-sm w-full px-8 py-6 rounded-md font-[Inter]">
@@ -137,7 +69,7 @@ const SignUpForm = () => {
             </label>
             <input
               className="border-neutral-400 block w-full outline-transparent  aria-[invalid=true]:outline-error focus:outline-accent focus:outline-2 py-2 bg-base-300 rounded-md px-4"
-              {...register('firstName', { required: true })}
+              {...register('firstName', { required: true, maxLength: 30 })}
               aria-invalid={errors.firstName ? 'true' : 'false'}
             />
             {errors.firstName && (
@@ -152,7 +84,7 @@ const SignUpForm = () => {
             </label>
             <input
               className="block w-full outline-transparent  aria-[invalid=true]:outline-error focus:outline-accent focus:outline-2 py-2 bg-base-300 rounded-md px-4"
-              {...register('lastName', { required: true })}
+              {...register('lastName', { required: true, maxLength: 20 })}
               aria-invalid={errors.lastName ? 'true' : 'false'}
             />
             {errors.lastName && (
@@ -168,7 +100,11 @@ const SignUpForm = () => {
             </label>
             <input
               className="block w-full outline-transparent  aria-[invalid=true]:outline-error focus:outline-accent focus:outline-2 py-2 bg-base-300 rounded-md px-4"
-              {...register('email', { required: true })}
+              {...register('email', {
+                required: true,
+                pattern:
+                  /^(?!\.)(?!.*\.\.)([a-z0-9_'+\-.]*)[a-z0-9_+-]@([a-z0-9][a-z0-9-]*\.)+[a-z]{2,}$/i,
+              })}
               aria-invalid={errors.email ? 'true' : 'false'}
             />
             {errors.email && (
@@ -206,7 +142,11 @@ const SignUpForm = () => {
               </label>
               <input
                 className="block w-full outline-transparent  aria-[invalid=true]:outline-error focus:outline-accent focus:outline-2 py-2 bg-base-300 rounded-md px-4"
-                {...register('matricNumber', { required: true })}
+                {...register('matricNumber', {
+                  pattern: /^\d{2}\/\d{5}$/,
+                  required:
+                    role === 'student' ? 'Enter your matric number' : false,
+                })}
                 aria-invalid={errors.matricNumber ? 'true' : 'false'}
               />
               {errors.matricNumber && (
@@ -233,28 +173,32 @@ const SignUpForm = () => {
             )}
           </div>
           {/* LEVEL */}
-          <div>
-            <label htmlFor="level" className="text-sm block">
-              Level
-            </label>
-            <select
-              className="block w-full outline-transparent  aria-[invalid=true]:outline-error py-2 bg-base-300 px-4 select select-accent"
-              {...register('level', { required: true, minLength: 6 })}
-              aria-invalid={errors.level ? 'true' : 'false'}
-            >
-              <option value="">Select your level</option>
-              <option value="100">100</option>
-              <option value="200">200</option>
-              <option value="300">300</option>
-              <option value="400">400</option>
-              <option value="500">500</option>
-            </select>
-            {errors.level && (
-              <p role="alert" className="text-sm text-error">
-                {errors.level.message}
-              </p>
-            )}
-          </div>
+          {role === 'student' && (
+            <div>
+              <label htmlFor="level" className="text-sm block">
+                Level
+              </label>
+              <select
+                className="block w-full outline-transparent  aria-[invalid=true]:outline-error py-2 bg-base-300 px-4 select select-accent"
+                {...register('level', {
+                  required: role === 'student' ? 'Enter your level' : false,
+                })}
+                aria-invalid={errors.level ? 'true' : 'false'}
+              >
+                <option value="">Select your level</option>
+                <option value="100">100</option>
+                <option value="200">200</option>
+                <option value="300">300</option>
+                <option value="400">400</option>
+                <option value="500">500</option>
+              </select>
+              {errors.level && (
+                <p role="alert" className="text-sm text-error">
+                  {errors.level.message}
+                </p>
+              )}
+            </div>
+          )}
           {/* PASSWORD */}
           <div>
             <label htmlFor="password" className="text-sm block">
@@ -263,7 +207,7 @@ const SignUpForm = () => {
             <input
               type="password"
               className="block w-full outline-transparent  aria-[invalid=true]:outline-error focus:outline-accent focus:outline-2 py-2 bg-base-300 rounded-md px-4"
-              {...register('password', { required: true, minLength: 6 })}
+              {...register('password', { required: 'Enter a password' })}
               aria-invalid={errors.password ? 'true' : 'false'}
             />
             {errors.password && (
