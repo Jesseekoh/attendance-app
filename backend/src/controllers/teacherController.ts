@@ -14,18 +14,20 @@ export async function addTeacherCourses(req: Request, res: Response) {
       CourseId,
     }));
     if (teacher) {
-      // const teacherCourses = await prisma.taught_courses.createMany(
-      //   taughtCourses,
-      //   {
-      //     updateOnDuplicate: ['CourseId', 'TeacherId'],
-      //   }
-      // );
+      console.log('bulaba');
+      const teacherCourses = await prisma.taught_courses.createMany(
+        { data: taughtCourses, skipDuplicates: true }
+        // {
+        //   updateOnDuplicate: ['CourseId', 'TeacherId'],
+        // }
+      );
 
       res.status(200).json({
         success: true,
         message: 'Courses added Successfully',
       });
     } else {
+      // todo: make middleware to manage access control
       res.status(403).json({
         success: false,
         message: 'Only teachers can teach courses',
@@ -35,6 +37,7 @@ export async function addTeacherCourses(req: Request, res: Response) {
     logger.error('An error occurred', error);
     res.status(500).json({
       success: false,
+      error,
       message: 'Something went wrong. Try again',
     });
   }
@@ -47,20 +50,17 @@ export async function getTeacherCourses(req: Request, res: Response) {
     const teacher = await prisma.teacher.findUnique({ where: { userId: id } });
     if (teacher) {
       //   // Get all the courses taught by a teacher
-      //   const data = await Teacher.findOne({
-      //     where: { id },
-      //     include: {
-      //       model: Course,
-      //       through: { attributes: [] },
-      //     },
-      //   });
+      const data = await prisma.taught_courses.findMany({
+        where: { TeacherId: id },
+        select: { course: true },
+      });
 
-      //   const courses: Course[] | undefined = data?.Courses;
+      const courseList = data.map((item) => item.course);
 
       res.status(200).json({
         success: true,
         message: 'Successfully retrieved courses',
-        // data: courses,
+        data: courseList,
       });
     } else {
       res.status(404).json({

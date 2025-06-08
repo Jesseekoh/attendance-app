@@ -18,13 +18,13 @@ export const RegisterSchema = z
       .string()
       .regex(/^\d{2}\/\d{5}$/, 'Only letters, numbers, and / are allowed'),
     level: z.enum(['100', '200', '300', '400', '500']).optional(),
-    department: z.string().min(5),
+    departmentId: z.string().uuid(),
   })
   .refine(
     (data) => {
       if (
         data.role === 'student' &&
-        !(data.matricNumber && data.level && data.department)
+        !(data.matricNumber && data.level && data.departmentId)
       ) {
         return false;
       }
@@ -38,7 +38,7 @@ export const RegisterSchema = z
   )
   .refine(
     (data) => {
-      if (data.role === 'teacher' && !data.department) {
+      if (data.role === 'teacher' && !data.departmentId) {
         return false;
       }
       return true;
