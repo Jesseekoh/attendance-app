@@ -69,14 +69,14 @@ export const auth = betterAuth({
     after: createAuthMiddleware(async (ctx) => {
       if (ctx.path !== '/sign-up/email') return;
 
-      const { role, matricNumber, department, level } = ctx.body;
+      const { role, matricNumber, departmentId, level } = ctx.body;
       const returned = ctx.context.returned as AuthReturnType;
       if (returned.user) {
         if (role === 'student') {
           const newStudent = await prisma.student.create({
             data: {
               userId: returned.user?.id,
-              department,
+              departmentId,
               level: Number(level),
               matricNumber,
             },
@@ -86,7 +86,7 @@ export const auth = betterAuth({
           const newTeacher = await prisma.teacher.create({
             data: {
               userId: returned.user.id,
-              department,
+              departmentId,
             },
           });
         }
