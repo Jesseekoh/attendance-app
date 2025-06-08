@@ -11,7 +11,7 @@ export const authClient = createAuthClient({
         },
         matricNumber: { type: 'string', required: false },
         level: { type: 'string', required: false },
-        department: { type: 'string', required: true },
+        departmentId: { type: 'string', required: true },
       },
     }),
   ],
