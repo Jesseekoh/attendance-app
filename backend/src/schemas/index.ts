@@ -1,10 +1,11 @@
 import { z } from 'zod';
 
 export const ClassSchema = z.object({
-  courseId: z.string().length(36),
-  venueId: z.string().length(36),
+  courseId: z.string().uuid(),
+  venueId: z.string().uuid(),
   startTime: z.string().datetime(),
   endTime: z.string().datetime(),
+  departmentId: z.string().uuid(),
 });
 
 export const RegisterSchema = z
