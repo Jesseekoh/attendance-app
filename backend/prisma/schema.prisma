@@ -9,20 +9,22 @@ datasource db {
 }
 
 model Class {
-  id         String       @id @default(uuid()) @db.Uuid
-  teacherId  String?
-  courseId   String?      @db.Uuid
-  venueId    String       @db.Uuid
-  startTime  DateTime?    @db.Timestamptz(6)
-  endTime    DateTime     @db.Timestamptz(6)
-  createdAt  DateTime     @default(now()) @db.Timestamptz(6)
-  updatedAt  DateTime     @updatedAt @db.Timestamptz(6)
-  course     Course?      @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  teacher    Teacher?     @relation(fields: [teacherId], references: [userId], onDelete: Cascade)
-  venue      Venue        @relation(fields: [venueId], references: [id], onDelete: Cascade)
-  attendance Attendance[]
+  id           String       @id @default(uuid()) @db.Uuid
+  teacherId    String?
+  courseId     String?      @db.Uuid
+  venueId      String       @db.Uuid
+  departmentId String       @db.Uuid
+  startTime    DateTime?    @db.Timestamptz(6)
+  endTime      DateTime     @db.Timestamptz(6)
+  createdAt    DateTime     @default(now()) @db.Timestamptz(6)
+  updatedAt    DateTime     @updatedAt @db.Timestamptz(6)
+  course       Course?      @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  teacher      Teacher?     @relation(fields: [teacherId], references: [userId], onDelete: Cascade)
+  venue        Venue        @relation(fields: [venueId], references: [id], onDelete: Cascade)
+  department   Department   @relation(fields: [departmentId], references: [id])
+  attendance   Attendance[]
 
-  @@unique([startTime, endTime, venueId, courseId], map: "classes_start_time_end_time_venue_id_course_id")
+  @@unique([startTime, endTime, venueId, courseId, departmentId], map: "classes_start_time_end_time_venue_id_course_id")
 }
 
 model Course {
@@ -81,6 +83,7 @@ model Department {
   name    String    @db.VarChar(255)
   Student Student[]
   Teacher Teacher[]
+  Class   Class[]
 }
 
 model taught_courses {
