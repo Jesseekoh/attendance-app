@@ -1,5 +1,16 @@
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../lib/axiosClient';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
+import { Users, Clock } from 'lucide-react';
+import { StatsCard } from './stats-card';
 const DashboardStats = () => {
   const {
     data: studentStats,
@@ -8,57 +19,54 @@ const DashboardStats = () => {
   } = useQuery({
     queryKey: ['my-stats'],
     queryFn: async () =>
-      await api.get('/students/stats').then((resp) => resp.data),
+      await api.get('/students/stats').then((resp) => resp.data.data),
   });
 
   if (studentStatsIsLoading) {
     return (
       <div className="flex flex-col gap-4">
-        <div className="skeleton h-32 w-full"></div>
-        <div className="skeleton h-4 w-28"></div>
-        <div className="skeleton h-4 w-full"></div>
-        <div className="skeleton h-4 w-full"></div>
+        <Skeleton className="h-32 w-full" />
+        <Skeleton className="h-4 w-28" />
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-full" />
       </div>
     );
   }
 
-  let attendancePercentage;
-  if (studentStats) {
-    const { attendedClasses, totalClasses } = studentStats.data;
-    if (attendedClasses === 0) {
-      attendancePercentage = 0;
-    } else {
-      attendancePercentage = (attendedClasses / totalClasses) * 100;
-    }
+  if (studentStatsIsError) {
+    return (
+      <>
+        <h1>Error fetching stats</h1>
+      </>
+    );
   }
+
+  const { attendedClasses, totalClasses } = studentStats;
+
   return (
-    <div className="flex shadow-md border-2 border-neutral/10 rounded-md items-center divide-x-3 divide-neutral/20">
-      <div className="px-4">
-        <div
-          className="radial-progress  text-base-content flex-1"
-          style={
-            {
-              '--value': studentStatsIsError ? 0 : attendancePercentage,
-            } as React.CSSProperties
-          }
-          aria-valuenow={studentStatsIsError ? 0 : attendancePercentage}
-          role="progressbar"
-        >
-          {studentStatsIsError ? '--' : attendancePercentage?.toFixed(2)} %
-        </div>
+    <>
+      <div className="grid auto-rows-min gap-4 md:grid-cols-3">
+        <StatsCard
+          title="Total Attendance"
+          value={1}
+          description="Across all classes"
+          icon={Users}
+          trend={{ value: 5, isPositive: true }}
+        />
+        <StatsCard
+          title="Classes Today"
+          value={3}
+          description="2 completed, 1 upcoming"
+          icon={Clock}
+        />
+        <StatsCard
+          title="Classes Attended"
+          value={attendedClasses}
+          description={`Out of ${totalClasses} classes`}
+          icon={Clock}
+        />
       </div>
-      <div className="stat flex-1">
-        <h3 className="stat-title">Classes attendend</h3>
-        {studentStats && (
-          <>
-            <h1 className="stat-value">{studentStats.data.attendedClasses}</h1>
-            <h3 className="stat-title">
-              of {studentStats.data.totalClasses} classes
-            </h3>
-          </>
-        )}
-      </div>
-    </div>
+    </>
   );
 };
 

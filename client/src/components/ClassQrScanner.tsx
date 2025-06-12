@@ -37,7 +37,6 @@ const ClassQrScanner = () => {
       },
       { highlightScanRegion: true }
     );
-    alert('Scanning');
     await scannerRef.current.start();
     setIsScanning(true);
   };
