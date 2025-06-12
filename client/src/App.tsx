@@ -15,13 +15,13 @@ import { classDetailsLoader } from './loaders';
 import Attendance from './pages/Attendance';
 import { ROLES } from './config/roles';
 import { useAuth } from './contexts/AuthContext';
+import Courses from './pages/Courses';
 
 function App() {
   const { user } = useAuth();
 
   const router = createBrowserRouter([
     {
-      // element: <RootLayout />,
       index: true,
       element: <Navigate to={user ? '/dashboard' : '/home'} replace />,
       errorElement: <Error />,
@@ -54,9 +54,21 @@ function App() {
           element: <h1>Forbidden bruh</h1>,
         },
         {
+          path: '/courses',
+          element: (
+            <Protected
+              allowedRoles={[ROLES.STUDENT, ROLES.TEACHER, ROLES.ADMIN]}
+            >
+              <Courses />
+            </Protected>
+          ),
+        },
+        {
           path: '/attendance',
           element: (
-            <Protected allowedRoles={[ROLES.STUDENT]}>
+            <Protected
+              allowedRoles={[ROLES.STUDENT, ROLES.ADMIN, ROLES.TEACHER]}
+            >
               <Attendance />
             </Protected>
           ),

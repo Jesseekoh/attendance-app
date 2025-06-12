@@ -1,31 +1,47 @@
 import { Link, useNavigate } from 'react-router';
-import toast from 'react-hot-toast';
-import { Controller, useForm } from 'react-hook-form';
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { toast } from 'sonner';
+import { useForm } from 'react-hook-form';
 import { authClient } from '../lib/auth-client';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { useQuery } from '@tanstack/react-query';
+import { api } from '@/lib/axiosClient';
 
 type SignUpFormInput = {
   firstName: string;
   lastName: string;
   email: string;
   role: string;
-  department: string;
+  departmentId: string;
   password: string;
   matricNumber?: string;
   level?: string;
 };
-const SignUpForm = () => {
-  const {
-    register,
-    control,
-    watch,
-    handleSubmit,
-    formState: { errors },
-  } = useForm({
+const SignUpForm = ({ className, ...props }: React.ComponentProps<'form'>) => {
+  const form = useForm({
     defaultValues: {
       firstName: '',
       lastName: '',
       email: '',
-      department: '',
+      departmentId: '',
       password: '',
       matricNumber: '',
       level: '',
@@ -33,11 +49,19 @@ const SignUpForm = () => {
     },
   });
 
-  const role = watch('role');
+  const { data: departments } = useQuery({
+    queryKey: ['departments'],
+    queryFn: async () => {
+      const resp = await api.get('/departments');
+      return resp.data.data;
+    },
+  });
+
+  const role = form.watch('role');
   const navigate = useNavigate();
   const onSubmit = async (data: SignUpFormInput) => {
     const { firstName, lastName, ...rest } = data;
-    const fullName = firstName + lastName;
+    const fullName = firstName + ' ' + lastName;
     await authClient.signUp.email(
       {
         ...rest,
@@ -54,183 +78,237 @@ const SignUpForm = () => {
       }
     );
   };
-
   return (
     <>
-      <div className="max-w-sm w-full px-8 py-6 rounded-md font-[Inter]">
-        <h1 className="text-xl font-semibold mb-3 text-center">
-          Sign up for an account
-        </h1>
-        {/* <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}> */}
-        <form className="space-y-4" onSubmit={handleSubmit(onSubmit)}>
-          <div>
-            <label htmlFor="firstName" className="text-sm block">
-              First Name
-            </label>
-            <input
-              className="border-neutral-400 block w-full outline-transparent  aria-[invalid=true]:outline-error focus:outline-accent focus:outline-2 py-2 bg-base-300 rounded-md px-4"
-              {...register('firstName', { required: true, maxLength: 30 })}
-              aria-invalid={errors.firstName ? 'true' : 'false'}
-            />
-            {errors.firstName && (
-              <p role="alert" className="text-sm text-error">
-                Enter a first name
-              </p>
-            )}
+      <Form {...form}>
+        <form
+          className={cn('flex flex-col gap-6', className)}
+          {...props}
+          onSubmit={form.handleSubmit(onSubmit)}
+        >
+          <div className="flex flex-col items-center gap-2 text-center">
+            <h1 className="text-2xl font-bold">Sign In to your account</h1>
+            <p className="text-muted-foreground text-sm text-balance">
+              Enter your email below to login to your account
+            </p>
           </div>
-          <div>
-            <label htmlFor="lastName" className="text-sm block">
-              Last Name
-            </label>
-            <input
-              className="block w-full outline-transparent  aria-[invalid=true]:outline-error focus:outline-accent focus:outline-2 py-2 bg-base-300 rounded-md px-4"
-              {...register('lastName', { required: true, maxLength: 20 })}
-              aria-invalid={errors.lastName ? 'true' : 'false'}
+          <div className="grid gap-6">
+            <FormField
+              control={form.control}
+              name="firstName"
+              rules={{
+                required: 'Enter your first name',
+                maxLength: {
+                  value: 20,
+                  message: 'First name must be 20 characters maximum',
+                },
+              }}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>First Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Mike" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            {errors.lastName && (
-              <p role="alert" className="text-sm text-error">
-                Enter a last name
-              </p>
-            )}
-          </div>
-          {/* EMAIL */}
-          <div>
-            <label htmlFor="email" className="text-sm block">
-              Email
-            </label>
-            <input
-              className="block w-full outline-transparent  aria-[invalid=true]:outline-error focus:outline-accent focus:outline-2 py-2 bg-base-300 rounded-md px-4"
-              {...register('email', {
+            <FormField
+              control={form.control}
+              name="lastName"
+              rules={{
                 required: true,
-                pattern:
-                  /^(?!\.)(?!.*\.\.)([a-z0-9_'+\-.]*)[a-z0-9_+-]@([a-z0-9][a-z0-9-]*\.)+[a-z]{2,}$/i,
-              })}
-              aria-invalid={errors.email ? 'true' : 'false'}
+                maxLength: {
+                  value: 20,
+                  message: 'First name must be 20 characters maximum',
+                },
+              }}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Last Name</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Ross" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-            {errors.email && (
-              <p role="alert" className="text-sm text-error">
-                Enter a valid email
-              </p>
-            )}
-          </div>
+            <FormField
+              control={form.control}
+              name="email"
+              rules={{
+                required: 'Enter your email',
+                pattern: {
+                  message: 'Enter a valid email',
+                  value:
+                    /^(?!\.)(?!.*\.\.)([a-z0-9_'+\-.]*)[a-z0-9_+-]@([a-z0-9][a-z0-9-]*\.)+[a-z]{2,}$/i,
+                },
+              }}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Email</FormLabel>
+                  <FormControl>
+                    <Input placeholder="m@example.com" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="departmentId"
+              rules={{ required: true }}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Department</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select your department" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {departments &&
+                        departments.map(
+                          (item: { id: string; name: string }) => (
+                            <SelectItem key={item.id} value={item.id}>
+                              {item.name}
+                            </SelectItem>
+                          )
+                        )}
+                    </SelectContent>
+                  </Select>
+                  <FormDescription>
+                    You can manage email addresses in your{' '}
+                    <Link to="/examples/forms">email settings</Link>.
+                  </FormDescription>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          {/* ROLE */}
-          <Controller
-            name="role"
-            control={control}
-            render={({ field }) => (
-              <div className="flex gap-2 items-center">
-                <input
-                  type="checkbox"
-                  defaultChecked
-                  className="checkbox checkbox-accent"
-                  checked={field.value === 'teacher'}
-                  onChange={(e) =>
-                    field.onChange(e.target.checked ? 'teacher' : 'student')
-                  }
+            <FormField
+              control={form.control}
+              name="role"
+              render={({ field }) => {
+                return (
+                  <FormItem className="flex flex-row items-center gap-2">
+                    <FormControl>
+                      <Checkbox
+                        checked={field.value === 'teacher'}
+                        onCheckedChange={(checked) => {
+                          field.onChange(checked ? 'teacher' : 'student');
+                        }}
+                      />
+                    </FormControl>
+                    <FormLabel className="text-sm font-normal">
+                      Are you a teacher?
+                    </FormLabel>
+                  </FormItem>
+                );
+              }}
+            />
+
+            {role === 'student' && (
+              <>
+                <FormField
+                  control={form.control}
+                  name="matricNumber"
+                  rules={{
+                    required: {
+                      value: role === 'student',
+                      message: 'Enter your matric Number',
+                    },
+                    pattern: {
+                      value: /^\d{2}\/\d{5}$/,
+                      message: 'Matric number should follow 12/34567',
+                    },
+                  }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Matric Number</FormLabel>
+                      <FormControl>
+                        <Input placeholder="12/34567" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
-                <label>I'm a teacher</label>
-              </div>
+                <FormField
+                  control={form.control}
+                  name="level"
+                  rules={{ required: role === 'student' }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Level</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select your current level" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="100">100</SelectItem>
+                          <SelectItem value="200">200</SelectItem>
+                          <SelectItem value="300">300</SelectItem>
+                          <SelectItem value="400">400</SelectItem>
+                          <SelectItem value="500">500</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormDescription>
+                        You can manage email addresses in your{' '}
+                        <Link to="/examples/forms">email settings</Link>.
+                      </FormDescription>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </>
             )}
-          />
-
-          {/* MATRIC NUMBER */}
-          {role === 'student' && (
-            <div>
-              <label htmlFor="matricNumber" className="text-sm block">
-                Matric Number
-              </label>
-              <input
-                className="block w-full outline-transparent  aria-[invalid=true]:outline-error focus:outline-accent focus:outline-2 py-2 bg-base-300 rounded-md px-4"
-                {...register('matricNumber', {
-                  pattern: /^\d{2}\/\d{5}$/,
-                  required:
-                    role === 'student' ? 'Enter your matric number' : false,
-                })}
-                aria-invalid={errors.matricNumber ? 'true' : 'false'}
-              />
-              {errors.matricNumber && (
-                <p role="alert" className="text-sm text-error">
-                  {errors.matricNumber.message}
-                </p>
+            <FormField
+              control={form.control}
+              name="password"
+              rules={{
+                required: 'Enter a valid password',
+                minLength: {
+                  value: 6,
+                  message: 'Enter a password of at least 6 characters',
+                },
+              }}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Password</FormLabel>
+                  <FormControl>
+                    <Input {...field} type="password" />
+                  </FormControl>
+                  <FormMessage />
+                  <a
+                    href="#"
+                    className="ml-auto text-sm underline-offset-4 hover:underline"
+                  >
+                    Forgot your password?
+                  </a>
+                </FormItem>
               )}
-            </div>
-          )}
-          {/* DEPARTMENT */}
-          <div>
-            <label htmlFor="department" className="text-sm block">
-              Department
-            </label>
-            <input
-              className="block w-full outline-transparent  aria-[invalid=true]:outline-error focus:outline-accent focus:outline-2 py-2 bg-base-300 rounded-md px-4"
-              {...register('department', { required: true })}
-              aria-invalid={errors.department ? 'true' : 'false'}
             />
-            {errors.department && (
-              <p role="alert" className="text-sm text-error">
-                Enter your department
-              </p>
-            )}
+            <Button type="submit" className="w-full">
+              Sign up
+            </Button>
           </div>
-          {/* LEVEL */}
-          {role === 'student' && (
-            <div>
-              <label htmlFor="level" className="text-sm block">
-                Level
-              </label>
-              <select
-                className="block w-full outline-transparent  aria-[invalid=true]:outline-error py-2 bg-base-300 px-4 select select-accent"
-                {...register('level', {
-                  required: role === 'student' ? 'Enter your level' : false,
-                })}
-                aria-invalid={errors.level ? 'true' : 'false'}
-              >
-                <option value="">Select your level</option>
-                <option value="100">100</option>
-                <option value="200">200</option>
-                <option value="300">300</option>
-                <option value="400">400</option>
-                <option value="500">500</option>
-              </select>
-              {errors.level && (
-                <p role="alert" className="text-sm text-error">
-                  {errors.level.message}
-                </p>
-              )}
-            </div>
-          )}
-          {/* PASSWORD */}
-          <div>
-            <label htmlFor="password" className="text-sm block">
-              Password
-            </label>
-            <input
-              type="password"
-              className="block w-full outline-transparent  aria-[invalid=true]:outline-error focus:outline-accent focus:outline-2 py-2 bg-base-300 rounded-md px-4"
-              {...register('password', { required: 'Enter a password' })}
-              aria-invalid={errors.password ? 'true' : 'false'}
-            />
-            {errors.password && (
-              <p role="alert" className="text-sm text-error">
-                {errors.password.message}
-              </p>
-            )}
-          </div>
-
-          <p className="text-sm">
+          <div className="text-center text-sm">
             Already have an account?{' '}
-            <Link to={'/signin'} className="text-accent">
+            <Link to="/signin" className="underline underline-offset-4">
               Sign in
             </Link>
-          </p>
-          <button
-            type="submit"
-            className="bg-accent text-lg px-4 py-2 block text-accent-content rounded-md w-full mt-4"
-          >
-            Sign up
-          </button>
+          </div>
         </form>
-      </div>
+      </Form>
     </>
   );
 };
