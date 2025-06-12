@@ -10,12 +10,12 @@ async function createClass(req: Request, res: Response) {
     res.status(400).json({
       success: false,
       message:
-        'You need to provide startTime, endTime, classVenue and courseId',
+        'You need to provide startTime, endTime, classVenue, courseId and departmentId',
     });
     return;
   }
   const { id } = req.user;
-  const { startTime, endTime, venueId, courseId } = req.body;
+  const { startTime, endTime, venueId, courseId, departmentId } = req.body;
 
   try {
     const user = await prisma.user.findUnique({ where: { id } });
@@ -33,6 +33,7 @@ async function createClass(req: Request, res: Response) {
         venueId,
         courseId,
         teacherId: id,
+        departmentId,
       },
     });
 
@@ -79,7 +80,12 @@ async function getClass(req: Request, res: Response) {
     const classData = await prisma.class.findUnique({
       where: { id: classId },
       include: {
-        teacher: true,
+        venue: true,
+        teacher: {
+          include: {
+            user: true,
+          },
+        },
         course: true,
       },
       // [
@@ -221,9 +227,16 @@ async function getRecentClasses(req: Request, res: Response) {
   try {
     const totalClasses = await prisma.class.count();
     const recentClasses = await prisma.class.findMany({
+      take: pageSize,
+      skip: (page - 1) * pageSize,
       include: {
-        teacher: true,
         venue: true,
+        teacher: {
+          include: {
+            user: true,
+          },
+        },
+        course: true,
       },
     });
     // const recentClasses = await Class.findAndCountAll({
@@ -283,7 +296,11 @@ async function getUpcomingClasses(req: Request, res: Response) {
       },
       include: {
         venue: true,
-        teacher: true,
+        teacher: {
+          include: {
+            user: true,
+          },
+        },
         course: true,
       },
     });
