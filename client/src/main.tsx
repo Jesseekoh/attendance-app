@@ -5,20 +5,21 @@ import App from './App.tsx';
 import { Toaster } from 'react-hot-toast';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import { Tooltip } from 'react-tooltip';
 import AuthProvider from './contexts/AuthProvider.tsx';
+import { ThemeProvider } from './components/theme-provider.tsx';
 const queryClient = new QueryClient({
   defaultOptions: {},
 });
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
-      <Toaster />
-      <AuthProvider>
-        <App />
-      </AuthProvider>
-      <Tooltip id="my-tooltip" />
-      <ReactQueryDevtools />
+      <ThemeProvider>
+        <Toaster />
+        <AuthProvider>
+          <App />
+        </AuthProvider>
+        <ReactQueryDevtools />
+      </ThemeProvider>
     </QueryClientProvider>
   </StrictMode>
 );
