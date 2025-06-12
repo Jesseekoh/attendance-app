@@ -1,5 +1,4 @@
 import { Request, Response, Router } from 'express';
-import { sequelize } from '../models';
 import courseController from '../controllers/courseController';
 import { authenticateToken } from '../middlewares/authMiddleware';
 

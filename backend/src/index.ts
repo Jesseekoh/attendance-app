@@ -5,8 +5,9 @@ import pinoHttp from 'pino-http';
 import { rateLimit } from 'express-rate-limit';
 import cors from 'cors';
 import cookieParser from 'cookie-parser';
+import { toNodeHandler, fromNodeHeaders } from 'better-auth/node';
+import { auth } from './utils/auth';
 import {
-  authRoutes,
   classRoutes,
   courseRoutes,
   studentRoutes,
@@ -14,15 +15,16 @@ import {
   userRoutes,
   venueRoutes,
 } from './routes';
-import { sequelize } from './models';
 import logger from './utils/logger';
 import swaggerJSDoc from 'swagger-jsdoc';
 import swaggerUi from 'swagger-ui-express';
+import { prisma } from './config/db';
 
 const app = express();
+
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  limit: 100,
+  limit: 200,
   standardHeaders: 'draft-8',
   legacyHeaders: false,
 });
@@ -69,32 +71,60 @@ const swaggerOptions = {
 };
 
 const swaggerDocs = swaggerJSDoc(swaggerOptions);
+
+// Configure CORS middleware
+app.use(
+  cors({
+    credentials: true,
+    origin: [
+      'http://localhost:5173',
+      'https://attendance-app-frontend-09ja.onrender.com',
+    ],
+  })
+);
+
+app.all('/api/auth/*', toNodeHandler(auth));
+
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
 app.use(pinoHttp({ logger }));
-app.use(cors({ credentials: true }));
+
 app.use(limiter);
 app.use(express.json());
 app.use(cookieParser());
 
-// test database connection
-try {
-  sequelize.authenticate();
-  logger.info('Database connected successfully');
-  sequelize
-    .sync({ alter: true })
-    .then(() => logger.info('Created Tables successfully'))
-    .catch((error) => logger.error('Error creating tables: ', error));
-} catch (error) {
-  logger.error('failed to connect to database: ', error);
-}
+// Test database connection
+prisma
+  .$connect()
+  .then(() => {
+    logger.info('Database connected successfully');
+  })
+  .catch((error) => {
+    logger.error('failed to connect to database: ', error);
+  });
 
-app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/classes', classRoutes);
 app.use('/api/v1/courses', courseRoutes);
 app.use('/api/v1/students', studentRoutes);
 app.use('/api/v1/teachers', teacherRoutes);
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/venues', venueRoutes);
+
+app.get('/api/v1/departments', async (req, res) => {
+  try {
+    const departments = await prisma.department.findMany();
+
+    res.status(200).json({
+      success: true,
+      message: 'Fetched departments successfully',
+      data: departments,
+    });
+  } catch (error) {
+    logger.error(error);
+    res
+      .status(500)
+      .json({ success: false, message: 'Failed to fetch departments' });
+  }
+});
 app.listen(process.env.PORT, () => {
   logger.info(`Server is listening on port ${process.env.PORT}`);
 });
@@ -102,7 +132,7 @@ app.listen(process.env.PORT, () => {
 const shutdown = async () => {
   logger.info('Shutting Down...');
   try {
-    await sequelize.close();
+    await prisma.$disconnect();
     logger.info('Database closed.');
   } catch (error) {
     logger.info('An error occured when closing the database: ', error);

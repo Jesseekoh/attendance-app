@@ -1,27 +1,29 @@
-import jwt, { JwtPayload } from 'jsonwebtoken';
 import { Request, Response, NextFunction } from 'express';
+import { auth } from '../utils/auth';
+import { fromNodeHeaders } from 'better-auth/node';
+import { APIError } from 'better-auth';
+import logger from '../utils/logger';
 
-export const authenticateToken = (
-    req: Request,
-    res: Response,
-    next: NextFunction
+export const authenticateToken = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
 ) => {
-    const token = req.cookies.accessToken;
-
-    if (!token) {
-        res.status(401).json({
-            success: false,
-            message: 'Unauthorized. Please log in',
-        });
-
-        return;
+  try {
+    const session = await auth.api.getSession({
+      headers: fromNodeHeaders(req.headers),
+    });
+    if (!session || !session.user) {
+      res
+        .status(401)
+        .json({ sucess: 'false', message: 'Unauthorized. Please sign in.' });
+      return;
     }
-    const secret = process.env.ACCESS_TOKEN_SECRET;
 
-    if (!secret) {
-        throw new Error('Access Token is not defined');
-    }
-    const user = jwt.verify(token, secret) as string | JwtPayload;
-    req.user = user;
+    req.user = session?.user;
     next();
+  } catch (error) {
+    logger.error('Error in authenticateToken middleware:', error);
+    res.status(500).json({ success: false, message: 'Internal server error' });
+  }
 };

@@ -26,6 +26,33 @@ router.post('/', authenticateToken, classController.createClass);
 
 /**
  * @swagger
+ *  /api/v1/classes/upcoming:
+ *    get:
+ *      summary: Gets all upcoming classes
+ *      responses:
+ *        "200":
+ *          description: OK
+ *        500:
+ *          description: Server error
+
+ */
+router.get('/upcoming', authenticateToken, classController.getUpcomingClasses);
+/**
+ * @swagger
+ *  /api/v1/classes/upcoming:
+ *    get:
+ *      summary: Gets all upcoming classes
+ *      responses:
+ *        "200":
+ *          description: OK
+ *        500:
+ *          description: Server error
+
+ */
+router.get('/recent', authenticateToken, classController.getRecentClasses);
+
+/**
+ * @swagger
  *  /api/v1/classes/:classId:
  *    get:
  *      summary: Get class by specified ID
@@ -46,7 +73,7 @@ router.post('/', authenticateToken, classController.createClass);
  *        404:
  *          description: Class not found
  */
-router.get('/:classId', classController.getClass);
+router.get('/:classId', authenticateToken, classController.getClass);
 
 /**
  * @swagger
@@ -129,4 +156,5 @@ router.post('/:classId', authenticateToken, classController.markAttendance);
 // Update class details
 router.put('/:classId', authenticateToken, classController.updateClassDetails);
 
+router.get('/ongoing', authenticateToken, classController.getOngoingClasses);
 export default router;

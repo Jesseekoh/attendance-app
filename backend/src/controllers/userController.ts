@@ -1,223 +1,141 @@
-import bcrypt from 'bcrypt';
-import { z } from 'zod';
+import { prisma } from '../config/db';
 import { Request, Response } from 'express';
-import { RegisterSchema, LoginSchema } from '../schemas';
-import { User, Student, Teacher, sequelize } from '../models';
-import { generateAccessToken, generateRefreshToken } from '../utils/helper';
 import logger from '../utils/logger';
-import { ITokenPayload } from '../types';
+import { Prisma } from '../../generated/prisma';
 
 // Function to register a new user
 export const registerUser = async (req: Request, res: Response) => {
-    // Start transaction so I can rollback any changes if any DB operation fails
-    const transaction = await sequelize.transaction();
-    try {
-        // parse and validate request body using register schema
-        const {
-            firstName,
-            lastName,
-            email,
-            role,
-            password,
-            matricNumber,
-            level,
-            department,
-        } = RegisterSchema.parse(req.body);
-
-        // hash password
-        const saltRounds = 10;
-        const passwordHash = await bcrypt.hash(password, saltRounds);
-
-        // Create a new User in database
-        const newUser = await User.create(
-            {
-                firstName,
-                lastName,
-                email,
-                passwordHash,
-                role,
-            },
-            { transaction }
-        );
-
-        // Create a new Student record if the user role is 'student'
-        if (role === 'student') {
-            const student = await Student.create(
-                {
-                    id: newUser.id,
-                    matricNumber,
-                    department,
-                    level,
-                },
-                { transaction }
-            );
-        } else if (role === 'teacher') {
-            // Create a new Teacher record if the user role is 'teacher'
-            const teacher = await Teacher.create(
-                {
-                    id: newUser.id,
-                    department,
-                },
-                { transaction }
-            );
-        }
-        await transaction.commit();
-        logger.info('User registered successfully');
-        res.status(200).json({
-            success: true,
-            message: 'User created successfully',
-        });
-        return;
-    } catch (error: any) {
-        await transaction.rollback();
-        logger.error('Error: ', error);
-        // Handle validation errors
-        if (error instanceof z.ZodError) {
-            res.status(400).json({
-                success: false,
-                message: 'Invalid request payload',
-                errors: error.errors,
-            });
-        } else if (error?.name == 'SequelizeUniqueConstraintError') {
-            // Handle unique constraint
-            res.status(409).json({
-                success: false,
-                message: 'User already exists',
-            });
-        } else {
-            // Handle other errors
-            res.status(500).json({
-                success: false,
-                message: 'Something went wrong. Please try again later',
-            });
-        }
-    }
+  // try {
+  //   // parse and validate request body using register schema
+  //   const {
+  //     firstName,
+  //     lastName,
+  //     email,
+  //     role,
+  //     password,
+  //     matricNumber,
+  //     level,
+  //     department,
+  //   } = RegisterSchema.parse(req.body);
+  //   // hash password
+  //   const saltRounds = 10;
+  //   const passwordHash = await bcrypt.hash(password, saltRounds);
+  //   // Create a new User in database
+  //   await prisma.$transaction(async (tx) => {
+  //     const newUser = await tx.users.create({
+  //       data: {
+  //         firstName,
+  //         lastName,
+  //         email: email.toLocaleLowerCase(),
+  //         passwordHash,
+  //         role,
+  //       },
+  //     });
+  //     if (role === 'student') {
+  //       const student = await tx.students.create({
+  //         data: {
+  //           id: newUser.id,
+  //           matricNumber,
+  //           department,
+  //           level: Number(level),
+  //         },
+  //       });
+  //     } else if (role === 'teacher') {
+  //       const teacher = await tx.teachers.create({
+  //         data: {
+  //           id: newUser.id,
+  //           department,
+  //         },
+  //       });
+  //     }
+  //   });
+  //   logger.info('User registered successfully');
+  //   res.status(200).json({
+  //     success: true,
+  //     message: 'User created successfully',
+  //   });
+  // } catch (error: any) {
+  //   logger.error('Error: ', error);
+  //   // Handle validation errors
+  //   if (error instanceof z.ZodError) {
+  //     res.status(400).json({
+  //       success: false,
+  //       message: 'Invalid request payload',
+  //       errors: error.errors,
+  //     });
+  //   } else if (error instanceof Prisma.PrismaClientKnownRequestError) {
+  //     // Handle unique constraint
+  //     if (error.code === 'P2002') {
+  //       res.status(409).json({
+  //         success: false,
+  //         message: 'User already exists',
+  //       });
+  //     }
+  //   } else {
+  //     // Handle other errors
+  //     res.status(500).json({
+  //       success: false,
+  //       message: 'Something went wrong. Please try again later',
+  //     });
+  //   }
+  // }
 };
-
-// Function to log in a user
-export const logInUser = async (req: Request, res: Response): Promise<void> => {
-    try {
-        const isValidRequest = LoginSchema.safeParse(req.body);
-        if (!isValidRequest.success) {
-            res.status(400).json({
-                success: false,
-                message: 'Email and password required',
-            });
-            return;
-        }
-        const { email, password } = LoginSchema.parse(req.body);
-        const existingUser = await User.findOne({ where: { email } });
-
-        if (!existingUser) {
-            res.status(404).json({
-                success: false,
-                message: 'User does not exist',
-            });
-            return;
-        }
-        bcrypt.compare(
-            password,
-            existingUser?.getDataValue('passwordHash'),
-            (err, result) => {
-                if (result) {
-                    const id = existingUser.getDataValue('id');
-                    const role = existingUser.getDataValue('role');
-                    const accessToken = generateAccessToken({ role, id });
-                    const refreshToken = generateRefreshToken({ role, id });
-
-                    res.cookie('accessToken', accessToken, {
-                        httpOnly: true,
-                        secure: true,
-                        sameSite: 'strict',
-                        expires: new Date(Date.now() + 15 * 60 * 1000), //15 minutes
-                    });
-                    res.cookie('refreshToken', refreshToken, {
-                        httpOnly: true,
-                        secure: true,
-                        sameSite: 'strict',
-                        expires: new Date(
-                            Date.now() + 30 * 24 * 60 * 60 * 1000 // 30 days
-                        ),
-                    });
-                    logger.info('User logged in successfully');
-                    res.status(200).json({
-                        success: true,
-                        message: 'Log in successful',
-                        data: { accessToken },
-                    });
-                    return;
-                }
-                res.status(401).json({
-                    success: false,
-                    message: 'Wrong email or password',
-                });
-            }
-        );
-    } catch (error: any) {
-        res.status(500).json({
-            success: false,
-            message: 'Something went wrong. Please try again later',
-        });
-    }
-};
-
-// Function to log out user
-export const logOutUser = async (
-    req: Request,
-    res: Response
-): Promise<void> => {
-    res.clearCookie('refreshToken');
-    logger.info('User logged out successfully');
-    res.status(200).json({ success: true, message: 'Logged out successfully' });
-};
-
-// Function to refresh access token
-export const refreshToken = async (
-    req: Request,
-    res: Response
-): Promise<void> => {};
 
 // Function to get the profile of the currently logged in user
 export const getMyProfile = async (
-    req: Request,
-    res: Response
+  req: Request,
+  res: Response
 ): Promise<void> => {
-    const { id } = req.user as ITokenPayload;
+  const { id, role } = req.user;
 
-    try {
-        const user = await User.findOne({
-            where: { id },
-        });
-        if (user) {
-            const {
-                passwordHash,
-                createdAt,
-                updatedAt,
-                ...userWithoutPasswordHash
-            } = user.dataValues;
-            res.status(200).json({
-                success: true,
-                message: 'Successfully returned user data',
-                data: { user: userWithoutPasswordHash },
-            });
-        } else {
-            res.status(404).json({ success: false, message: 'User not found' });
-        }
-    } catch (error) {
-        logger.error('An error occured: ', error);
-        res.status(500).json({
-            success: false,
-            message: 'An error occured',
-            error,
-        });
+  try {
+    let user;
+    if (role === 'student') {
+      user = await prisma.user.findUnique({
+        where: { id },
+        include: {
+          student: true,
+        },
+      });
+      // user = await User.findOne({
+      //   where: { id },
+      //   include: [
+      //     {
+      //       model: Student,
+      //       attributes: ['matricNumber', 'department', 'level'],
+      //     },
+      //   ],
+      // });
     }
-    return;
+    if (role === 'teacher') {
+      user = await prisma.user.findUnique({
+        where: id,
+        include: {
+          teacher: true,
+        },
+      });
+    }
+    if (user) {
+      res.status(200).json({
+        success: true,
+        message: 'Successfully returned user data',
+        data: user,
+      });
+    } else {
+      res.status(404).json({ success: false, message: 'User not found' });
+    }
+  } catch (error) {
+    logger.error('An error occured: ', error);
+    res.status(500).json({
+      success: false,
+      message: 'An error occured',
+      error,
+    });
+  }
+  return;
 };
 
 export default {
-    refreshToken,
-    getMyProfile,
-    logOutUser,
-    logInUser,
-    registerUser,
+  getMyProfile,
+  registerUser,
 };
