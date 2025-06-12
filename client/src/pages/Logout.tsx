@@ -2,12 +2,11 @@ import { useEffect } from 'react';
 import { Navigate, useNavigate } from 'react-router';
 import { authClient } from '../lib/auth-client';
 import { useAuth } from '../contexts/AuthContext';
-import { toast } from 'react-hot-toast';
+import { toast } from 'sonner';
 const Logout = () => {
   const { session } = useAuth();
   const navigate = useNavigate();
   useEffect(() => {
-    console.log('bulaba');
     const logout = async () => {
       await authClient.signOut({
         fetchOptions: {
