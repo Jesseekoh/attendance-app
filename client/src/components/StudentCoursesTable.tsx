@@ -13,10 +13,11 @@ import {
 } from '@/components/ui/table';
 const StudentCoursesTable = () => {
   const { user } = useAuth();
+
   const { data, isLoading, isError } = useQuery({
     queryKey: ['my-courses'],
     queryFn: async () => {
-      const response = await api.get(`/${user.role}s/courses`);
+      const response = await api.get(`/${user?.role}s/courses`);
       console.log(response);
       return response.data;
     },
