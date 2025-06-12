@@ -1,14 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { api } from '../lib/axiosClient';
 import { Skeleton } from '@/components/ui/skeleton';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import { Users, Clock } from 'lucide-react';
 import { StatsCard } from './stats-card';
 const DashboardStats = () => {

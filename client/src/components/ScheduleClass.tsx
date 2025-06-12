@@ -44,6 +44,24 @@ type FormInput = {
   day: Date;
   venueId: string;
 };
+
+type DepartmentType = {
+  id: string;
+  name: string;
+};
+type CourseType = {
+  id: string;
+  title: string;
+  code: string;
+  desc: string;
+};
+
+type VenueType = {
+  id: string;
+  name: string;
+  latitude: number;
+  longitude: number;
+};
 const ScheduleClass = () => {
   const { data: courses } = useQuery({
     queryKey: ['all-courses'],
@@ -159,7 +177,7 @@ const ScheduleClass = () => {
                           </FormControl>
                           <SelectContent>
                             {departments &&
-                              departments.map((item) => (
+                              departments.map((item: DepartmentType) => (
                                 <SelectItem key={item.id} value={item.id}>
                                   {item.name}
                                 </SelectItem>
@@ -188,7 +206,7 @@ const ScheduleClass = () => {
                           </FormControl>
                           <SelectContent>
                             {courses &&
-                              courses.map((item) => (
+                              courses.map((item: CourseType) => (
                                 <SelectItem key={item.id} value={item.id}>
                                   {item.code} - {item.title}
                                 </SelectItem>
@@ -217,7 +235,7 @@ const ScheduleClass = () => {
                           </FormControl>
                           <SelectContent>
                             {venues &&
-                              venues.map((item) => (
+                              venues.map((item: VenueType) => (
                                 <SelectItem key={item.id} value={item.id}>
                                   {item.name}
                                 </SelectItem>
