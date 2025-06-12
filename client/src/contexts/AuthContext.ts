@@ -2,16 +2,13 @@ import { Session, User } from '@/lib/auth-client';
 import { createContext, useContext } from 'react';
 
 interface AuthContextType {
-  user: User | null;
-  session: Session | null;
+  user: User;
+  session: Session;
   isLoading: boolean;
 }
-export const AuthContext = createContext<AuthContextType | undefined>(
+export const AuthContext = createContext<AuthContextType>(
   {} as AuthContextType
 );
 export const useAuth = () => {
-  const context = useContext(AuthContext);
-  if (context) return context;
-
-  throw new Error('useAuth must be used within an AuthProvider');
+  return useContext(AuthContext);
 };

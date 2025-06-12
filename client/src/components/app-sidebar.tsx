@@ -35,7 +35,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
 
   const avatar = user?.image ?? '';
   let navItems: { title: string; icon: LucideIcon; url: string }[];
-  switch (user.role) {
+  switch (user?.role) {
     case ROLES.STUDENT:
       navItems = [
         { title: 'Dashboard', icon: LayoutDashboard, url: '/dashboard' },

@@ -1,18 +1,19 @@
 import { ReactNode, useEffect, useState } from 'react';
 import { AuthContext } from './AuthContext';
-import { authClient, User } from '../lib/auth-client';
-import { Session } from 'better-auth/types';
+import { authClient, User, Session } from '../lib/auth-client';
 
 const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
+  const [user, setUser] = useState<User>({} as User);
+  const [session, setSession] = useState<Session>({} as Session);
   const [isLoading, setIsLoading] = useState(true);
 
   const { data, isPending, error } = authClient.useSession();
 
   useEffect(() => {
-    setSession(data?.session ?? null);
-    setUser(data?.user ?? null);
+    if (data) {
+      setSession(data.session);
+      setUser(data.user);
+    }
     setIsLoading(isPending);
   }, [data, isPending, error]);
   if (isLoading) {
