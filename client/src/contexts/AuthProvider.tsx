@@ -4,8 +4,8 @@ import { authClient, User } from '../lib/auth-client';
 import { Session } from 'better-auth/types';
 
 const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>({} as User);
-  const [session, setSession] = useState<Session | null>({} as Session);
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   const { data, isPending, error } = authClient.useSession();
