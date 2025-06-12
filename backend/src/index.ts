@@ -108,6 +108,23 @@ app.use('/api/v1/students', studentRoutes);
 app.use('/api/v1/teachers', teacherRoutes);
 app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/venues', venueRoutes);
+
+app.get('/api/v1/departments', async (req, res) => {
+  try {
+    const departments = await prisma.department.findMany();
+
+    res.status(200).json({
+      success: true,
+      message: 'Fetched departments successfully',
+      data: departments,
+    });
+  } catch (error) {
+    logger.error(error);
+    res
+      .status(500)
+      .json({ success: false, message: 'Failed to fetch departments' });
+  }
+});
 app.listen(process.env.PORT, () => {
   logger.info(`Server is listening on port ${process.env.PORT}`);
 });
