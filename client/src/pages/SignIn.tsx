@@ -1,15 +1,23 @@
 import { SquareCheckBig } from 'lucide-react';
-import SignInForm from '../components/SignInForm';
+import { LoginForm } from '@/components/login-form';
 const SignIn = () => {
   return (
-    <div className="grid place-items-center content-center min-h-svh font-[Inter]">
-      <div>
-        <h1 className="flex text-2xl font-bold items-center mb-4">
-          <SquareCheckBig />
-          CheckIn
-        </h1>
+    <div className="grid min-h-svh lg:grid-cols-1">
+      <div className="flex flex-col gap-4 p-6 md:p-10">
+        <div className="flex justify-center gap-2 md:justify-start">
+          <a href="#" className="flex items-center gap-2 font-medium">
+            <div className="bg-primary text-primary-foreground flex size-6 items-center justify-center rounded-md">
+              <SquareCheckBig className="size-4" />
+            </div>
+            Acme Inc.
+          </a>
+        </div>
+        <div className="flex flex-1 items-center justify-center">
+          <div className="w-full max-w-xs">
+            <LoginForm />
+          </div>
+        </div>
       </div>
-      <SignInForm />
     </div>
   );
 };
