@@ -2,35 +2,24 @@ import { ReactNode, useEffect, useState } from 'react';
 import { AuthContext } from './AuthContext';
 import { authClient, User } from '../lib/auth-client';
 import { Session } from 'better-auth/types';
+import Spinner from '@/components/Spinner';
 
 const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [user, setUser] = useState<User | null>({} as User);
-  const [session, setSession] = useState<Session | null>({} as Session);
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const { data } = authClient.useSession();
+  const { data, isPending, error } = authClient.useSession();
+
   useEffect(() => {
-    const initializeAuth = async () => {
-      try {
-        if (data) {
-          setSession(data.session);
-          setUser(data.user);
-        } else {
-          setUser(null);
-          setSession(null);
-        }
-      } catch (error) {
-        console.log(error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    initializeAuth();
-  }, []);
+    setSession(data?.session ?? null);
+    setUser(data?.user ?? null);
+    setIsLoading(isPending);
+  }, [data, isPending, error]);
   if (isLoading) {
     return (
-      <div className="min-h-svh w-full flex justify-center">
-        <span className="loading loading-spinner loading-xl"></span>
+      <div className="min-h-svh w-full grid place-items-center">
+        <Spinner />
       </div>
     );
   }
