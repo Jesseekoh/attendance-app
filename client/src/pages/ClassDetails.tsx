@@ -25,24 +25,17 @@ const ClassDetails = () => {
         await api
           .post('/classes/' + classId, {
             studentLocation: {
-              latitude: 6.66973743,
-              longitude: 3.63735952,
-              // latitude: pos.coords.latitude,
-              // longitude: pos.coords.longitude,
+              latitude: pos.coords.latitude,
+              longitude: pos.coords.longitude,
             },
           })
           .then(() => toast.success('Marked attendance successfully'))
           .catch((error: AxiosError) => {
-            toast.error(error.response!.statusText);
-            // console.log(error);
+            // toast.error(error.response!.statusText);
+            toast.error('Something went wrong');
+            console.log(error);
           });
-        // console.log(pos);
-        toast.success(
-          'latitude: ' +
-            pos.coords.latitude +
-            ', longitude: ' +
-            pos.coords.longitude
-        );
+        console.log(pos);
       },
       (err) => console.log(err),
       { maximumAge: 0, timeout: 5000, enableHighAccuracy: true }
