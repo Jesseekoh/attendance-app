@@ -29,20 +29,22 @@ const StudentDashboard = () => {
           </Card>
         </CardContent>
       </Card>
-      <div className="flex flex-col gap-6">
-        <Tabs defaultValue="upcoming">
-          <TabsList>
-            <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
-            <TabsTrigger value="recent">Recent</TabsTrigger>
-          </TabsList>
-          <TabsContent value="upcoming">
-            <UpcomingClasses />
-          </TabsContent>
-          <TabsContent value="recent">
-            <RecentClasses />
-          </TabsContent>
-        </Tabs>
-      </div>
+      <Card>
+        <CardContent>
+          <Tabs defaultValue="upcoming">
+            <TabsList>
+              <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
+              <TabsTrigger value="recent">Recent</TabsTrigger>
+            </TabsList>
+            <TabsContent value="upcoming">
+              <UpcomingClasses />
+            </TabsContent>
+            <TabsContent value="recent">
+              <RecentClasses />
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
     </div>
   );
 };
