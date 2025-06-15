@@ -15,9 +15,7 @@ async function enrollCourses(req: Request, res: Response) {
         CourseId: courseId,
         StudentId: id,
       }));
-      // await Enrollment.bulkCreate(enrollments, {
-      //   updateOnDuplicate: ['CourseId', 'StudentId'],
-      // });
+      await prisma.enrollments.createMany({ data: enrollments });
 
       res.status(200).json({
         success: true,
@@ -47,29 +45,20 @@ async function getStudentCourses(req: Request, res: Response) {
 
     if (student) {
       // get all courses a student is enrolled in
-      const data = await prisma.student.findFirst({
-        where: { userId: id },
-        include: {
-          Enrollments: true,
+      let enrollments = await prisma.enrollments.findMany({
+        where: { StudentId: id },
+        select: {
+          Courses: true,
         },
       });
 
-      // const courses: Course[] = data!.Courses;
-      const courses = [1];
+      const courses = enrollments.map((i) => i.Courses);
 
-      if (courses.length !== 0) {
-        res.status(200).json({
-          success: true,
-          message: 'Successfully fetched data',
-          data: courses,
-        });
-      } else {
-        res.status(200).json({
-          success: true,
-          data: [],
-          message: 'Student is enrolled in no courses',
-        });
-      }
+      res.status(200).json({
+        success: true,
+        message: 'Successfully fetched courses',
+        data: courses,
+      });
     } else {
       // response if no student is found
       res.status(404).json({
@@ -78,7 +67,7 @@ async function getStudentCourses(req: Request, res: Response) {
       });
     }
   } catch (error) {
-    logger.error('An error occured', error);
+    logger.error('An error occurred', error);
     res.status(500).json({
       success: false,
       message: 'Something went wrong. Please try again',
