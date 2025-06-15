@@ -24,24 +24,22 @@ async function getAllCourseStudents(req: Request, res: Response) {
   try {
     const user = await prisma.user.findUnique({ where: { id } });
     if (user?.role === 'teacher') {
-      const query =
-        await prisma.$queryRaw`SELECT * FROM "Enrollments"  enrollments INNER JOIN users on enrollments."StudentId" = users.id INNER JOIN "Students" on enrollments."StudentId" = "Students".id where "CourseId" = :courseId`;
-
-      // const students = query[0].map((student: any) => ({
-      //   id: student.id,
-      //   firstName: student.firstName,
-      //   lastName: student.lastName,
-      //   email: student.email,
-      //   matricNumber: student.matricNumber,
-      //   level: student.level,
-      //   department: student.department,
-      // }));
+      const students = await prisma.enrollments.findMany({
+        where: {
+          CourseId: courseId,
+        },
+        select: {
+          Student: {
+            include: { user: true },
+          },
+        },
+      });
 
       res.status(200).json({
         success: true,
         message: 'Successful',
         // data: students,
-        data: [],
+        data: students,
       });
     } else {
       res.status(403).json({
