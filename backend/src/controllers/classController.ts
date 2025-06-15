@@ -88,16 +88,6 @@ async function getClass(req: Request, res: Response) {
         },
         course: true,
       },
-      // [
-
-      //   {
-      //     model: Teacher,
-      //     include: [
-      //       { model: User, attributes: ['firstName', 'lastName', 'email'] },
-      //     ],
-      //   },
-      //   { model: Course, attributes: ['title', 'desc', 'code'], as: 'course' },
-      // ],
     });
     if (classData) {
       res.status(200).json({
@@ -220,6 +210,12 @@ async function getOngoingClasses(req: Request, res: Response) {
 
 async function getRecentClasses(req: Request, res: Response) {
   const { id, role } = req.user;
+
+  let departmentId;
+  if (role === 'student') {
+    const user = await prisma.student.findUnique({ where: { userId: id } });
+    departmentId = user?.departmentId;
+  }
   const pageStr = req.query.page as string;
   const page = isNaN(parseInt(pageStr)) ? 1 : parseInt(pageStr);
 
@@ -229,6 +225,12 @@ async function getRecentClasses(req: Request, res: Response) {
     const recentClasses = await prisma.class.findMany({
       take: pageSize,
       skip: (page - 1) * pageSize,
+      where: {
+        departmentId,
+        endTime: {
+          lt: new Date(),
+        },
+      },
       include: {
         venue: true,
         teacher: {
