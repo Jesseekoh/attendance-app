@@ -46,7 +46,7 @@ const StudentCoursesTable = () => {
       {courses ? (
         <div className="overflow-x-auto mb-4">
           <Table>
-            <TableCaption>A list of courses you teach</TableCaption>
+            <TableCaption>Enrolled Courses</TableCaption>
             <TableHeader>
               <TableRow>
                 <TableHead>Code</TableHead>
