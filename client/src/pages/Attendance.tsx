@@ -20,6 +20,9 @@ const Attendance = () => {
   useEffect(() => {
     if (data) {
       setItems(data);
+      if (data.length === 0) {
+        setHasMore(false);
+      }
     }
   }, [data]);
 
@@ -58,16 +61,17 @@ const Attendance = () => {
     }
   };
   return (
-    <div className="flex flex-col gap-12">
+    <div className="flex flex-col gap-4">
       <InfiniteScroll
         dataLength={items.length}
         hasMore={hasMore}
         next={fetchData}
-        style={{ display: 'grid', flexDirection: 'column', gap: '2rem' }}
+        // style={{ display: 'grid', flexDirection: 'column', gap: '2rem' }}
+        className="grid grid-col gap-4"
         loader={<h4>Loading...</h4>}
         endMessage={
           <p style={{ textAlign: 'center' }}>
-            <b>Yay! You have seen it all</b>
+            <p className="text-muted-foreground">You've seen it all</p>
           </p>
         }
       >

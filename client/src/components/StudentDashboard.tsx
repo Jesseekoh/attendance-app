@@ -9,7 +9,7 @@ const StudentDashboard = () => {
   const { user } = useAuth();
   return (
     <div className="flex flex-1 flex-col gap-4">
-      <div className="rounded-lg bg-gradient-to-r from-blue-500 to-teal-500 p-6 text-white">
+      <div className="rounded-lg bg-gradient-to-r from-[#42047e] to-[#07f49e] p-6 text-white">
         <h1 className="text-2xl font-bold">Good morning, {user?.name}</h1>
         <p className="text-blue-100 mt-1">
           You have 3 classes scheduled for today. 2 attendance sessions
@@ -33,8 +33,8 @@ const StudentDashboard = () => {
         <CardContent>
           <Tabs defaultValue="upcoming">
             <TabsList>
-              <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
-              <TabsTrigger value="recent">Recent</TabsTrigger>
+              <TabsTrigger value="upcoming">Upcoming Classes</TabsTrigger>
+              <TabsTrigger value="recent">Recent Classes</TabsTrigger>
             </TabsList>
             <TabsContent value="upcoming">
               <UpcomingClasses />
