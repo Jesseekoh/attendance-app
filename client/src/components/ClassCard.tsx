@@ -2,7 +2,6 @@ import { BookOpen, MapPin, User, Calendar, Clock } from 'lucide-react';
 import { Link } from 'react-router';
 import { ClassInfoType } from './RecentClasses';
 import React from 'react';
-import clsx from 'clsx';
 import {
   Card,
   CardContent,
@@ -11,33 +10,47 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-
+import { Badge } from './ui/badge';
+import { cn } from '@/lib/utils';
 interface ClassCardProps {
   classInfo: ClassInfoType;
+  withFooter?: boolean;
 }
-const ClassCard: React.FC<ClassCardProps> = ({ classInfo }) => {
+const ClassCard: React.FC<ClassCardProps> = ({ classInfo, withFooter }) => {
+  console.log(classInfo.attended);
   return (
     // <div>
     <Card className="gap-2">
       <CardHeader>
-        <CardTitle>
-          <h3 className="text-lg">{classInfo.course.title}</h3>
+        <CardTitle className="flex justify-between">
+          <h3 className="text-lg">{classInfo.course.code}</h3>
+          {classInfo.attended !== undefined && (
+            <Badge
+              variant="outline"
+              className={cn(
+                'text-white',
+                classInfo.attended ? 'bg-green-400' : 'bg-red-400'
+              )}
+            >
+              {classInfo.attended ? 'Attended' : 'Missed'}
+            </Badge>
+          )}
         </CardTitle>
       </CardHeader>
 
       <CardContent>
-        <div className="flex flex-col gap-1.5 mb-4">
+        <div className="flex flex-col md:flex-row gap-3 mb-4 flex-wrap">
           {/* <p>{data.data.course.desc}</p> */}
-          <div className="flex gap-12">
-            <div className="flex gap-2">
-              <BookOpen className="text-accent-foreground/35" />
-              <p>{classInfo.course.code}</p>
-            </div>
-            <div className="flex gap-2">
-              <MapPin className="text-accent-foreground/35" />
-              <p>{classInfo.venue.name}</p>
-            </div>
+
+          <div className="flex gap-2">
+            <BookOpen className="text-accent-foreground/35" />
+            <p>{classInfo.course.title}</p>
           </div>
+          <div className="flex gap-2">
+            <MapPin className="text-accent-foreground/35" />
+            <p>{classInfo.venue.name}</p>
+          </div>
+
           <div className="flex gap-2">
             <Calendar className="text-accent-foreground/35" />
             <p>
@@ -55,35 +68,25 @@ const ClassCard: React.FC<ClassCardProps> = ({ classInfo }) => {
               {new Date(classInfo.endTime).toLocaleTimeString()}
             </p>
           </div>
+
           <div className="flex gap-2">
             <User className="text-accent-foreground/35" />
             <p>{classInfo.teacher.user.name}</p>
           </div>
-
-          {classInfo.attended !== undefined && (
-            <div>
-              <div
-                className={clsx('', {
-                  'badge-success': classInfo.attended,
-                  'badge-error': !classInfo.attended,
-                })}
-              >
-                {classInfo.attended ? 'Attended' : 'Absent'}
-              </div>
-            </div>
-          )}
         </div>
       </CardContent>
-      <CardFooter>
-        <CardAction className="w-full">
-          <Link
-            to={'/classes/' + classInfo.id}
-            className="rounded-lg text-center inline-block w-full bg-primary text-primary-foreground px-4 py-2"
-          >
-            View Details
-          </Link>
-        </CardAction>
-      </CardFooter>
+      {withFooter && (
+        <CardFooter>
+          <CardAction className="w-full">
+            <Link
+              to={'/classes/' + classInfo.id}
+              className="rounded-lg text-center inline-block w-full bg-primary text-primary-foreground px-4 py-2"
+            >
+              View Details
+            </Link>
+          </CardAction>
+        </CardFooter>
+      )}
     </Card>
     // </div>
   );
