@@ -4,6 +4,28 @@ import { fromNodeHeaders } from 'better-auth/node';
 import { APIError } from 'better-auth';
 import logger from '../utils/logger';
 
+/**
+ *
+ * @param req
+ * @param res
+ * @param next
+ * @param allowedRoles
+ */
+export function roleBasedAccess(allowedRoles: string[]) {
+  return (req: Request, res: Response, next: NextFunction) => {
+    const { role } = req.user;
+
+    if (allowedRoles.includes(role)) {
+      return next();
+    } else {
+      res.status(403).json({
+        success: false,
+        message: `Only ${allowedRoles} can access this route`,
+      });
+    }
+  };
+}
+
 export const authenticateToken = async (
   req: Request,
   res: Response,

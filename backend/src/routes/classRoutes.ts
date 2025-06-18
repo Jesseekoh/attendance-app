@@ -1,6 +1,10 @@
 import { Router } from 'express';
-import { authenticateToken } from '../middlewares/authMiddleware';
+import {
+  authenticateToken,
+  roleBasedAccess,
+} from '../middlewares/authMiddleware';
 import classController from '../controllers/classController';
+import { Roles } from '../constants/role';
 const router = Router();
 
 /**
@@ -22,7 +26,12 @@ const router = Router();
  *        400:
  *          description: Class already exists
  */
-router.post('/', authenticateToken, classController.createClass);
+router.post(
+  '/',
+  authenticateToken,
+  roleBasedAccess([Roles.TEACHER, Roles.ADMIN]),
+  classController.createClass
+);
 
 /**
  * @swagger

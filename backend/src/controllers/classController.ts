@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { prisma } from '../config/db';
 
 async function createClass(req: Request, res: Response) {
+  // validate request body
   const isValidRequest = ClassSchema.safeParse(req.body);
   if (!isValidRequest.success) {
     res.status(400).json({
@@ -14,18 +15,10 @@ async function createClass(req: Request, res: Response) {
     });
     return;
   }
-  const { id } = req.user;
+  const { id, role } = req.user;
   const { startTime, endTime, venueId, courseId, departmentId } = req.body;
 
   try {
-    const user = await prisma.user.findUnique({ where: { id } });
-    if (user?.role !== 'teacher') {
-      res.status(403).json({
-        success: false,
-        message: 'Only teachers can access this route',
-      });
-      return;
-    }
     const newClass = await prisma.class.create({
       data: {
         endTime,
@@ -211,81 +204,91 @@ async function getOngoingClasses(req: Request, res: Response) {
 async function getRecentClasses(req: Request, res: Response) {
   const { id, role } = req.user;
 
-  let departmentId;
-  if (role === 'student') {
-    const user = await prisma.student.findUnique({ where: { userId: id } });
-    departmentId = user?.departmentId;
-  }
-  const pageStr = req.query.page as string;
-  const page = isNaN(parseInt(pageStr)) ? 1 : parseInt(pageStr);
-
-  const pageSize = 10;
   try {
-    const totalClasses = await prisma.class.count();
-    const recentClasses = await prisma.class.findMany({
-      take: pageSize,
-      skip: (page - 1) * pageSize,
-      where: {
-        departmentId,
-        endTime: {
-          lt: new Date(),
-        },
-      },
-      include: {
-        venue: true,
-        teacher: {
-          include: {
-            user: true,
+    const pageStr = req.query.page as string;
+    const page = isNaN(parseInt(pageStr)) ? 1 : parseInt(pageStr);
+
+    const pageSize = 10;
+    if (role === 'student') {
+      const user = await prisma.student.findUnique({ where: { userId: id } });
+      const departmentId = user?.departmentId;
+
+      const totalClasses = await prisma.class.count();
+      const classes = await prisma.class.findMany({
+        take: pageSize,
+        skip: (page - 1) * pageSize,
+        where: {
+          departmentId,
+          endTime: {
+            lt: new Date(),
           },
         },
-        course: true,
-      },
-    });
-    // const recentClasses = await Class.findAndCountAll({
-    //   where: {
-    //     startTime: {
-    //       [Op.lt]: new Date(),
-    //     },
-    //   },
-    //   order: [['startTime', 'DESC']],
-    //   limit: pageSize,
-    //   offset: (page - 1) * pageSize,
-    //   include: [
-    //     { model: Venue },
-    //     {
-    //       model: Teacher,
-    //       include: [
-    //         { model: User, attributes: ['firstName', 'lastName', 'email'] },
-    //       ],
-    //     },
-    //     { model: Course, attributes: ['title', 'desc', 'code'], as: 'course' },
-    //   ],
-    //   attributes: {
-    //     include: [
-    //       [
-    //         literal(`
-    //       EXISTS (
-    //         SELECT 1
-    //         FROM attendance
-    //         WHERE attendance."ClassId" = "Class"."id"
-    //         AND attendance."StudentId" = '${id}'
-    //       )
-    //     `),
-    //         'attended',
-    //       ],
-    //     ],
-    //   },
-    // });
-    res.status(200).json({
-      success: true,
-      page,
-      message: 'Fetched classes successfully',
-      data: { recentClasses, totalClasses },
-    });
-    return;
+        include: {
+          attendance: {
+            where: {
+              studentId: id,
+            },
+            select: {
+              studentId: true,
+            },
+          },
+          course: true,
+          venue: { select: { name: true } },
+          teacher: {
+            include: {
+              user: { select: { email: true, name: true, role: true } },
+            },
+          },
+        },
+      });
+      let formattedClasses = classes.map((cls) => ({
+        ...cls,
+        attended: cls.attendance.length > 0,
+      }));
+
+      res.status(200).json({
+        success: true,
+        page,
+        message: 'Fetched classes successfully',
+        data: { recentClasses: formattedClasses, totalClasses },
+      });
+      return;
+    } else if (role === 'teacher') {
+      const totalClasses = await prisma.class.count({
+        where: { teacherId: id },
+      });
+      const recentClasses = await prisma.class.findMany({
+        take: pageSize,
+        skip: (page - 1) * pageSize,
+        where: {
+          teacherId: id,
+          endTime: {
+            lt: new Date(),
+          },
+        },
+        include: {
+          venue: true,
+          teacher: {
+            include: {
+              user: true,
+            },
+          },
+          course: true,
+        },
+      });
+
+      res.status(200).json({
+        success: true,
+        page,
+        message: 'Fetched classes successfully',
+        data: { recentClasses, totalClasses },
+      });
+      return;
+    }
   } catch (error) {
     logger.error(error);
     res.status(500).json({ success: false, message: 'Sever Error' });
+    return;
   }
 }
 
