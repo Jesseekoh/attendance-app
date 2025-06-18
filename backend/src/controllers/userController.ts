@@ -2,7 +2,7 @@ import { prisma } from '../config/db';
 import { Request, Response } from 'express';
 import logger from '../utils/logger';
 import { Prisma } from '../../generated/prisma';
-
+import { Roles } from '../constants/role';
 // Function to register a new user
 export const registerUser = async (req: Request, res: Response) => {
   // try {
@@ -90,26 +90,18 @@ export const getMyProfile = async (
 
   try {
     let user;
-    if (role === 'student') {
+    if (role === Roles.STUDENT) {
       user = await prisma.user.findUnique({
         where: { id },
         include: {
           student: true,
         },
       });
-      // user = await User.findOne({
-      //   where: { id },
-      //   include: [
-      //     {
-      //       model: Student,
-      //       attributes: ['matricNumber', 'department', 'level'],
-      //     },
-      //   ],
-      // });
     }
-    if (role === 'teacher') {
+
+    if (role === Roles.TEACHER) {
       user = await prisma.user.findUnique({
-        where: id,
+        where: { id },
         include: {
           teacher: true,
         },
