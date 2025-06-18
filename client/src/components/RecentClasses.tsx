@@ -2,15 +2,9 @@ import { useQuery } from '@tanstack/react-query';
 import { api } from '../lib/axiosClient';
 import ClassCard from './ClassCard';
 import { Link } from 'react-router';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  // CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Button } from './ui/button';
+import { cn } from '@/lib/utils';
 export interface ClassInfoType {
   id: string;
   teacherId: string;
@@ -84,33 +78,20 @@ const RecentClasses = () => {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Recent</CardTitle>
-        <CardDescription>
-          Make changes to your account here. Click save when you&apos;re done.
-        </CardDescription>
-      </CardHeader>
-      <CardContent>
-        <div className="pt-2 flex flex-col gap-2">
-          {recentClasses.data.totalClasses > 0 ? (
-            recentClasses.data.recentClasses.map((classInfo: ClassInfoType) => (
-              <ClassCard classInfo={classInfo} key={classInfo.id} />
-            ))
-          ) : (
-            <p>You have no recent classes</p>
-          )}
-          {recentClasses.data.totalClasses > 10 && (
-            <Link
-              className="text-center bg-neutral text-neutral-content rounded-md py-2"
-              to="/attendance"
-            >
-              View More
-            </Link>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+    <div className="pt-2 flex flex-col gap-2">
+      {recentClasses.data.totalClasses > 0 ? (
+        recentClasses.data.recentClasses.map((classInfo: ClassInfoType) => (
+          <ClassCard classInfo={classInfo} key={classInfo.id} />
+        ))
+      ) : (
+        <p>You have no recent classes</p>
+      )}
+      {recentClasses.data.totalClasses >= 5 && (
+        <Link className="self-end" to="/attendance">
+          <Button className={cn('w-full md:w-auto ')}>View More</Button>
+        </Link>
+      )}
+    </div>
   );
 };
 
