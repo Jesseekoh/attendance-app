@@ -74,6 +74,14 @@ function App() {
           ),
         },
         {
+          path: '/classes',
+          element: (
+            <Protected allowedRoles={[ROLES.TEACHER]}>
+              <h1>All my classes</h1>
+            </Protected>
+          ),
+        },
+        {
           path: '/classes/:classId',
           loader: classDetailsLoader,
           errorElement: <Error />,
