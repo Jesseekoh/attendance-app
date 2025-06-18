@@ -42,7 +42,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           { title: 'My Courses', icon: BookOpenText, url: '/courses' },
           { title: 'Attendance', icon: BookTemplate, url: '/attendance' },
           { title: 'Report', icon: FileChartColumnIncreasing, url: '/reports' },
-          { title: 'Classes', icon: Presentation, url: '/classes' },
         ];
         break;
       case ROLES.TEACHER:

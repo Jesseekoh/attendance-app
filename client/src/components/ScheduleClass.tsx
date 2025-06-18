@@ -35,7 +35,7 @@ import { useForm } from 'react-hook-form';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/axiosClient';
 import { Calendar } from '@/components/ui/calendar';
-
+import { toast } from 'sonner';
 type FormInput = {
   departmentId: string;
   courseId: string;
@@ -95,9 +95,6 @@ const ScheduleClass = () => {
       venueId: '',
     },
   });
-  const { reset } = form;
-
-  // { courseId, classVenue, startTime, endTime }
 
   const onSubmit = async (data: FormInput) => {
     try {
@@ -128,9 +125,12 @@ const ScheduleClass = () => {
       });
 
       if (resp.status === 200) {
+        toast.success('Class Schedule created successfully');
+        form.reset();
         console.log('success');
       }
     } catch (error) {
+      toast.error('Failed to create class schedule');
       console.log(error);
     }
   };
@@ -138,7 +138,7 @@ const ScheduleClass = () => {
     <>
       <Drawer
         onOpenChange={(open) => {
-          if (!open) reset();
+          if (!open) form.reset();
         }}
       >
         <DrawerTrigger asChild>
@@ -149,10 +149,6 @@ const ScheduleClass = () => {
         </DrawerTrigger>
         <DrawerContent>
           <div className="mx-auto w-full max-w-sm">
-            {/* <DrawerHeader>
-              <DrawerTitle>Set a Class</DrawerTitle>
-              <DrawerDescription>Create a class schedule</DrawerDescription>
-            </DrawerHeader> */}
             <div className="p-4 pb-0">
               <Form {...form}>
                 <form
@@ -169,6 +165,7 @@ const ScheduleClass = () => {
                         <Select
                           onValueChange={field.onChange}
                           defaultValue={field.value}
+                          value={field.value}
                         >
                           <FormControl>
                             <SelectTrigger className="w-full">
@@ -198,6 +195,7 @@ const ScheduleClass = () => {
                         <Select
                           onValueChange={field.onChange}
                           defaultValue={field.value}
+                          value={field.value}
                         >
                           <FormControl>
                             <SelectTrigger className="w-full">
@@ -227,6 +225,7 @@ const ScheduleClass = () => {
                         <Select
                           onValueChange={field.onChange}
                           defaultValue={field.value}
+                          value={field.value}
                         >
                           <FormControl>
                             <SelectTrigger className="w-full">
@@ -376,7 +375,7 @@ const ScheduleClass = () => {
             </div>
             <DrawerFooter>
               <DrawerClose asChild>
-                <Button variant="outline" onClick={() => reset()}>
+                <Button variant="outline" onClick={() => form.reset()}>
                   Cancel
                 </Button>
               </DrawerClose>
