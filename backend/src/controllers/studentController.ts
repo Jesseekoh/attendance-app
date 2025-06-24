@@ -15,7 +15,10 @@ async function enrollCourses(req: Request, res: Response) {
         CourseId: courseId,
         StudentId: id,
       }));
-      await prisma.enrollments.createMany({ data: enrollments });
+      await prisma.enrollments.createMany({
+        data: enrollments,
+        skipDuplicates: true,
+      });
 
       res.status(200).json({
         success: true,

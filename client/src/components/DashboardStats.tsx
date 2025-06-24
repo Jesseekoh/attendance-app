@@ -3,6 +3,7 @@ import { api } from '../lib/axiosClient';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Users, Clock } from 'lucide-react';
 import { StatsCard } from './stats-card';
+import { Card, CardContent } from '@/components/ui/card';
 const DashboardStats = () => {
   const {
     data: studentStats,
@@ -27,9 +28,11 @@ const DashboardStats = () => {
 
   if (studentStatsIsError) {
     return (
-      <>
-        <h1>Error fetching stats</h1>
-      </>
+      <Card className="bg-red-500/80">
+        <CardContent>
+          <p className="text-red-200">Error loading courses</p>
+        </CardContent>
+      </Card>
     );
   }
 
