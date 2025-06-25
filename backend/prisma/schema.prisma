@@ -33,18 +33,18 @@ model Course {
   title          String           @unique @db.VarChar(255)
   desc           String?
   classes        Class[]
-  Enrollments    Enrollments[]
+  enrollments    Enrollments[]
   taught_courses taught_courses[]
 }
 
 model Enrollments {
-  CourseId  String  @db.Uuid
-  StudentId String
+  courseId  String  @db.Uuid
+  studentId String
   grade     Int?
-  Courses   Course  @relation(fields: [CourseId], references: [id], onDelete: Cascade)
-  Student   Student @relation(fields: [StudentId], references: [userId], onDelete: Cascade)
+  course    Course  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  student   Student @relation(fields: [studentId], references: [userId], onDelete: Cascade)
 
-  @@id([CourseId, StudentId])
+  @@id([courseId, studentId])
 }
 
 model Student {
@@ -53,15 +53,15 @@ model Student {
   level        Int           @db.SmallInt
   departmentId String        @db.Uuid
   department   Department    @relation(fields: [departmentId], references: [id])
-  Enrollments  Enrollments[]
+  enrollments  Enrollments[]
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  attendance   Attendance[]
+  attendances  Attendance[]
 }
 
 model Teacher {
   userId         String           @id
   departmentId   String           @db.Uuid
-  Classes        Class[]
+  classes        Class[]
   department     Department       @relation(fields: [departmentId], references: [id])
   user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
   taught_courses taught_courses[]
@@ -73,28 +73,28 @@ model Attendance {
   studentId String
   classId   String   @db.Uuid
   class     Class    @relation(fields: [classId], references: [id], onDelete: Cascade)
-  Student   Student  @relation(fields: [studentId], references: [userId], onDelete: Cascade)
+  student   Student  @relation(fields: [studentId], references: [userId], onDelete: Cascade)
 
   @@id([studentId, classId])
 }
 
 model Department {
-  id      String    @id @default(uuid()) @db.Uuid
-  name    String    @db.VarChar(255)
-  Student Student[]
-  Teacher Teacher[]
-  Class   Class[]
+  id       String    @id @default(uuid()) @db.Uuid
+  name     String    @db.VarChar(255)
+  students Student[]
+  teachers Teacher[]
+  class    Class[]
 }
 
 model taught_courses {
   createdAt DateTime @default(now()) @db.Timestamptz(6)
   updatedAt DateTime @updatedAt @db.Timestamptz(6)
-  TeacherId String
-  CourseId  String   @db.Uuid
-  course    Course   @relation(fields: [CourseId], references: [id], onDelete: Cascade)
-  teacher   Teacher  @relation(fields: [TeacherId], references: [userId], onDelete: Cascade)
+  teacherId String
+  courseId  String   @db.Uuid
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  teacher   Teacher  @relation(fields: [teacherId], references: [userId], onDelete: Cascade)
 
-  @@id([TeacherId, CourseId])
+  @@id([teacherId, courseId])
 }
 
 model Venue {
@@ -102,7 +102,7 @@ model Venue {
   name      String   @unique @db.VarChar(255)
   latitude  Decimal  @db.Decimal(10, 8)
   longitude Decimal? @db.Decimal(10, 8)
-  Classes   Class[]
+  classes   Class[]
 
   @@unique([latitude, longitude], map: "venues_latitude_longitude")
 }
