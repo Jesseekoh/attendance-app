@@ -1,9 +1,9 @@
-import classRoutes from './classRoutes';
-import courseRoutes from './courseRoutes';
-import studentRoutes from './studentRoutes';
-import teacherRoutes from './teacherRoutes';
-import userRoutes from './userRoutes';
-import venueRoutes from './venueRoutes';
+import classRoutes from './class';
+import courseRoutes from './course';
+import studentRoutes from './student';
+import teacherRoutes from './teacher';
+import userRoutes from './user';
+import venueRoutes from './venue';
 export {
   classRoutes,
   courseRoutes,

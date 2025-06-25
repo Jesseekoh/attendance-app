@@ -3,7 +3,7 @@ import {
   authenticateToken,
   roleBasedAccess,
 } from '../middlewares/authMiddleware';
-import classController from '../controllers/classController';
+import classController from '../controllers/class';
 import { Roles } from '../constants/role';
 const router = Router();
 

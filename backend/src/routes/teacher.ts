@@ -1,9 +1,6 @@
 import { Router } from 'express';
 import { authenticateToken } from '../middlewares/authMiddleware';
-import {
-    addTeacherCourses,
-    getTeacherCourses,
-} from '../controllers/teacherController';
+import { addTeacherCourses, getTeacherCourses } from '../controllers/teacher';
 
 const router = Router();
 

@@ -26,10 +26,10 @@ async function getAllCourseStudents(req: Request, res: Response) {
     if (user?.role === 'teacher') {
       const students = await prisma.enrollments.findMany({
         where: {
-          CourseId: courseId,
+          courseId: courseId,
         },
         select: {
-          Student: {
+          student: {
             include: { user: true },
           },
         },

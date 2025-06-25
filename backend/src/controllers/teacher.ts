@@ -51,7 +51,7 @@ export async function getTeacherCourses(req: Request, res: Response) {
     if (teacher) {
       //   // Get all the courses taught by a teacher
       const data = await prisma.taught_courses.findMany({
-        where: { TeacherId: id },
+        where: { teacherId: id },
         select: { course: true },
       });
 
