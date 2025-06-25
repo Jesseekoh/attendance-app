@@ -9,11 +9,31 @@ async function enrollCourses(req: Request, res: Response) {
   const { id } = req.user;
   const { courses } = req.body;
   try {
-    const user = await prisma.student.findUnique({ where: { userId: id } });
+    const user = await prisma.student.findUnique({
+      where: { userId: id },
+      include: { enrollments: { select: { course: true } } },
+    });
     if (user) {
+      // Handle deleting records that are not in req.body.courses
+      const enrolledCourseIds = user.enrollments.map((item) => item.course.id);
+      const updatedCoursesSet = new Set(courses);
+      // filter courses that are in the students enrollments but not in req.body.courses
+      const coursesToDelete = [...enrolledCourseIds].filter(
+        (course) => !updatedCoursesSet.has(course)
+      );
+
+      await prisma.enrollments.deleteMany({
+        where: {
+          studentId: id,
+          courseId: {
+            in: coursesToDelete,
+          },
+        },
+      });
+
       const enrollments = courses.map((courseId: string) => ({
-        CourseId: courseId,
-        StudentId: id,
+        courseId: courseId,
+        studentId: id,
       }));
       await prisma.enrollments.createMany({
         data: enrollments,
@@ -49,13 +69,13 @@ async function getStudentCourses(req: Request, res: Response) {
     if (student) {
       // get all courses a student is enrolled in
       let enrollments = await prisma.enrollments.findMany({
-        where: { StudentId: id },
+        where: { studentId: id },
         select: {
-          Courses: true,
+          course: true,
         },
       });
 
-      const courses = enrollments.map((i) => i.Courses);
+      const courses = enrollments.map((i) => i.course);
 
       res.status(200).json({
         success: true,
