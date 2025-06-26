@@ -16,11 +16,21 @@ async function enrollCourses(req: Request, res: Response) {
     if (user) {
       // Handle deleting records that are not in req.body.courses
       const enrolledCourseIds = user.enrollments.map((item) => item.course.id);
-      const updatedCoursesSet = new Set(courses);
+      const updatedCoursesSet: Set<string> = new Set(courses);
       // filter courses that are in the students enrollments but not in req.body.courses
+
       const coursesToDelete = [...enrolledCourseIds].filter(
         (course) => !updatedCoursesSet.has(course)
       );
+
+      const coursesToAdd: string[] = [...updatedCoursesSet].filter(
+        (item) => !coursesToDelete.includes(item)
+      );
+
+      const enrollments = coursesToAdd.map((courseId: string) => ({
+        courseId,
+        studentId: id,
+      }));
 
       await prisma.enrollments.deleteMany({
         where: {
@@ -31,10 +41,6 @@ async function enrollCourses(req: Request, res: Response) {
         },
       });
 
-      const enrollments = courses.map((courseId: string) => ({
-        courseId: courseId,
-        studentId: id,
-      }));
       await prisma.enrollments.createMany({
         data: enrollments,
         skipDuplicates: true,
