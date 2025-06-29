@@ -178,17 +178,14 @@ async function getOngoingClasses(req: Request, res: Response) {
       },
       orderBy: { startTime: 'asc' },
       include: {
-        venue: true,
-        teacher: true,
+        course: true,
+        venue: { select: { name: true } },
+        teacher: {
+          include: {
+            user: { select: { email: true, name: true, role: true } },
+          },
+        },
       },
-      // { model: Venue },
-      // {
-      //   model: Teacher,
-      //   include: [
-      //     { model: User, attributes: ['firstName', 'lastName', 'email'] },
-      //   ],
-      // },
-      // { model: Course, attributes: ['title', 'desc', 'code'], as: 'course' },
     });
     res.status(200).json({
       success: true,
