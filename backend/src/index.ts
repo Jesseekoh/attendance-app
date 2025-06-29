@@ -17,6 +17,7 @@ import {
 } from './routes';
 import logger from './utils/logger';
 import swaggerJSDoc from 'swagger-jsdoc';
+import helmet from 'helmet';
 import swaggerUi from 'swagger-ui-express';
 import { prisma } from './config/db';
 
@@ -72,6 +73,7 @@ const swaggerOptions = {
 
 const swaggerDocs = swaggerJSDoc(swaggerOptions);
 
+app.use(helmet());
 // Configure CORS middleware
 app.use(
   cors({
