@@ -48,7 +48,7 @@ export type Course = {
   id: string;
   title: string;
   code: string;
-  // desc: string;
+  desc: string;
 };
 
 type props = {
@@ -65,7 +65,7 @@ const EditCourses = ({ setIsEditing }: props) => {
   } = useQuery({
     queryKey: ['my-courses'],
     queryFn: async () => {
-      const response = await api.get(`/${user?.role}s/courses`);
+      const response = await api.get(`/${user?.role}s/${user?.id}/courses`);
       console.log(response);
       return response.data.data;
     },
@@ -116,6 +116,13 @@ const EditCourses = ({ setIsEditing }: props) => {
         <div className="capitalize">{row.getValue('code')}</div>
       ),
     },
+    // {
+    //   accessorKey: 'desc',
+    //   header: 'desc',
+    //   cell: ({ row }) => (
+    //     <div className="capitalize">{row.getValue('desc')}</div>
+    //   ),
+    // },
     {
       accessorKey: 'title',
       header: 'title',
@@ -180,7 +187,9 @@ const EditCourses = ({ setIsEditing }: props) => {
   const handleSubmit = async () => {
     try {
       const courseIds = courses.map((course) => course.id);
-      const resp = await api.post('/students/courses', { courses: courseIds });
+      const resp = await api.post(`/${user?.role}s/${user?.id}/courses`, {
+        courses: courseIds,
+      });
 
       if (resp.status === 200) {
         toast.success('Successfully added courses');
@@ -206,7 +215,7 @@ const EditCourses = ({ setIsEditing }: props) => {
     );
   }
   return (
-    <div className="w-full">
+    <>
       <div className="rounded-md border">
         <Table>
           <TableHeader>
@@ -299,7 +308,7 @@ const EditCourses = ({ setIsEditing }: props) => {
           </Button>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 

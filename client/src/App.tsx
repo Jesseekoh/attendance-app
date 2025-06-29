@@ -16,6 +16,7 @@ import Attendance from './pages/Attendance';
 import { ROLES } from './config/roles';
 import { useAuth } from './contexts/AuthContext';
 import Courses from './pages/Courses';
+import TeacherClasses from './pages/TeacherClasses';
 
 function App() {
   const { user } = useAuth();
@@ -51,7 +52,7 @@ function App() {
         },
         {
           path: '/forbidden',
-          element: <h1>Forbidden bruh</h1>,
+          element: <h1 className="text-4xl text-center">403, Forbidden</h1>,
         },
         {
           path: '/courses',
@@ -77,7 +78,7 @@ function App() {
           path: '/classes',
           element: (
             <Protected allowedRoles={[ROLES.TEACHER]}>
-              <h1>All my classes</h1>
+              <TeacherClasses />
             </Protected>
           ),
         },

@@ -12,13 +12,14 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Card, CardContent } from '@/components/ui/card';
+import { ROLES } from '@/config/roles';
 const UserCourses = () => {
   const { user } = useAuth();
 
   const { data, isLoading, isError } = useQuery({
     queryKey: ['my-courses'],
     queryFn: async () => {
-      const response = await api.get(`/${user?.role}s/courses`);
+      const response = await api.get(`/${user?.role}s/${user?.id}/courses`);
       console.log(response);
       return response.data;
     },
@@ -51,14 +52,13 @@ const UserCourses = () => {
   return (
     <>
       {courses ? (
-        <div className="overflow-x-auto mb-4">
+        <div className="border pb-2">
           <Table>
             <TableCaption>Enrolled Courses</TableCaption>
             <TableHeader>
               <TableRow>
                 <TableHead>Code</TableHead>
                 <TableHead>Title</TableHead>
-                <TableHead>Description</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -72,13 +72,17 @@ const UserCourses = () => {
                   <TableRow key={course.id}>
                     <TableCell>{course.code}</TableCell>
                     <TableCell>{course.title}</TableCell>
-                    <TableCell>{course.desc}</TableCell>
                   </TableRow>
                 )
               )}
             </TableBody>
           </Table>
-          {courses.length === 0 && <p>You're not enrolled in any classes</p>}
+          {courses.length === 0 &&
+            (user?.role === ROLES.STUDENT ? (
+              <p>You're not enrolled in any classes</p>
+            ) : (
+              <p>You currently teach no courses</p>
+            ))}
         </div>
       ) : (
         <h1>No courses</h1>

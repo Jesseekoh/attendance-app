@@ -47,7 +47,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       case ROLES.TEACHER:
         navItems = [
           { title: 'Dashboard', icon: Home, url: '/dashboard' },
-          { title: 'My Courses', icon: BookOpenText, url: '/courses' },
+          { title: 'Courses', icon: BookOpenText, url: '/courses' },
           { title: 'Classes', icon: Presentation, url: '/classes' },
           { title: 'Students', icon: Users, url: '/attendance' },
           { title: 'Attendance', icon: BookTemplate, url: '/attendance' },
