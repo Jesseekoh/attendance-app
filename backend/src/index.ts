@@ -86,6 +86,7 @@ app.use(
 app.all('/api/auth/*', toNodeHandler(auth));
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocs));
+app.disable('x-powered-by');
 app.use(pinoHttp({ logger }));
 
 app.use(limiter);
