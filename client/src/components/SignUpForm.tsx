@@ -8,7 +8,7 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form';
-import { toast } from 'sonner';
+import toast from 'react-hot-toast';
 import { useForm } from 'react-hook-form';
 import { authClient } from '../lib/auth-client';
 import { cn } from '@/lib/utils';

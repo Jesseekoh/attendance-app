@@ -38,7 +38,7 @@ import { useForm } from 'react-hook-form';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/axiosClient';
 import { Calendar } from '@/components/ui/calendar';
-import { toast } from 'sonner';
+import toast from 'react-hot-toast';
 import { useAuth } from '@/contexts/AuthContext';
 type FormInput = {
   departmentId: string;
@@ -67,7 +67,7 @@ type VenueType = {
   longitude: number;
 };
 const ScheduleClass = () => {
-  const {user} = useAuth()
+  const { user } = useAuth();
   const { data: courses } = useQuery({
     queryKey: ['teachers-course'],
     queryFn: async () => {

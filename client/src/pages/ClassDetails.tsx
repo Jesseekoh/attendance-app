@@ -1,7 +1,7 @@
 import { useLoaderData, useParams } from 'react-router';
 import { api } from '../lib/axiosClient';
 import { BookOpen, Calendar, Clock, MapPin, User } from 'lucide-react';
-import { toast } from 'sonner';
+import toast from 'react-hot-toast';
 import { AxiosError } from 'axios';
 import { Button } from '@/components/ui/button';
 import {
