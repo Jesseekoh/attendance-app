@@ -10,7 +10,7 @@ import {
 import { useTheme } from '@/components/theme-provider';
 import { cn } from '@/lib/utils';
 
-import React from 'react';
+import * as React from 'react';
 
 export function ModeToggle({ className }: React.ComponentProps<'button'>) {
   const { setTheme } = useTheme();
