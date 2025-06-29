@@ -16,7 +16,7 @@ export function roleBasedAccess(allowedRoles: string[]) {
     const { role } = req.user;
 
     if (allowedRoles.includes(role)) {
-      return next();
+      next();
     } else {
       res.status(403).json({
         success: false,

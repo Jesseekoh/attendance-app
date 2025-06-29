@@ -6,11 +6,11 @@ import logger from '../utils/logger';
  * Enrolls a student in the specified courses
  */
 async function enrollCourses(req: Request, res: Response) {
-  const { id } = req.user;
+  const { studentId } = req.params;
   const { courses } = req.body;
   try {
     const user = await prisma.student.findUnique({
-      where: { userId: id },
+      where: { userId: studentId },
       include: { enrollments: { select: { course: true } } },
     });
     if (user) {
@@ -24,17 +24,18 @@ async function enrollCourses(req: Request, res: Response) {
       );
 
       const coursesToAdd: string[] = [...updatedCoursesSet].filter(
-        (item) => !coursesToDelete.includes(item)
+        (item) => !enrolledCourseIds.includes(item)
       );
 
       const enrollments = coursesToAdd.map((courseId: string) => ({
         courseId,
-        studentId: id,
+        studentId,
       }));
 
+      // await prisma.$transaction(async (tx) => {
       await prisma.enrollments.deleteMany({
         where: {
-          studentId: id,
+          studentId,
           courseId: {
             in: coursesToDelete,
           },
@@ -43,8 +44,9 @@ async function enrollCourses(req: Request, res: Response) {
 
       await prisma.enrollments.createMany({
         data: enrollments,
-        skipDuplicates: true,
+        // skipDuplicates: true,
       });
+      // });
 
       res.status(200).json({
         success: true,

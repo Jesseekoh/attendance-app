@@ -2,38 +2,47 @@ import { Request, Response } from 'express';
 import logger from '../utils/logger';
 import { prisma } from '../config/db';
 
+// Add courses to list of courses a teacher is teaching
 export async function addTeacherCourses(req: Request, res: Response) {
-  const { id } = req.user;
-  const { courses } = req.body;
+  const { teacherId } = req.params;
+  const { courses }: { courses: string[] } = req.body;
 
   try {
-    const teacher = await prisma.teacher.findFirst({ where: { userId: id } });
+    const teacher = await prisma.teacher.findFirst({
+      where: { userId: teacherId },
+      include: {
+        taught_courses: { select: { course: true } },
+      },
+    });
 
-    const taughtCourses = courses.map((CourseId: string) => ({
-      TeacherId: id,
-      CourseId,
-    }));
-    if (teacher) {
-      console.log('bulaba');
-      const teacherCourses = await prisma.taught_courses.createMany(
-        { data: taughtCourses, skipDuplicates: true }
-        // {
-        //   updateOnDuplicate: ['CourseId', 'TeacherId'],
-        // }
-      );
+    const teachersCoursesIds = teacher?.taught_courses.map(
+      (item) => item.course.id
+    );
+    const coursesToDelete = teachersCoursesIds?.filter(
+      (courseId) => !courses.includes(courseId)
+    );
 
-      res.status(200).json({
-        success: true,
-        message: 'Courses added Successfully',
-      });
-    } else {
-      // todo: make middleware to manage access control
-      res.status(403).json({
-        success: false,
-        message: 'Only teachers can teach courses',
-      });
-    }
+    const coursesToAdd = courses
+      .filter((courseId) => !teachersCoursesIds?.includes(courseId))
+      .map((courseId) => ({ courseId, teacherId }));
+
+    console.log(coursesToAdd);
+    console.log(coursesToDelete);
+
+    await prisma.taught_courses.deleteMany({
+      where: { teacherId, courseId: { in: coursesToDelete } },
+    });
+    await prisma.taught_courses.createMany({
+      data: coursesToAdd,
+      skipDuplicates: true,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Courses added Successfully',
+    });
   } catch (error) {
+    console.log(error);
     logger.error('An error occurred', error);
     res.status(500).json({
       success: false,
