@@ -70,9 +70,9 @@ const Attendance = () => {
         className="grid grid-col gap-4"
         loader={<h4>Loading...</h4>}
         endMessage={
-          <p style={{ textAlign: 'center' }}>
+          <div style={{ textAlign: 'center' }}>
             <p className="text-muted-foreground">You've seen it all</p>
-          </p>
+          </div>
         }
       >
         {items.map((item: ClassInfoType) => (

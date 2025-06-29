@@ -21,6 +21,9 @@ import {
   Drawer,
   DrawerClose,
   DrawerContent,
+  DrawerHeader,
+  DrawerDescription,
+  DrawerTitle,
   DrawerFooter,
   DrawerTrigger,
 } from '@/components/ui/drawer';
@@ -36,6 +39,7 @@ import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/axiosClient';
 import { Calendar } from '@/components/ui/calendar';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
 type FormInput = {
   departmentId: string;
   courseId: string;
@@ -63,10 +67,11 @@ type VenueType = {
   longitude: number;
 };
 const ScheduleClass = () => {
+  const {user} = useAuth()
   const { data: courses } = useQuery({
-    queryKey: ['all-courses'],
+    queryKey: ['teachers-course'],
     queryFn: async () => {
-      const resp = await api.get('/courses');
+      const resp = await api.get(`/teachers/${user?.id}/courses`);
       return resp.data.data;
     },
   });
@@ -147,8 +152,12 @@ const ScheduleClass = () => {
             Schedule a class
           </Button>
         </DrawerTrigger>
-        <DrawerContent>
+        <DrawerContent className="!max-h-dvh">
           <div className="mx-auto w-full max-w-sm">
+            <DrawerHeader>
+              <DrawerTitle>Add Class</DrawerTitle>
+              <DrawerDescription>Create a class session</DrawerDescription>
+            </DrawerHeader>
             <div className="p-4 pb-0">
               <Form {...form}>
                 <form
@@ -302,6 +311,7 @@ const ScheduleClass = () => {
                         },
                         validate: (value) => {
                           const { endTime } = form.getValues();
+                          // const today = new Date().
                           const end = new Date(`1970-01-01T${endTime}`);
                           const start = new Date(`1970-01-01T${value}`);
 

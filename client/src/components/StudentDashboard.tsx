@@ -33,8 +33,8 @@ const StudentDashboard = () => {
         <CardContent>
           <Tabs defaultValue="upcoming">
             <TabsList>
-              <TabsTrigger value="upcoming">Upcoming Classes</TabsTrigger>
-              <TabsTrigger value="recent">Recent Classes</TabsTrigger>
+              <TabsTrigger value="upcoming">Upcoming</TabsTrigger>
+              <TabsTrigger value="recent">Recent</TabsTrigger>
             </TabsList>
             <TabsContent value="upcoming">
               <UpcomingClasses />

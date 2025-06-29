@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button';
 import UserCourses from '@/components/UserCourses';
 import { useState } from 'react';
 import EditCourses from './EditCourses';
-// TODO: use react query to handle errors gracefully instead of within each fetcher function
 const Courses = () => {
   // const { user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
@@ -19,13 +18,19 @@ const Courses = () => {
           </Button>
         )}
       </div>
-      {/* <h3 className="text-2xl font-to-base-300">Courses</h3> */}
-
-      {isEditing ? (
+      <div className="overflow-x-auto">
+        {/* <div className="w-[200%] h-60 border">hello</div> */}
+        {isEditing ? (
+          <EditCourses setIsEditing={setIsEditing} />
+        ) : (
+          <UserCourses />
+        )}
+      </div>
+      {/* {isEditing ? (
         <EditCourses setIsEditing={setIsEditing} />
       ) : (
         <UserCourses />
-      )}
+      )} */}
     </div>
   );
 };

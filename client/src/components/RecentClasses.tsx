@@ -5,6 +5,7 @@ import { Link } from 'react-router';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
 export interface ClassInfoType {
   id: string;
   teacherId: string;
@@ -52,24 +53,48 @@ const RecentClasses = () => {
   } = useQuery({
     queryKey: ['RecentClasses'],
     queryFn: async () => {
-      const response = await api.get('/classes/recent');
+      const response = await api.get(`/classes/recent`);
       return response.data;
     },
   });
 
   if (isLoading) {
     return (
-      <div className="flex flex-col gap-4">
-        <div className="flex items-center gap-4">
-          <div className="h-16 w-16 shrink-0 rounded-full"></div>
-          <Skeleton className="h-16 w-16 rounded-full" />
-          <div className="flex flex-col gap-4">
-            <Skeleton className="h-4 w-20" />
-            <Skeleton className="h-4 w-28" />
+      <>
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center gap-4">
+            <div className="h-16 w-16 shrink-0 rounded-full"></div>
+            <Skeleton className="h-16 w-16 rounded-full" />
+            <div className="flex flex-col gap-4">
+              <Skeleton className="h-4 w-20" />
+              <Skeleton className="h-4 w-28" />
+            </div>
           </div>
+          <Skeleton className="h-32 w-full" />
         </div>
-        <Skeleton className="h-32 w-full" />
-      </div>
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center gap-4">
+            <div className="h-16 w-16 shrink-0 rounded-full"></div>
+            <Skeleton className="h-16 w-16 rounded-full" />
+            <div className="flex flex-col gap-4">
+              <Skeleton className="h-4 w-20" />
+              <Skeleton className="h-4 w-28" />
+            </div>
+          </div>
+          <Skeleton className="h-32 w-full" />
+        </div>
+        <div className="flex flex-col gap-4">
+          <div className="flex items-center gap-4">
+            <div className="h-16 w-16 shrink-0 rounded-full"></div>
+            <Skeleton className="h-16 w-16 rounded-full" />
+            <div className="flex flex-col gap-4">
+              <Skeleton className="h-4 w-20" />
+              <Skeleton className="h-4 w-28" />
+            </div>
+          </div>
+          <Skeleton className="h-32 w-full" />
+        </div>
+      </>
     );
   }
 

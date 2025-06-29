@@ -4,7 +4,9 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Users, Clock } from 'lucide-react';
 import { StatsCard } from './stats-card';
 import { Card, CardContent } from '@/components/ui/card';
+import { useAuth } from '@/contexts/AuthContext';
 const DashboardStats = () => {
+  const { user } = useAuth();
   const {
     data: studentStats,
     isLoading: studentStatsIsLoading,
@@ -12,7 +14,9 @@ const DashboardStats = () => {
   } = useQuery({
     queryKey: ['my-stats'],
     queryFn: async () =>
-      await api.get('/students/stats').then((resp) => resp.data.data),
+      await api
+        .get(`/students/${user?.id}/stats`)
+        .then((resp) => resp.data.data),
   });
 
   if (studentStatsIsLoading) {
