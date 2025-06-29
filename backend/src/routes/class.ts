@@ -62,6 +62,20 @@ router.get('/recent', authenticateToken, classController.getRecentClasses);
 
 /**
  * @swagger
+ *  /api/v1/classes/ongoing:
+ *    get:
+ *      summary: Gets all ongoing classes
+ *      responses:
+ *        "200":
+ *          description: OK
+ *        500:
+ *          description: Server error
+
+ */
+router.get('/ongoing', authenticateToken, classController.getOngoingClasses);
+
+/**
+ * @swagger
  *  /api/v1/classes/:classId:
  *    get:
  *      summary: Get class by specified ID
