@@ -5,6 +5,7 @@ import { Link } from 'react-router';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
+import {Card, CardContent} from "@/components/ui/card.tsx";
 
 export interface ClassInfoType {
   id: string;
@@ -54,7 +55,7 @@ const RecentClasses = () => {
     queryKey: ['RecentClasses'],
     queryFn: async () => {
       const response = await api.get(`/classes/recent`);
-      return response.data;
+      return response.data.data;
     },
   });
 
@@ -104,14 +105,18 @@ const RecentClasses = () => {
 
   return (
     <div className="pt-2 flex flex-col gap-2">
-      {recentClasses.data.totalClasses > 0 ? (
-        recentClasses.data.recentClasses.map((classInfo: ClassInfoType) => (
+      {recentClasses.recentClasses.length > 0 ? (
+        recentClasses.recentClasses.map((classInfo: ClassInfoType) => (
           <ClassCard classInfo={classInfo} key={classInfo.id} />
         ))
       ) : (
+          <Card>
+            <CardContent>
         <p>You have no recent classes</p>
+            </CardContent>
+          </Card>
       )}
-      {recentClasses.data.totalClasses >= 5 && (
+      {recentClasses.totalClasses >= 5 && (
         <Link className="self-end" to="/attendance">
           <Button className={cn('w-full md:w-auto ')}>View More</Button>
         </Link>

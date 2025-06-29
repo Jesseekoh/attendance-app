@@ -1,7 +1,7 @@
 import { BookOpen, MapPin, User, Calendar, Clock } from 'lucide-react';
 import { Link } from 'react-router';
 import { ClassInfoType } from './RecentClasses';
-import React from 'react';
+import * as React from 'react';
 import {
   Card,
   CardContent,
@@ -15,9 +15,9 @@ import { cn } from '@/lib/utils';
 interface ClassCardProps {
   classInfo: ClassInfoType;
   withFooter?: boolean;
+  key: string
 }
 const ClassCard: React.FC<ClassCardProps> = ({ classInfo, withFooter }) => {
-  console.log(classInfo.attended);
   return (
     // <div>
     <Card className="gap-2">
