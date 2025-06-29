@@ -5,7 +5,7 @@ import { Link } from 'react-router';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
-import { useAuth } from '@/contexts/AuthContext';
+
 export interface ClassInfoType {
   id: string;
   teacherId: string;
