@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { useSidebar } from '@/components/ui/sidebar';
 import { ModeToggle } from './mode-toggle';
+import { Link } from 'react-router';
 
 export function SiteHeader() {
   const { toggleSidebar } = useSidebar();
@@ -20,6 +21,11 @@ export function SiteHeader() {
           <SidebarIcon />
         </Button>
         <Separator orientation="vertical" className="mr-2 h-4" />
+        <Link to="/" className="md:hidden">
+          <span className="font-['Space_Mono'] font-black">Check-in</span>
+          {/* <CheckSquare className="text-secondary-foreground" size={25} /> */}
+        </Link>
+        <Separator orientation="vertical" />
         <ModeToggle className="ml-auto" />
       </div>
     </header>
