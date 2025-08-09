@@ -3,7 +3,11 @@ import {
   authenticateToken,
   roleBasedAccess,
 } from '../middlewares/authMiddleware';
-import { addTeacherCourses, getTeacherCourses } from '../controllers/teacher';
+import {
+  addTeacherCourses,
+  getTeacherClasses,
+  getTeacherCourses,
+} from '../controllers/teacher';
 import { Roles } from '../constants/role';
 
 const router = Router();
@@ -22,6 +26,13 @@ router.post(
   authenticateToken,
   roleBasedAccess([Roles.ADMIN, Roles.TEACHER]),
   addTeacherCourses
+);
+
+router.get(
+  '/:teacherId/classes',
+  authenticateToken,
+  roleBasedAccess([Roles.ADMIN, Roles.TEACHER]),
+  getTeacherClasses
 );
 
 export default router;
