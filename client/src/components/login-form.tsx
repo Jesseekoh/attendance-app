@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -5,6 +6,7 @@ import { useForm } from 'react-hook-form';
 import { authClient } from '../lib/auth-client';
 import { Link } from 'react-router';
 import toast from 'react-hot-toast';
+import { LoaderCircle } from 'lucide-react';
 import {
   Form,
   FormControl,
@@ -18,6 +20,7 @@ export function LoginForm({
   className,
   ...props
 }: React.ComponentProps<'form'>) {
+  const [isLoading, setLoading] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const previousUrl = location.state?.from.pathname || '/dashboard';
@@ -36,21 +39,26 @@ export function LoginForm({
     email: string;
     password: string;
   }) => {
-    await authClient.signIn.email(
-      {
-        email,
-        password,
-      },
-      {
-        onError: (ctx) => {
-          toast.error(ctx.error.message);
+    setLoading(true);
+    try {
+      await authClient.signIn.email(
+        {
+          email,
+          password,
         },
-        onSuccess: () => {
-          toast.success('Logged in successful');
-          navigate(previousUrl, { replace: true });
-        },
-      }
-    );
+        {
+          onError: (ctx) => {
+            toast.error(ctx.error.message);
+          },
+          onSuccess: () => {
+            toast.success('Logged in successful');
+            navigate(previousUrl, { replace: true });
+          },
+        }
+      );
+    } finally {
+      setLoading(false);
+    }
   };
   return (
     <Form {...form}>
@@ -109,8 +117,15 @@ export function LoginForm({
               </FormItem>
             )}
           />
-          <Button type="submit" className="w-full">
-            Login
+          <Button type="submit" className="w-full" disabled={isLoading}>
+            {isLoading ? (
+              <>
+                <LoaderCircle className="animate-spin" />
+                Logging in
+              </>
+            ) : (
+              'Log in'
+            )}
           </Button>
         </div>
         <div className="text-center text-sm">
