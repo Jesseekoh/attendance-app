@@ -9,6 +9,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarGroupContent,
+  useSidebar,
 } from '@/components/ui/sidebar';
 import { NavLink } from 'react-router';
 
@@ -26,6 +27,15 @@ export function NavMain({
     }[];
   }[];
 }) {
+  const { isMobile, setOpenMobile } = useSidebar();
+
+  const handleLinkClick = () => {
+    // Close mobile sidebar when a link is clicked
+    if (isMobile) {
+      setOpenMobile(false);
+    }
+  };
+
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Navigation</SidebarGroupLabel>
@@ -34,7 +44,7 @@ export function NavMain({
           <SidebarMenu>
             {items.map((item) => (
               <SidebarMenuItem key={item.title}>
-                <NavLink to={item.url}>
+                <NavLink to={item.url} onClick={handleLinkClick}>
                   {({ isActive }) => (
                     <SidebarMenuButton
                       asChild
