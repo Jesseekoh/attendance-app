@@ -13,7 +13,7 @@ export function ModeToggle({ className }: React.ComponentProps<'button'>) {
   return (
     <Button
       className={cn(className)}
-      variant="outline"
+      variant="ghost"
       size="icon"
       onClick={() => {
         setTheme(theme === 'dark' ? 'light' : 'dark');
