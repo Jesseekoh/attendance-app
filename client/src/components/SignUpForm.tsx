@@ -1,3 +1,5 @@
+import { useState } from 'react';
+import { LoaderCircle } from 'lucide-react';
 import { Link, useNavigate } from 'react-router';
 import {
   Form,
@@ -36,6 +38,7 @@ type SignUpFormInput = {
   level?: string;
 };
 const SignUpForm = ({ className, ...props }: React.ComponentProps<'form'>) => {
+  const [isLoading, setLoading] = useState(false);
   const form = useForm({
     defaultValues: {
       firstName: '',
@@ -43,6 +46,7 @@ const SignUpForm = ({ className, ...props }: React.ComponentProps<'form'>) => {
       email: '',
       departmentId: '',
       password: '',
+      confirmPassword: '',
       matricNumber: '',
       level: '',
       role: 'student',
@@ -58,25 +62,32 @@ const SignUpForm = ({ className, ...props }: React.ComponentProps<'form'>) => {
   });
 
   const role = form.watch('role');
+  const password = form.watch('password');
   const navigate = useNavigate();
   const onSubmit = async (data: SignUpFormInput) => {
     const { firstName, lastName, ...rest } = data;
     const fullName = firstName + ' ' + lastName;
-    await authClient.signUp.email(
-      {
-        ...rest,
-        name: fullName,
-      },
-      {
-        onSuccess: (ctx) => {
-          toast.success(ctx.response.statusText);
-          navigate('/signin', { replace: true });
+
+    setLoading(true);
+    try {
+      await authClient.signUp.email(
+        {
+          ...rest,
+          name: fullName,
         },
-        onError: (ctx) => {
-          toast.error(ctx.error.message);
-        },
-      }
-    );
+        {
+          onSuccess: (ctx) => {
+            toast.success(ctx.response.statusText);
+            navigate('/signin', { replace: true });
+          },
+          onError: (ctx) => {
+            toast.error(ctx.error.message);
+          },
+        }
+      );
+    } finally {
+      setLoading(false);
+    }
   };
   return (
     <>
@@ -181,10 +192,7 @@ const SignUpForm = ({ className, ...props }: React.ComponentProps<'form'>) => {
                         )}
                     </SelectContent>
                   </Select>
-                  <FormDescription>
-                    You can manage email addresses in your{' '}
-                    <Link to="/examples/forms">email settings</Link>.
-                  </FormDescription>
+
                   <FormMessage />
                 </FormItem>
               )}
@@ -261,10 +269,6 @@ const SignUpForm = ({ className, ...props }: React.ComponentProps<'form'>) => {
                           <SelectItem value="500">500</SelectItem>
                         </SelectContent>
                       </Select>
-                      <FormDescription>
-                        You can manage email addresses in your{' '}
-                        <Link to="/examples/forms">email settings</Link>.
-                      </FormDescription>
                       <FormMessage />
                     </FormItem>
                   )}
@@ -288,17 +292,43 @@ const SignUpForm = ({ className, ...props }: React.ComponentProps<'form'>) => {
                     <Input {...field} type="password" />
                   </FormControl>
                   <FormMessage />
-                  <a
-                    href="#"
-                    className="ml-auto text-sm underline-offset-4 hover:underline"
-                  >
-                    Forgot your password?
-                  </a>
                 </FormItem>
               )}
             />
-            <Button type="submit" className="w-full">
-              Sign up
+            <FormField
+              control={form.control}
+              name="confirmPassword"
+              rules={{
+                required: 'Enter the same password',
+                validate: (value) => {
+                  if (value !== password) {
+                    return 'Passwords do not match';
+                  }
+                },
+                minLength: {
+                  value: 6,
+                  message: 'Enter a password of at least 6 characters',
+                },
+              }}
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Confrim Password</FormLabel>
+                  <FormControl>
+                    <Input {...field} type="password" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <Button type="submit" className="w-full" disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <LoaderCircle className="animate-spin" />
+                  Signing up
+                </>
+              ) : (
+                'Sign up'
+              )}
             </Button>
           </div>
           <div className="text-center text-sm">
