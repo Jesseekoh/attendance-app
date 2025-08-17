@@ -1,13 +1,22 @@
 import { Request, Response } from 'express';
 import logger from '../utils/logger';
 import { prisma } from '../config/db';
+import { Roles } from '../constants/role';
 
 // Add courses to list of courses a teacher is teaching
 export async function addTeacherCourses(req: Request, res: Response) {
+  const { id, role } = req.user;
   const { teacherId } = req.params;
   const { courses }: { courses: string[] } = req.body;
 
   try {
+    if (role === Roles.TEACHER && id !== teacherId) {
+      res.status(403).json({
+        success: false,
+        message: 'You cannot make changes to another teacher account',
+      });
+      return;
+    }
     const teacher = await prisma.teacher.findFirst({
       where: { userId: teacherId },
       include: {

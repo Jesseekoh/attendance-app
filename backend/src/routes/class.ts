@@ -72,6 +72,7 @@ router.get('/recent', authenticateToken, classController.getRecentClasses);
  *          description: Server error
 
  */
+
 router.get('/ongoing', authenticateToken, classController.getOngoingClasses);
 
 /**
@@ -97,6 +98,12 @@ router.get('/ongoing', authenticateToken, classController.getOngoingClasses);
  *          description: Class not found
  */
 router.get('/:classId', authenticateToken, classController.getClass);
+
+router.get(
+  '/:classId/attendance',
+  authenticateToken,
+  classController.
+);
 
 /**
  * @swagger
@@ -179,5 +186,4 @@ router.post('/:classId', authenticateToken, classController.markAttendance);
 // Update class details
 router.put('/:classId', authenticateToken, classController.updateClassDetails);
 
-router.get('/ongoing', authenticateToken, classController.getOngoingClasses);
 export default router;

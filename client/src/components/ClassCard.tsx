@@ -15,9 +15,16 @@ import { cn } from '@/lib/utils';
 interface ClassCardProps {
   classInfo: ClassInfoType;
   withFooter?: boolean;
-  key: string
+  key: string;
+  footerLinkTo?: string;
+  footerLabel?: string;
 }
-const ClassCard: React.FC<ClassCardProps> = ({ classInfo, withFooter }) => {
+const ClassCard: React.FC<ClassCardProps> = ({
+  classInfo,
+  withFooter,
+  footerLinkTo,
+  footerLabel,
+}) => {
   return (
     // <div>
     <Card className="gap-2">
@@ -79,10 +86,10 @@ const ClassCard: React.FC<ClassCardProps> = ({ classInfo, withFooter }) => {
         <CardFooter>
           <CardAction className="w-full">
             <Link
-              to={'/classes/' + classInfo.id}
+              to={footerLinkTo ?? '/classes/' + classInfo.id}
               className="rounded-lg text-center inline-block w-full bg-primary text-primary-foreground px-4 py-2"
             >
-              View Details
+              {footerLabel ?? 'View Details'}
             </Link>
           </CardAction>
         </CardFooter>

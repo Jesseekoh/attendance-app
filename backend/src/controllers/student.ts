@@ -2,6 +2,11 @@ import { Request, Response } from 'express';
 import { prisma } from '../config/db';
 import logger from '../utils/logger';
 
+async function getAllStudents(req: Request, res: Response) {
+  try {
+  } catch (error) {}
+}
+
 /**
  * Enrolls a student in the specified courses
  */
@@ -107,13 +112,12 @@ async function getStudentCourses(req: Request, res: Response) {
 }
 
 async function getStudentStats(req: Request, res: Response) {
-  const { id, role } = req.user;
+  // const { id, role } = req.user;
+  const { studentId } = req.params;
   try {
     const [totalClasses, attendedClasses] = await Promise.all([
-      // Class.count(),
       prisma.class.count(),
-      prisma.attendance.count({ where: { studentId: id } }),
-      // sequelize.models.attendance.count({ where: { StudentId: id } }),
+      prisma.attendance.count({ where: { studentId } }),
     ]);
     res.status(200).json({
       success: true,
@@ -130,4 +134,65 @@ async function getStudentStats(req: Request, res: Response) {
   }
 }
 
-export default { enrollCourses, getStudentCourses, getStudentStats };
+async function getStudentClasses(req: Request, res: Response) {
+  const { studentId } = req.params;
+
+  try {
+    const enrollments = await prisma.enrollments.findMany({
+      where: { studentId },
+      select: { courseId: true },
+    });
+
+    const courseIds = enrollments.map((e) => e.courseId);
+    if (courseIds.length === 0) {
+      res.status(200).json({
+        success: true,
+        message: 'Fetched classes successfully',
+        data: [],
+      });
+      return;
+    }
+
+    const classes = await prisma.class.findMany({
+      where: { courseId: { in: courseIds } },
+      orderBy: { startTime: 'asc' },
+      include: {
+        attendance: {
+          where: { studentId },
+          select: { studentId: true },
+        },
+        course: true,
+        venue: { select: { name: true } },
+        teacher: {
+          include: {
+            user: { select: { email: true, name: true, role: true } },
+          },
+        },
+      },
+    });
+
+    const formattedClasses = classes.map((cls) => ({
+      ...cls,
+      attended: cls.attendance.length > 0,
+    }));
+
+    res.status(200).json({
+      success: true,
+      message: 'Fetched classes successfully',
+      data: formattedClasses,
+    });
+  } catch (error) {
+    logger.error(error);
+    res.status(500).json({
+      success: false,
+      message: 'Error fetching classes',
+    });
+  }
+}
+
+export default {
+  enrollCourses,
+  getStudentCourses,
+  getStudentStats,
+  getStudentClasses,
+};

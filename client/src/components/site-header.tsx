@@ -20,12 +20,12 @@ export function SiteHeader() {
         >
           <SidebarIcon />
         </Button>
-        <Separator orientation="vertical" className="mr-2 h-4" />
+        <Separator orientation="vertical" className="mr-2 h-4 md:hidden" />
         <Link to="/" className="md:hidden">
           <span className="font-['Space_Mono'] font-black">Check-in</span>
           {/* <CheckSquare className="text-secondary-foreground" size={25} /> */}
         </Link>
-        <Separator orientation="vertical" />
+        {/* <Separator orientation="vertical" /> */}
         <ModeToggle className="ml-auto" />
       </div>
     </header>

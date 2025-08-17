@@ -19,5 +19,10 @@ router.get(
   authenticateToken,
   studentController.getStudentStats
 );
+router.get(
+  '/:studentId/classes',
+  authenticateToken,
+  studentController.getStudentClasses
+);
 
 export default router;

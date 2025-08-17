@@ -162,6 +162,94 @@ async function updateClassDetails(req: Request, res: Response) {
   }
 }
 
+async function getClassAttendance(req: Request, res: Response) {
+  const { classId } = req.params;
+
+  try {
+    const lectureSession = await prisma.class.findUnique({
+      where: { id: classId },
+      select: { id: true, courseId: true },
+    });
+
+    if (!lectureSession) {
+      res
+        .status(404)
+        .json({ success: false, message: 'Lecture session not found' });
+      return;
+    }
+
+    if (!lectureSession.courseId) {
+      res.status(400).json({
+        success: false,
+        message: 'Class is not associated with a course',
+      });
+      return;
+    }
+
+    const [courseWithEnrollments, attendanceRecords] = await Promise.all([
+      prisma.course.findUnique({
+        where: { id: lectureSession.courseId },
+        select: {
+          enrollments: {
+            include: {
+              student: {
+                include: {
+                  user: {
+                    select: { id: true, name: true, email: true, role: true },
+                  },
+                },
+              },
+            },
+          },
+        },
+      }),
+      prisma.attendance.findMany({
+        where: { classId },
+        select: { studentId: true },
+      }),
+    ]);
+
+    const enrolledStudents = (courseWithEnrollments?.enrollments ?? []).map(
+      (e) => e.student
+    );
+
+    const attendedUserIds = new Set(attendanceRecords.map((a) => a.studentId));
+
+    const attendees = enrolledStudents
+      .filter((s) => attendedUserIds.has(s.userId))
+      .map((s) => ({
+        studentId: s.userId,
+        userId: s.userId,
+        name: s.user?.name,
+        email: s.user?.email,
+      }));
+
+    const absentees = enrolledStudents
+      .filter((s) => !attendedUserIds.has(s.userId))
+      .map((s) => ({
+        studentId: s.userId,
+        userId: s.userId,
+        name: s.user?.name,
+        email: s.user?.email,
+      }));
+
+    res.status(200).json({
+      success: true,
+      message: 'Fetched class attendance successfully',
+      data: {
+        attendees,
+        absentees,
+        counts: { attended: attendees.length, missed: absentees.length },
+      },
+    });
+  } catch (error) {
+    logger.error(error);
+    res
+      .status(500)
+      .json({ success: false, message: 'Error fetching attendance' });
+  }
+}
+
 async function getOngoingClasses(req: Request, res: Response) {
   const { id, role } = req.user;
 
@@ -425,4 +513,5 @@ export default {
   getOngoingClasses,
   updateClassDetails,
   markAttendance,
+  getClassAttendance,
 };

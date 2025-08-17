@@ -49,7 +49,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           { title: 'Dashboard', icon: Home, url: '/dashboard' },
           { title: 'Courses', icon: BookOpenText, url: '/courses' },
           { title: 'Classes', icon: Presentation, url: '/classes' },
-          { title: 'Students', icon: Users, url: '/attendance' },
+          { title: 'Students', icon: Users, url: '/students' },
           { title: 'Attendance', icon: BookTemplate, url: '/attendance' },
           { title: 'Report', icon: BarChart3, url: '/reports' },
         ];
@@ -65,7 +65,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         // className="top-(--header-height) h-[calc(100svh-var(--header-height))]!"
       >
         <SidebarHeader>
-          <SidebarMenu>
+          <SidebarMenu className="hidden md:block">
             <SidebarMenuItem>
               <SidebarMenuButton size="lg" asChild>
                 <Link to="/">

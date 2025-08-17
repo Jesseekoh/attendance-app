@@ -4,7 +4,7 @@ import DashboardStats from '../components/DashboardStats';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
-import OngoingClasses from '@/components/OngoingClasses.tsx'
+import OngoingClasses from '@/components/OngoingClasses.tsx';
 const StudentDashboard = () => {
   const { user } = useAuth();
   return (
@@ -22,7 +22,7 @@ const StudentDashboard = () => {
           <CardTitle>Ongoing classes</CardTitle>
         </CardHeader>
         <CardContent>
-          <OngoingClasses/>
+          <OngoingClasses />
         </CardContent>
       </Card>
       <Card>

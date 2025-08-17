@@ -17,6 +17,8 @@ import { ROLES } from './config/roles';
 import { useAuth } from './contexts/AuthContext';
 import Courses from './pages/Courses';
 import TeacherClasses from './pages/TeacherClasses';
+import StudentsList from './components/StudentsList';
+import ClassAttendanceRecord from './pages/ClassAttendanceRecord';
 
 function App() {
   const { user } = useAuth();
@@ -65,6 +67,14 @@ function App() {
           ),
         },
         {
+          path: '/students',
+          element: (
+            <Protected allowedRoles={[ROLES.ADMIN, ROLES.TEACHER]}>
+              <StudentsList />
+            </Protected>
+          ),
+        },
+        {
           path: '/attendance',
           element: (
             <Protected
@@ -91,6 +101,14 @@ function App() {
               allowedRoles={[ROLES.ADMIN, ROLES.STUDENT, ROLES.TEACHER]}
             >
               <ClassDetails />
+            </Protected>
+          ),
+        },
+        {
+          path: '/classes/:classId/attendance',
+          element: (
+            <Protected allowedRoles={[ROLES.ADMIN, ROLES.TEACHER]}>
+              <ClassAttendanceRecord />
             </Protected>
           ),
         },
