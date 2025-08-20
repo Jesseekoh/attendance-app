@@ -1,4 +1,5 @@
 import { useLoaderData, useParams } from 'react-router';
+import { useState } from 'react';
 import { api } from '../lib/axiosClient';
 import { BookOpen, Calendar, Clock, MapPin, User } from 'lucide-react';
 import toast from 'react-hot-toast';
@@ -16,30 +17,65 @@ const ClassDetails = () => {
   const classData = useLoaderData();
   const { classId } = useParams();
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const getCurrentPositionAsync = (options?: PositionOptions) =>
+    new Promise<GeolocationPosition>((resolve, reject) => {
+      if (!('geolocation' in navigator)) {
+        reject(new Error('Geolocation is not supported by this browser'));
+        return;
+      }
+      navigator.geolocation.getCurrentPosition(resolve, reject, options);
+    });
+
   const handleSubmitAttendance = async (
     event: React.MouseEvent<HTMLButtonElement>
   ) => {
     event.preventDefault();
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        await api
-          .post('/classes/' + classId, {
-            studentLocation: {
-              latitude: pos.coords.latitude,
-              longitude: pos.coords.longitude,
-            },
-          })
-          .then(() => toast.success('Marked attendance successfully'))
-          .catch((error: AxiosError) => {
-            // toast.error(error.response!.statusText);
-            toast.error('Something went wrong');
-            console.log(error);
-          });
-        console.log(pos);
-      },
-      (err) => console.log(err),
-      { maximumAge: 0, timeout: 5000, enableHighAccuracy: true }
-    );
+    setIsSubmitting(true);
+
+    try {
+      const pos = await getCurrentPositionAsync({
+        maximumAge: 0,
+        timeout: 10000,
+        enableHighAccuracy: true,
+      });
+
+      try {
+        await api.post('/classes/' + classId, {
+          studentLocation: {
+            latitude: pos.coords.latitude,
+            longitude: pos.coords.longitude,
+          },
+        });
+        toast.success('Marked attendance successfully');
+      } catch (error) {
+        const axiosErr = error as AxiosError;
+        toast.error(axiosErr.response?.statusText || 'Something went wrong');
+        console.log(error);
+      }
+    } catch (err: unknown) {
+      let message = 'Unable to get location';
+      const geoErr = err as GeolocationPositionError & { message?: string };
+      if (typeof geoErr === 'object' && geoErr && 'code' in geoErr) {
+        switch (geoErr.code) {
+          case geoErr.PERMISSION_DENIED:
+            message = 'Location permission denied';
+            break;
+          case geoErr.POSITION_UNAVAILABLE:
+            message = 'Location unavailable';
+            break;
+          case geoErr.TIMEOUT:
+            message = 'Location request timed out';
+            break;
+          default:
+            message = geoErr.message || message;
+        }
+      }
+      toast.error(message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const startTime = new Date(classData.data.startTime);
@@ -95,8 +131,9 @@ const ClassDetails = () => {
                 className="w-full"
                 type="button"
                 onClick={handleSubmitAttendance}
+                disabled={isSubmitting}
               >
-                Mark Attendance
+                {isSubmitting ? 'Marking…' : 'Mark Attendance'}
               </Button>
             </div>
           </CardAction>
