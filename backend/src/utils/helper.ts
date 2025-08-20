@@ -1,36 +1,21 @@
-import jwt from 'jsonwebtoken';
-import { ITokenPayload } from '../types';
-export function generateAccessToken({ id, role }: ITokenPayload) {
-  const secret = process.env.ACCESS_TOKEN_SECRET;
+export const toRadians = (deg: number) => (deg * Math.PI) / 180;
 
-  if (!secret) {
-    throw new Error('Access JWT secret is not defined');
-  }
-  return jwt.sign({ id, role }, secret, { expiresIn: '15m' });
-}
-
-export function generateRefreshToken({ id, role }: ITokenPayload) {
-  const secret = process.env.REFRESH_TOKEN_SECRET;
-  if (!secret) {
-    throw new Error('Refresh JWT secret is not defined');
-  }
-  return jwt.sign({ role, id }, secret, { expiresIn: '7d' });
-}
-
-export function verifyAccessToken(token: string) {
-  const ACCESS_TOKEN_SECRET = process.env.ACCESS_TOKEN_SECRET!;
-  try {
-    return jwt.verify(token, ACCESS_TOKEN_SECRET);
-  } catch (error) {
-    return null;
-  }
-}
-
-export function verifyRefreshToken(token: string) {
-  const REFRESH_TOKEN_SECRET = process.env.REFRESH_TOKEN_SECRET!;
-  try {
-    return jwt.verify(token, REFRESH_TOKEN_SECRET);
-  } catch (error) {
-    return null;
-  }
-}
+// calculates the distance between two positions
+export const haversineDistanceMeters = (
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number
+) => {
+  const R = 6371000; // meters
+  const dLat = toRadians(lat2 - lat1);
+  const dLon = toRadians(lon2 - lon1);
+  const a =
+    Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+    Math.cos(toRadians(lat1)) *
+      Math.cos(toRadians(lat2)) *
+      Math.sin(dLon / 2) *
+      Math.sin(dLon / 2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
+};

@@ -102,7 +102,7 @@ router.get('/:classId', authenticateToken, classController.getClass);
 router.get(
   '/:classId/attendance',
   authenticateToken,
-  classController.
+  classController.getClassAttendance
 );
 
 /**

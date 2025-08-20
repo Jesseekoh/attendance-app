@@ -3,6 +3,7 @@ import logger from '../utils/logger';
 import { ClassSchema } from '../schemas';
 import { z } from 'zod';
 import { prisma } from '../config/db';
+import { haversineDistanceMeters, toRadians } from '../utils/helper';
 
 async function createClass(req: Request, res: Response) {
   // validate request body
@@ -445,43 +446,80 @@ async function markAttendance(req: Request, res: Response) {
     if (user?.role === 'student') {
       const currentTime = new Date();
 
-      // checks if the attendance is too early or too late
+      // Early submission check
+      if (currentTime < classData.startTime!) {
+        res.status(400).json({
+          success: false,
+          message: 'Class has not started. Attendance is not yet allowed.',
+        });
+        return;
+      }
+
+      // Late submission check
+      if (currentTime > classData.endTime!) {
+        res.status(400).json({
+          success: false,
+          message: 'Class has ended. Attendance can no longer be marked.',
+        });
+        return;
+      }
+
+      // Validate and compute distance to venue (100 meters threshold)
+      if (!studentLocation || typeof studentLocation !== 'object') {
+        res.status(400).json({
+          success: false,
+          message: 'studentLocation with latitude and longitude is required',
+        });
+        return;
+      }
+
+      const studentLat = Number(studentLocation.latitude);
+      const studentLng = Number(studentLocation.longitude);
+      const venueLat = Number((classData.venue as any)?.latitude);
+      const venueLng = Number((classData.venue as any)?.longitude);
+
+      const isValidNumber = (n: number) =>
+        Number.isFinite(n) && !Number.isNaN(n);
       if (
-        currentTime < classData.startTime! ||
-        currentTime > classData?.endTime
+        !isValidNumber(studentLat) ||
+        !isValidNumber(studentLng) ||
+        !isValidNumber(venueLat) ||
+        !isValidNumber(venueLng)
       ) {
         res.status(400).json({
           success: false,
-          message: 'Attendance is not allowed at this time',
+          message: 'Invalid latitude/longitude values provided',
         });
         return;
       }
 
-      // TODO: Check if user's location matxhes the venue of the class
+      // Check if student's position is within 100 meters of the lecture venue
 
-      if (
-        studentLocation.latitude === classData?.venue.latitude &&
-        studentLocation.longitude === classData?.venue.longitude
-      ) {
-        await prisma.attendance.create({
-          data: {
-            studentId: id,
-            classId: classData?.id,
-          },
-        });
-        res.status(200).json({
-          success: true,
-          message: 'Attendance marked successfully',
-          data: {
-            studentLocation,
-            location: typeof classData?.venue.latitude,
-          },
+      const distanceMeters = haversineDistanceMeters(
+        studentLat,
+        studentLng,
+        venueLat,
+        venueLng
+      );
+
+      if (distanceMeters > 100) {
+        res.status(403).json({
+          success: false,
+          message:
+            'You are not at the class venue (must be within 100 meters).',
         });
         return;
       }
-      res.status(403).json({
-        success: false,
-        message: 'You are not at the class venue',
+
+      await prisma.attendance.create({
+        data: {
+          studentId: id,
+          classId: classData?.id,
+        },
+      });
+      res.status(200).json({
+        success: true,
+        message: 'Attendance marked successfully',
       });
       return;
     }
