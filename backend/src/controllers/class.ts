@@ -299,11 +299,23 @@ async function getRecentClasses(req: Request, res: Response) {
       const user = await prisma.student.findUnique({ where: { userId: id } });
       const departmentId = user?.departmentId;
 
+      const enrolledCourses = await prisma.enrollments.findMany({
+        where: {
+          studentId: id,
+        },
+        select: {
+          courseId: true,
+        },
+      });
+
+      const enrolledCourseIds = enrolledCourses.map((obj) => obj.courseId);
+
       const totalClasses = await prisma.class.count();
       const classes = await prisma.class.findMany({
         take: pageSize,
         skip: (page - 1) * pageSize,
         where: {
+          courseId: { in: enrolledCourseIds },
           departmentId,
           endTime: {
             lt: new Date(),
