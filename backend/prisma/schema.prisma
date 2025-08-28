@@ -10,16 +10,16 @@ datasource db {
 
 model Class {
   id           String       @id @default(uuid()) @db.Uuid
-  teacherId    String?
-  courseId     String?      @db.Uuid
+  teacherId    String
+  courseId     String      @db.Uuid
   venueId      String       @db.Uuid
   departmentId String       @db.Uuid
-  startTime    DateTime?    @db.Timestamptz(6)
+  startTime    DateTime    @db.Timestamptz(6)
   endTime      DateTime     @db.Timestamptz(6)
   createdAt    DateTime     @default(now()) @db.Timestamptz(6)
   updatedAt    DateTime     @updatedAt @db.Timestamptz(6)
-  course       Course?      @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  teacher      Teacher?     @relation(fields: [teacherId], references: [userId], onDelete: Cascade)
+  course       Course      @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  teacher      Teacher     @relation(fields: [teacherId], references: [userId], onDelete: Cascade)
   venue        Venue        @relation(fields: [venueId], references: [id], onDelete: Cascade)
   department   Department   @relation(fields: [departmentId], references: [id])
   attendance   Attendance[]
@@ -101,7 +101,7 @@ model Venue {
   id        String   @id @default(uuid()) @db.Uuid
   name      String   @unique @db.VarChar(255)
   latitude  Decimal  @db.Decimal(10, 8)
-  longitude Decimal? @db.Decimal(10, 8)
+  longitude Decimal @db.Decimal(10, 8)
   classes   Class[]
 
   @@unique([latitude, longitude], map: "venues_latitude_longitude")
