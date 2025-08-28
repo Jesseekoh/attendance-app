@@ -13,9 +13,13 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { useAuth } from '@/contexts/AuthContext';
+import { ROLES } from '@/config/roles';
+
 const ClassDetails = () => {
   const classData = useLoaderData();
   const { classId } = useParams();
+  const { user } = useAuth();
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -124,20 +128,22 @@ const ClassDetails = () => {
             </div>
           </div>
         </CardContent>
-        <CardFooter>
-          <CardAction>
-            <div className="card-action">
-              <Button
-                className="w-full"
-                type="button"
-                onClick={handleSubmitAttendance}
-                disabled={isSubmitting}
-              >
-                {isSubmitting ? 'Marking…' : 'Mark Attendance'}
-              </Button>
-            </div>
-          </CardAction>
-        </CardFooter>
+        {user?.role === ROLES.STUDENT && (
+          <CardFooter>
+            <CardAction>
+              <div className="card-action">
+                <Button
+                  className="w-full"
+                  type="button"
+                  onClick={handleSubmitAttendance}
+                  disabled={isSubmitting}
+                >
+                  {isSubmitting ? 'Marking…' : 'Mark Attendance'}
+                </Button>
+              </div>
+            </CardAction>
+          </CardFooter>
+        )}
       </Card>
     </div>
   );
