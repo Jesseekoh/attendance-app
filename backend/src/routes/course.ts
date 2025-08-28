@@ -39,6 +39,10 @@ router.get(
 );
 
 // get all the attendance for the specified course
-router.get('/:courseId/attendance', authenticateToken);
+router.get(
+  '/:courseId/attendance',
+  authenticateToken,
+  courseController.getCourseAttendanceRecord
+);
 
 export default router;
