@@ -221,6 +221,10 @@ async function getClassAttendance(req: Request, res: Response) {
       matricNumber: s.student.matricNumber,
     }));
 
+    const totalStudents = formattedEnrolledStudents.length;
+    const presentCount = presentStudentIds.size;
+    const absentCount = totalStudents - presentCount;
+
     // const attendees = enrolledStudents
     //   .filter((s) => !attendedStudentIds.has(s.student.userId))
     //   .map((s) => ({
@@ -235,6 +239,9 @@ async function getClassAttendance(req: Request, res: Response) {
       data: {
         presentStudentIds: [...presentStudentIds],
         students: formattedEnrolledStudents,
+        totalStudents,
+        presentCount,
+        absentCount,
       },
     });
   } catch (error) {
