@@ -102,5 +102,8 @@
     },
     "ts-node": {
         "files": true
-    }
+    },
+    "include": [
+        "prisma"
+    ]
 }
