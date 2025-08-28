@@ -1,23 +1,29 @@
 import { useParams } from 'react-router';
 import { useQuery } from '@tanstack/react-query';
 import { api } from '@/lib/axiosClient';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { DataTable } from '@/components/data-table';
+import { Columns } from '@/components/classAttendance/columns';
 
 type AttendanceStudent = {
   id: string;
   name: string;
+  matricNumber: string;
   email?: string;
   attended: boolean;
+  // attended: boolean;
 };
 
 type ClassAttendanceResponse = {
-  class: {
-    id: string;
-    course: { id: string; code: string; title: string };
-    startTime: string;
-    endTime: string;
-  };
+  presentStudentIds: string[];
+
+  // class: {
+  //   id: string;
+  //   course: { id: string; code: string; title: string };
+  //   startTime: string;
+  //   endTime: string;
+  // };
   students: AttendanceStudent[];
 };
 
@@ -54,80 +60,11 @@ const ClassAttendanceRecord = () => {
     );
   }
 
-  const present = data.students.filter((s) => s.attended);
-  const absent = data.students.filter((s) => !s.attended);
+  const { students } = data;
 
   return (
     <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            {data.class.course.code} — {data.class.course.title}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <p className="text-sm text-muted-foreground">
-            {new Date(data.class.startTime).toLocaleString()} -{' '}
-            {new Date(data.class.endTime).toLocaleTimeString()}
-          </p>
-        </CardContent>
-      </Card>
-
-      <div className="grid md:grid-cols-2 gap-6">
-        <Card>
-          <CardHeader>
-            <CardTitle>Present ({present.length})</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-2">
-              {present.map((s) => (
-                <li
-                  key={s.id}
-                  className="flex justify-between border p-3 rounded-md"
-                >
-                  <span>{s.name}</span>
-                  {s.email && (
-                    <span className="text-xs text-muted-foreground">
-                      {s.email}
-                    </span>
-                  )}
-                </li>
-              ))}
-              {present.length === 0 && (
-                <p className="text-sm text-muted-foreground">
-                  No one attended.
-                </p>
-              )}
-            </ul>
-          </CardContent>
-        </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle>Absent ({absent.length})</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <ul className="space-y-2">
-              {absent.map((s) => (
-                <li
-                  key={s.id}
-                  className="flex justify-between border p-3 rounded-md"
-                >
-                  <span>{s.name}</span>
-                  {s.email && (
-                    <span className="text-xs text-muted-foreground">
-                      {s.email}
-                    </span>
-                  )}
-                </li>
-              ))}
-              {absent.length === 0 && (
-                <p className="text-sm text-muted-foreground">No absences.</p>
-              )}
-            </ul>
-          </CardContent>
-        </Card>
-      </div>
+      <DataTable columns={Columns} data={students} />
     </div>
   );
 };
