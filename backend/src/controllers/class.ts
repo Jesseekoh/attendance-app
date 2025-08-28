@@ -168,36 +168,36 @@ async function getClassAttendance(req: Request, res: Response) {
 
   try {
     const lectureSession = await prisma.class.findUnique({
-      where: { id: classId },
-      select: { id: true, courseId: true },
+      where: {
+        id: classId,
+      },
     });
 
     if (!lectureSession) {
-      res
-        .status(404)
-        .json({ success: false, message: 'Lecture session not found' });
-      return;
-    }
-
-    if (!lectureSession.courseId) {
-      res.status(400).json({
+      res.status(404).json({
         success: false,
-        message: 'Class is not associated with a course',
+        message: 'Lecture Session not found',
       });
-      return;
     }
+    const { courseId, departmentId } = lectureSession!;
 
-    const [courseWithEnrollments, attendanceRecords] = await Promise.all([
-      prisma.course.findUnique({
-        where: { id: lectureSession.courseId },
+    // get all students enrolled in the course
+    const [enrolledStudents, attendanceRecords] = await Promise.all([
+      prisma.enrollments.findMany({
+        where: {
+          courseId,
+          student: {
+            departmentId,
+          },
+        },
         select: {
-          enrollments: {
-            include: {
-              student: {
-                include: {
-                  user: {
-                    select: { id: true, name: true, email: true, role: true },
-                  },
+          student: {
+            select: {
+              userId: true,
+              matricNumber: true,
+              user: {
+                select: {
+                  name: true,
                 },
               },
             },
@@ -210,37 +210,31 @@ async function getClassAttendance(req: Request, res: Response) {
       }),
     ]);
 
-    const enrolledStudents = (courseWithEnrollments?.enrollments ?? []).map(
-      (e) => e.student
+    const presentStudentIds = new Set(
+      attendanceRecords.map((record) => record.studentId)
     );
 
-    const attendedUserIds = new Set(attendanceRecords.map((a) => a.studentId));
+    const formattedEnrolledStudents = enrolledStudents.map((s) => ({
+      name: s.student.user.name,
+      id: s.student.userId,
+      attended: presentStudentIds.has(s.student.userId),
+      matricNumber: s.student.matricNumber,
+    }));
 
-    const attendees = enrolledStudents
-      .filter((s) => attendedUserIds.has(s.userId))
-      .map((s) => ({
-        studentId: s.userId,
-        userId: s.userId,
-        name: s.user?.name,
-        email: s.user?.email,
-      }));
+    // const attendees = enrolledStudents
+    //   .filter((s) => !attendedStudentIds.has(s.student.userId))
+    //   .map((s) => ({
+    //     studentId: s.student.userId,
+    //     name: s.student.user.name,
 
-    const absentees = enrolledStudents
-      .filter((s) => !attendedUserIds.has(s.userId))
-      .map((s) => ({
-        studentId: s.userId,
-        userId: s.userId,
-        name: s.user?.name,
-        email: s.user?.email,
-      }));
+    //   }));
 
     res.status(200).json({
       success: true,
       message: 'Fetched class attendance successfully',
       data: {
-        attendees,
-        absentees,
-        counts: { attended: attendees.length, missed: absentees.length },
+        presentStudentIds: [...presentStudentIds],
+        students: formattedEnrolledStudents,
       },
     });
   } catch (error) {
@@ -287,6 +281,9 @@ async function getOngoingClasses(req: Request, res: Response) {
   }
 }
 
+/**
+ * Get recent Lecture sessions for courses a student is enrolled in
+ */
 async function getRecentClasses(req: Request, res: Response) {
   const { id, role } = req.user;
 
