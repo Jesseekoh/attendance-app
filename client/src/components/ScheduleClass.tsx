@@ -1,6 +1,6 @@
 import { Plus, CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
-import { cn } from '@/lib/utils';
+import { cn, combineDateAndTime } from '@/lib/utils';
 import {
   Select,
   SelectContent,
@@ -311,11 +311,8 @@ const ScheduleClass = () => {
                         },
                         validate: (value) => {
                           const { endTime } = form.getValues();
-                          // const today = new Date().
                           const end = new Date(`1970-01-01T${endTime}`);
                           const start = new Date(`1970-01-01T${value}`);
-
-                          console.log('blah', end > start);
                           if (start >= end) {
                             return 'Start time must be before end time';
                           }
@@ -332,9 +329,9 @@ const ScheduleClass = () => {
                             className="bg-background appearance-none [&::-webkit-calendar-picker-indicator]:hidden [&::-webkit-calendar-picker-indicator]:appearance-none"
                             {...field}
                           />
-                          <FormDescription>
+                          {/* <FormDescription>
                             When the class starts
-                          </FormDescription>
+                          </FormDescription> */}
                           <FormMessage />
                         </FormItem>
                       )}
@@ -348,13 +345,15 @@ const ScheduleClass = () => {
                           value: true,
                         },
                         validate: (value) => {
-                          const { startTime } = form.getValues();
+                          const { startTime, day } = form.getValues();
                           // Convert both endTime and startTime to Date objects to compare
                           // Used 1970 because it still works even if I put the current date
-                          const start = new Date(`1970-01-01T${startTime}`);
-                          const end = new Date(`1970-01-01T${value}`);
-                          if (end <= start) {
-                            return 'End time must be after start time';
+                          const start = combineDateAndTime(day, startTime)
+                          const now = new Date();
+
+                          const end = combineDateAndTime(day, value);
+                          if (end <= start || end <= now) {
+                            return 'End time must be after start time and some time in the future';
                           }
                           return true;
                         },
@@ -371,7 +370,7 @@ const ScheduleClass = () => {
                               {...field}
                             />
                           </div>
-                          <FormDescription>When the class ends</FormDescription>
+                          {/* <FormDescription>When the class ends</FormDescription> */}
                           <FormMessage />
                         </FormItem>
                       )}
