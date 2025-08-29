@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import { ROLES } from '@/config/roles';
+import { ErrorResponse } from '@/types';
 
 const ClassDetails = () => {
   const classData = useLoaderData();
@@ -55,7 +56,8 @@ const ClassDetails = () => {
         toast.success('Marked attendance successfully');
       } catch (error) {
         const axiosErr = error as AxiosError;
-        toast.error(axiosErr.response?.statusText || 'Something went wrong');
+        const data = axiosErr.response?.data as ErrorResponse;
+        toast.error(data?.message || 'Something went wrong');
         console.log(error);
       }
     } catch (err: unknown) {
