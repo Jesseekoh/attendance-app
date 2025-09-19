@@ -1,9 +1,10 @@
-import { Request, Response } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import logger from '../utils/logger';
 import { ClassSchema } from '../schemas';
 import { z } from 'zod';
 import { prisma } from '../config/db';
 import { haversineDistanceMeters, toRadians } from '../utils/helper';
+import { Roles } from '../constants/role';
 
 async function createClass(req: Request, res: Response) {
   // validate request body
@@ -288,160 +289,6 @@ async function getOngoingClasses(req: Request, res: Response) {
   }
 }
 
-/**
- * Get recent Lecture sessions for courses a student is enrolled in
- */
-async function getRecentClasses(req: Request, res: Response) {
-  const { id, role } = req.user;
-
-  try {
-    const pageStr = req.query.page as string;
-    const page = isNaN(parseInt(pageStr)) ? 1 : parseInt(pageStr);
-
-    const pageSize = 10;
-    if (role === 'student') {
-      const user = await prisma.student.findUnique({ where: { userId: id } });
-      const departmentId = user?.departmentId;
-
-      const enrolledCourses = await prisma.enrollments.findMany({
-        where: {
-          studentId: id,
-        },
-        select: {
-          courseId: true,
-        },
-      });
-
-      const enrolledCourseIds = enrolledCourses.map((obj) => obj.courseId);
-
-      const totalClasses = await prisma.class.count();
-      const classes = await prisma.class.findMany({
-        take: pageSize,
-        skip: (page - 1) * pageSize,
-        where: {
-          courseId: { in: enrolledCourseIds },
-          departmentId,
-          endTime: {
-            lt: new Date(),
-          },
-        },
-        include: {
-          attendance: {
-            where: {
-              studentId: id,
-            },
-            select: {
-              studentId: true,
-            },
-          },
-          course: true,
-          venue: { select: { name: true } },
-          teacher: {
-            include: {
-              user: { select: { email: true, name: true, role: true } },
-            },
-          },
-        },
-      });
-      let formattedClasses = classes.map((cls) => ({
-        ...cls,
-        attended: cls.attendance.length > 0,
-      }));
-
-      res.status(200).json({
-        success: true,
-        page,
-        message: 'Fetched classes successfully',
-        data: { recentClasses: formattedClasses, totalClasses },
-      });
-      return;
-    } else if (role === 'teacher') {
-      const totalClasses = await prisma.class.count({
-        where: { teacherId: id },
-      });
-      const recentClasses = await prisma.class.findMany({
-        take: pageSize,
-        skip: (page - 1) * pageSize,
-        where: {
-          teacherId: id,
-          endTime: {
-            lt: new Date(),
-          },
-        },
-        include: {
-          venue: true,
-          teacher: {
-            include: {
-              user: true,
-            },
-          },
-          course: true,
-        },
-      });
-
-      res.status(200).json({
-        success: true,
-        page,
-        message: 'Fetched classes successfully',
-        data: { recentClasses, totalClasses },
-      });
-      return;
-    }
-  } catch (error) {
-    logger.error(error);
-    res.status(500).json({ success: false, message: 'Sever Error' });
-    return;
-  }
-}
-
-async function getUpcomingClasses(req: Request, res: Response) {
-  const { id, role } = req.user;
-  try {
-    const upcomingClasses = await prisma.class.findMany({
-      where: {
-        startTime: { gt: new Date() },
-      },
-      include: {
-        venue: true,
-        teacher: {
-          include: {
-            user: true,
-          },
-        },
-        course: true,
-      },
-    });
-    // const upcomingClasses = await Class.findAll({
-    //   where: {
-    //     startTime: {
-    //       [Op.gt]: new Date(),
-    //     },
-    //   },
-    //   order: [['startTime', 'ASC']],
-    //   include: [
-    //     { model: Venue },
-    //     {
-    //       model: Teacher,
-    //       include: [
-    //         { model: User, attributes: ['firstName', 'lastName', 'email'] },
-    //       ],
-    //     },
-    //     { model: Course, attributes: ['title', 'desc', 'code'], as: 'course' },
-    //   ],
-    // });
-
-    res.status(200).json({
-      success: true,
-      message: 'Fetched classes successfully',
-      data: upcomingClasses,
-    });
-    return;
-  } catch (error) {
-    logger.error(error);
-    res.status(500).json({ success: false, message: 'Sever Error' });
-  }
-}
-
 async function markAttendance(req: Request, res: Response) {
   const { id } = req.user;
   const { studentLocation } = req.body;
@@ -562,8 +409,6 @@ async function markAttendance(req: Request, res: Response) {
 export default {
   createClass,
   getClass,
-  getUpcomingClasses,
-  getRecentClasses,
   getOngoingClasses,
   updateClassDetails,
   markAttendance,

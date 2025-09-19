@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import logger from '../utils/logger';
 import { prisma } from '../config/db';
 import { Roles } from '../constants/role';
@@ -101,11 +101,121 @@ export async function getTeacherCourses(req: Request, res: Response) {
   }
 }
 
-export async function getTeacherClasses(req: Request, res: Response) {
-  const { teacherId } = req.params;
+export async function getTeacherRecentClasses(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const { id, role } = req.user;
   try {
+    const teacher = await prisma.teacher.findUnique({ where: { userId: id } });
+    if (!teacher) {
+      res.status(404).json({
+        success: false,
+        message: 'Teacher not found',
+      });
+      return;
+    }
+    const recentClasses = await prisma.class.findMany({
+      where: {
+        teacherId: id,
+        startTime: { lt: new Date() },
+      },
+      select: {
+        id: true,
+        startTime: true,
+        endTime: true,
+        course: {
+          select: {
+            code: true,
+            title: true,
+            desc: true,
+          },
+        },
+        venue: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
+    res.status(200).json({
+      success: true,
+      message: 'Fetched recent classes successfully',
+      data: recentClasses,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getTeacherUpcomingClasses(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const { id, role } = req.user;
+  try {
+    const teacher = await prisma.teacher.findUnique({ where: { userId: id } });
+    if (!teacher) {
+      res.status(404).json({
+        success: false,
+        message: 'Teacher not found',
+      });
+      return;
+    }
+    const upcomingClasses = await prisma.class.findMany({
+      where: {
+        teacherId: id,
+        startTime: { gt: new Date() },
+      },
+      select: {
+        id: true,
+        startTime: true,
+        endTime: true,
+        course: {
+          select: {
+            code: true,
+            title: true,
+            desc: true,
+          },
+        },
+        venue: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
+    res.status(200).json({
+      success: true,
+      message: 'Fetched upcoming classes classes successfully',
+      data: upcomingClasses,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function getTeacherClasses(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  const { teacherId } = req.params;
+  const { id, role } = req.user;
+  try {
+    const teacher = await prisma.teacher.findUnique({ where: { userId: id } });
+    if (!teacher) {
+      res.status(404).json({
+        success: false,
+        message: 'Teacher not found',
+      });
+      return;
+    }
     const teacherClasses = await prisma.class.findMany({
       where: { teacherId },
+      orderBy: { startTime: 'desc' },
       include: {
         course: true,
         venue: { select: { name: true } },
@@ -121,10 +231,6 @@ export async function getTeacherClasses(req: Request, res: Response) {
       .json({ message: 'successful', success: true, data: teacherClasses });
   } catch (error) {
     logger.error('An error occurred', error);
-    res.status(500).json({
-      success: false,
-      message: 'An error occurred',
-      error,
-    });
+    next(error);
   }
 }

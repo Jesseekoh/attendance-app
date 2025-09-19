@@ -35,33 +35,6 @@ router.post(
 
 /**
  * @swagger
- *  /api/v1/classes/upcoming:
- *    get:
- *      summary: Gets all upcoming classes
- *      responses:
- *        "200":
- *          description: OK
- *        500:
- *          description: Server error
-
- */
-router.get('/upcoming', authenticateToken, classController.getUpcomingClasses);
-/**
- * @swagger
- *  /api/v1/classes/upcoming:
- *    get:
- *      summary: Gets all upcoming classes
- *      responses:
- *        "200":
- *          description: OK
- *        500:
- *          description: Server error
-
- */
-router.get('/recent', authenticateToken, classController.getRecentClasses);
-
-/**
- * @swagger
  *  /api/v1/classes/ongoing:
  *    get:
  *      summary: Gets all ongoing classes
