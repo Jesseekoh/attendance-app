@@ -7,8 +7,10 @@ import { Link } from 'react-router';
 import { Button } from '@/components/ui/button.tsx';
 import { cn } from '@/lib/utils.ts';
 import { ClassInfoType } from '@/components/RecentClasses.tsx';
+import { useAuth } from '@/contexts/AuthContext';
 
 export default function OngoingClasses() {
+  const { user } = useAuth();
   const {
     data: ongoingClasses,
     isError,
@@ -16,7 +18,7 @@ export default function OngoingClasses() {
   } = useQuery({
     queryKey: ['onGoing-classes'],
     queryFn: async () => {
-      const resp = await api.get('/classes/ongoing');
+      const resp = await api.get(`/${user?.role}s/${user?.id}/classes/ongoing`);
       return resp.data.data;
     },
   });
