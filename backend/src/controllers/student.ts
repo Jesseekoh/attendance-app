@@ -113,11 +113,23 @@ async function getStudentCourses(req: Request, res: Response) {
 }
 
 async function getStudentStats(req: Request, res: Response) {
-  // const { id, role } = req.user;
+  const { id, role } = req.user;
   const { studentId } = req.params;
   try {
+    if (role === Roles.STUDENT && id !== studentId) {
+      res.status(403).json({
+        message: "You cannot access a fellow student's data",
+        success: false,
+      });
+
+      return;
+    }
     const [totalClasses, attendedClasses] = await Promise.all([
-      prisma.class.count(),
+      prisma.class.count({
+        where: {
+          startTime: { lt: new Date() },
+        },
+      }),
       prisma.attendance.count({ where: { studentId } }),
     ]);
     res.status(200).json({
@@ -326,7 +338,7 @@ async function getStudentUpcomingClasses(
 ) {
   const { id, role } = req.user;
   try {
-    const user = await prisma.user.findUnique({ where: { id } });
+    const user = await prisma.student.findUnique({ where: { userId: id } });
     if (!user) {
       res.status(404).json({
         success: false,
@@ -350,6 +362,7 @@ async function getStudentUpcomingClasses(
       where: {
         startTime: { gt: new Date() },
         courseId: { in: enrolledCourseIds },
+        departmentId: user.departmentId,
       },
       include: {
         venue: true,
