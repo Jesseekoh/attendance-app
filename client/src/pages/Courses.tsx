@@ -7,7 +7,7 @@ const Courses = () => {
   const [isEditing, setIsEditing] = useState(false);
   return (
     <div>
-      <div className="flex gap-4">
+      <div className="mb-4">
         {!isEditing && (
           <Button className="ml-auto" onClick={() => setIsEditing(true)}>
             Edit Courses
