@@ -1,25 +1,41 @@
 import './App.css';
 import { createBrowserRouter, Navigate, RouterProvider } from 'react-router';
+import { lazy, Suspense } from 'react';
 import RootLayout from './layout/RootLayout';
-import Home from './pages/Home';
-import SignIn from './pages/SignIn';
-import SignUp from './pages/SignUp';
-import Protected from './components/Protected';
-import Profile from './pages/Profile';
 import AppLayout from './layout/AppLayout';
-import Dashboard from './pages/Dashboard';
-import ClassDetails from './pages/ClassDetails';
-import Logout from './pages/Logout';
-import Error from './pages/Error';
+import Protected from './components/Protected';
 import { classDetailsLoader } from './loaders';
-import Attendance from './pages/Attendance';
 import { ROLES } from './config/roles';
 import { useAuth } from './contexts/AuthContext';
-import Courses from './pages/Courses';
-import TeacherClasses from './pages/TeacherClasses';
-import StudentsList from './components/StudentsList';
-import ClassAttendanceRecord from './pages/ClassAttendanceRecord';
+import Spinner from './components/Spinner';
 
+const Home = lazy(() => import('./pages/Home'));
+const SignIn = lazy(() => import('./pages/SignIn'));
+const SignUp = lazy(() => import('./pages/SignUp'));
+const Profile = lazy(() => import('./pages/Profile'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const ClassDetails = lazy(() => import('./pages/ClassDetails'));
+const Logout = lazy(() => import('./pages/Logout'));
+const Error = lazy(() => import('./pages/Error'));
+const Attendance = lazy(() => import('./pages/Attendance'));
+const Courses = lazy(() => import('./pages/Courses'));
+const TeacherClasses = lazy(() => import('./pages/TeacherClasses'));
+const StudentsList = lazy(() => import('./components/StudentsList'));
+const ClassAttendanceRecord = lazy(
+  () => import('./pages/ClassAttendanceRecord')
+);
+
+const PageLoader = () => {
+  return (
+    <div className="min-h-svh w-full grid place-items-center">
+      <Spinner />
+    </div>
+  );
+};
+
+const LazyRoute = ({ children }: { children: React.ReactNode }) => {
+  return <Suspense fallback={<PageLoader />}>{children}</Suspense>;
+};
 function App() {
   const { user } = useAuth();
 
@@ -27,7 +43,11 @@ function App() {
     {
       index: true,
       element: <Navigate to={user ? '/dashboard' : '/home'} replace />,
-      errorElement: <Error />,
+      errorElement: (
+        <LazyRoute>
+          <Error />
+        </LazyRoute>
+      ),
     },
     {
       path: '/home',
@@ -35,7 +55,11 @@ function App() {
       children: [
         {
           index: true,
-          element: <Home />,
+          element: (
+            <LazyRoute>
+              <Home />
+            </LazyRoute>
+          ),
         },
       ],
     },
@@ -48,7 +72,9 @@ function App() {
             <Protected
               allowedRoles={[ROLES.STUDENT, ROLES.ADMIN, ROLES.TEACHER]}
             >
-              <Dashboard />
+              <LazyRoute>
+                <Dashboard />
+              </LazyRoute>
             </Protected>
           ),
         },
@@ -62,7 +88,9 @@ function App() {
             <Protected
               allowedRoles={[ROLES.STUDENT, ROLES.TEACHER, ROLES.ADMIN]}
             >
-              <Courses />
+              <LazyRoute>
+                <Courses />
+              </LazyRoute>
             </Protected>
           ),
         },
@@ -70,7 +98,9 @@ function App() {
           path: '/students',
           element: (
             <Protected allowedRoles={[ROLES.ADMIN, ROLES.TEACHER]}>
-              <StudentsList />
+              <LazyRoute>
+                <StudentsList />
+              </LazyRoute>
             </Protected>
           ),
         },
@@ -80,7 +110,9 @@ function App() {
             <Protected
               allowedRoles={[ROLES.STUDENT, ROLES.ADMIN, ROLES.TEACHER]}
             >
-              <Attendance />
+              <LazyRoute>
+                <Attendance />
+              </LazyRoute>
             </Protected>
           ),
         },
@@ -88,7 +120,9 @@ function App() {
           path: '/classes',
           element: (
             <Protected allowedRoles={[ROLES.TEACHER]}>
-              <TeacherClasses />
+              <LazyRoute>
+                <TeacherClasses />
+              </LazyRoute>
             </Protected>
           ),
         },
@@ -100,7 +134,9 @@ function App() {
             <Protected
               allowedRoles={[ROLES.ADMIN, ROLES.STUDENT, ROLES.TEACHER]}
             >
-              <ClassDetails />
+              <LazyRoute>
+                <ClassDetails />
+              </LazyRoute>
             </Protected>
           ),
         },
@@ -108,7 +144,9 @@ function App() {
           path: '/classes/:classId/attendance',
           element: (
             <Protected allowedRoles={[ROLES.ADMIN, ROLES.TEACHER]}>
-              <ClassAttendanceRecord />
+              <LazyRoute>
+                <ClassAttendanceRecord />
+              </LazyRoute>
             </Protected>
           ),
         },
@@ -118,7 +156,9 @@ function App() {
             <Protected
               allowedRoles={[ROLES.ADMIN, ROLES.TEACHER, ROLES.STUDENT]}
             >
-              <Profile />
+              <LazyRoute>
+                <Profile />
+              </LazyRoute>
             </Protected>
           ),
         },
@@ -127,15 +167,31 @@ function App() {
           element: <h1>Not found</h1>,
         },
       ],
-      errorElement: <Error />,
+      errorElement: (
+        <LazyRoute>
+          <Error />
+        </LazyRoute>
+      ),
     },
     {
       path: '/signup',
-      element: user ? <Navigate to={'/dashboard'} replace /> : <SignUp />,
+      element: user ? (
+        <Navigate to={'/dashboard'} replace />
+      ) : (
+        <LazyRoute>
+          <SignUp />
+        </LazyRoute>
+      ),
     },
     {
       path: '/signin',
-      element: user ? <Navigate to={'/dashboard'} replace /> : <SignIn />,
+      element: user ? (
+        <Navigate to={'/dashboard'} replace />
+      ) : (
+        <LazyRoute>
+          <SignIn />
+        </LazyRoute>
+      ),
     },
     {
       path: '/logout',
