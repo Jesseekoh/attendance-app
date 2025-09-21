@@ -372,6 +372,58 @@ async function getStudentUpcomingClasses(
     res.status(500).json({ success: false, message: 'Sever Error' });
   }
 }
+async function getStudentOngoingClasses(req: Request, res: Response) {
+  const { id, role } = req.user;
+
+  try {
+    const student = await prisma.student.findUnique({ where: { userId: id } });
+
+    if (!student) {
+      res.status(404).json({
+        success: false,
+        message: 'User not found',
+      });
+      return;
+    }
+    const currentTime = new Date();
+
+    const enrolledCourses = await prisma.enrollments.findMany({
+      where: { studentId: id },
+      select: { courseId: true },
+    });
+    const enrolledCourseIds = enrolledCourses.map((c) => c.courseId);
+    const ongoingClasses = await prisma.class.findMany({
+      where: {
+        courseId: { in: enrolledCourseIds },
+        departmentId: student.departmentId,
+        startTime: {
+          lt: currentTime,
+        },
+        endTime: {
+          gt: currentTime,
+        },
+      },
+      orderBy: { startTime: 'asc' },
+      include: {
+        course: true,
+        venue: { select: { name: true } },
+        teacher: {
+          include: {
+            user: { select: { email: true, name: true, role: true } },
+          },
+        },
+      },
+    });
+    res.status(200).json({
+      success: true,
+      message: 'Fetched classes successfully',
+      data: ongoingClasses,
+    });
+  } catch (error) {
+    logger.error(error);
+    res.status(500).json({ success: false, message: 'Error fetching classes' });
+  }
+}
 
 export default {
   enrollCourses,
@@ -379,5 +431,6 @@ export default {
   getStudentRecentClasses,
   getStudentUpcomingClasses,
   getStudentStats,
+  getStudentOngoingClasses,
   getStudentClasses,
 };
