@@ -7,7 +7,6 @@ import { haversineDistanceMeters, toRadians } from '../utils/helper';
 import { Roles } from '../constants/role';
 
 async function createClass(req: Request, res: Response) {
-  // validate request body
   const isValidRequest = ClassSchema.safeParse(req.body);
   if (!isValidRequest.success) {
     res.status(400).json({
