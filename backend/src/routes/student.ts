@@ -30,6 +30,13 @@ router.get(
 );
 
 router.get(
+  '/:studentId/classes/ongoing',
+  authenticateToken,
+  roleBasedAccess([Roles.STUDENT, Roles.ADMIN]),
+  studentController.getStudentOngoingClasses
+);
+
+router.get(
   '/:studentId/classes/upcoming',
   authenticateToken,
   roleBasedAccess([Roles.STUDENT, Roles.ADMIN]),
