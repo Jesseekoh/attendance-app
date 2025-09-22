@@ -1,7 +1,6 @@
 import { api } from '../lib/axiosClient';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
-import { Skeleton } from '@/components/ui/skeleton';
 import {
   Table,
   TableBody,
@@ -13,14 +12,14 @@ import {
 } from '@/components/ui/table';
 import { Card, CardContent } from '@/components/ui/card';
 import { ROLES } from '@/config/roles';
+import CoursesTableSkeleton from './CoursesTableSkeleton';
 const UserCourses = () => {
   const { user } = useAuth();
 
   const { data, isLoading, isError } = useQuery({
-    queryKey: ['my-courses'],
+    queryKey: ['user-courses'],
     queryFn: async () => {
       const response = await api.get(`/${user?.role}s/${user?.id}/courses`);
-      console.log(response);
       return response.data;
     },
     refetchOnWindowFocus: false,
@@ -28,14 +27,7 @@ const UserCourses = () => {
   });
 
   if (isLoading) {
-    return (
-      <div className="flex flex-col gap-4">
-        <Skeleton className="h-32 w-full" />
-        <Skeleton className="h-4 w-28" />
-        <Skeleton className="h-4 w-full" />
-        <Skeleton className="h-4 w-full" />
-      </div>
-    );
+    return <CoursesTableSkeleton />;
   }
 
   if (isError) {
@@ -51,10 +43,14 @@ const UserCourses = () => {
   const courses = data.data;
   return (
     <>
-      {courses ? (
+      {courses.length > 0 ? (
         <div className="border pb-2">
           <Table>
-            <TableCaption>Enrolled Courses</TableCaption>
+            <TableCaption>
+              {user?.role === ROLES.STUDENT
+                ? 'Enrolled Courses'
+                : 'Taught Courses'}
+            </TableCaption>
             <TableHeader>
               <TableRow>
                 <TableHead>Code</TableHead>
