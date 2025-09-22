@@ -54,7 +54,6 @@ export async function addTeacherCourses(req: Request, res: Response) {
       message: 'Courses added Successfully',
     });
   } catch (error) {
-    console.log(error);
     logger.error('An error occurred', error);
     res.status(500).json({
       success: false,
@@ -108,6 +107,10 @@ export async function getTeacherRecentClasses(
 ) {
   const { id, role } = req.user;
   try {
+    const pageStr = req.query.page as string;
+    const page = isNaN(parseInt(pageStr)) ? 1 : parseInt(pageStr);
+
+    const pageSize = 10;
     const teacher = await prisma.teacher.findUnique({ where: { userId: id } });
     if (!teacher) {
       res.status(404).json({
@@ -117,6 +120,8 @@ export async function getTeacherRecentClasses(
       return;
     }
     const recentClasses = await prisma.class.findMany({
+      take: pageSize,
+      skip: (page - 1) * pageSize,
       where: {
         teacherId: id,
         startTime: { lt: new Date() },
@@ -125,6 +130,16 @@ export async function getTeacherRecentClasses(
         id: true,
         startTime: true,
         endTime: true,
+        teacher: {
+          select: {
+            user: {
+              select: {
+                name: true,
+                email: true,
+              },
+            },
+          },
+        },
         course: {
           select: {
             code: true,
@@ -137,12 +152,15 @@ export async function getTeacherRecentClasses(
             name: true,
           },
         },
+        _count: {
+          select: { attendance: true },
+        },
       },
     });
     res.status(200).json({
       success: true,
       message: 'Fetched recent classes successfully',
-      data: recentClasses,
+      data: { recentClasses },
     });
   } catch (error) {
     next(error);

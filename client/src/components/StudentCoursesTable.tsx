@@ -18,7 +18,6 @@ const StudentCoursesTable = () => {
     queryKey: ['my-courses'],
     queryFn: async () => {
       const response = await api.get(`/${user?.role}s/courses`);
-      console.log(response);
       return response.data;
     },
     refetchOnWindowFocus: false,

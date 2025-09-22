@@ -66,7 +66,6 @@ const EditCourses = ({ setIsEditing }: props) => {
     queryKey: ['my-courses'],
     queryFn: async () => {
       const response = await api.get(`/${user?.role}s/${user?.id}/courses`);
-      console.log(response);
       return response.data.data;
     },
   });
@@ -145,7 +144,6 @@ const EditCourses = ({ setIsEditing }: props) => {
                   (items) => items.id !== course.id
                 );
                 setCourses(updatedCourses);
-                console.log(`Closing ${course.code}`);
               }}
             >
               <X />
@@ -194,10 +192,8 @@ const EditCourses = ({ setIsEditing }: props) => {
       if (resp.status === 200) {
         toast.success('Successfully added courses');
         setIsEditing(false);
-        // navigate('/courses', { replace: true });
       }
     } catch (error) {
-      console.log(error);
       toast.error('Failed to add courses');
     }
   };

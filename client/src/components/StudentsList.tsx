@@ -22,7 +22,6 @@ const StudentsList = () => {
   if (isError) {
     return <div>Error loading students</div>;
   }
-  console.log(data);
   return <div>StudentsList</div>;
 };
 

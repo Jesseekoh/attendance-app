@@ -132,11 +132,9 @@ const ScheduleClass = () => {
       if (resp.status === 200) {
         toast.success('Class Schedule created successfully');
         form.reset();
-        console.log('success');
       }
     } catch (error) {
       toast.error('Failed to create class schedule');
-      console.log(error);
     }
   };
   return (
@@ -147,7 +145,7 @@ const ScheduleClass = () => {
         }}
       >
         <DrawerTrigger asChild>
-          <Button variant="outline">
+          <Button size="sm" className="w-max !hover:bg-blue-800">
             <Plus className="w-4 h-4 mr-2" />
             Schedule a class
           </Button>
@@ -348,7 +346,7 @@ const ScheduleClass = () => {
                           const { startTime, day } = form.getValues();
                           // Convert both endTime and startTime to Date objects to compare
                           // Used 1970 because it still works even if I put the current date
-                          const start = combineDateAndTime(day, startTime)
+                          const start = combineDateAndTime(day, startTime);
                           const now = new Date();
 
                           const end = combineDateAndTime(day, value);

@@ -58,7 +58,6 @@ const ClassDetails = () => {
         const axiosErr = error as AxiosError;
         const data = axiosErr.response?.data as ErrorResponse;
         toast.error(data?.message || 'Something went wrong');
-        console.log(error);
       }
     } catch (err: unknown) {
       let message = 'Unable to get location';

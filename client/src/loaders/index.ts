@@ -10,7 +10,6 @@ export async function classDetailsLoader({ params }: LoaderFunctionArgs) {
   } catch (error) {
     if (axios.isAxiosError(error)) {
       if (error.response?.status === 401) {
-        console.log('redirecting...');
         return redirect('/signin');
       }
       const status = error.response?.status || 500;
