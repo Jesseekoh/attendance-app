@@ -1,5 +1,10 @@
 import './App.css';
-import { createBrowserRouter, Navigate, RouterProvider } from 'react-router';
+import {
+  createBrowserRouter,
+  Navigate,
+  RouterProvider,
+  useLocation,
+} from 'react-router';
 import { lazy, Suspense } from 'react';
 import RootLayout from './layout/RootLayout';
 import AppLayout from './layout/AppLayout';
@@ -8,6 +13,7 @@ import { classDetailsLoader } from './loaders';
 import { ROLES } from './config/roles';
 import { useAuth } from './contexts/AuthContext';
 import Spinner from './components/Spinner';
+import Logout from './pages/Logout';
 
 const Home = lazy(() => import('./pages/Home'));
 const SignIn = lazy(() => import('./pages/SignIn'));
@@ -15,7 +21,6 @@ const SignUp = lazy(() => import('./pages/SignUp'));
 const Profile = lazy(() => import('./pages/Profile'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const ClassDetails = lazy(() => import('./pages/ClassDetails'));
-const Logout = lazy(() => import('./pages/Logout'));
 const Error = lazy(() => import('./pages/Error'));
 const Attendance = lazy(() => import('./pages/Attendance'));
 const Courses = lazy(() => import('./pages/Courses'));
@@ -32,10 +37,15 @@ const PageLoader = () => {
     </div>
   );
 };
-
 const LazyRoute = ({ children }: { children: React.ReactNode }) => {
-  return <Suspense fallback={<PageLoader />}>{children}</Suspense>;
+  const location = useLocation();
+  return (
+    <Suspense fallback={<PageLoader />} key={location.key}>
+      {children}
+    </Suspense>
+  );
 };
+
 function App() {
   const { user } = useAuth();
 
@@ -43,11 +53,7 @@ function App() {
     {
       index: true,
       element: <Navigate to={user ? '/dashboard' : '/home'} replace />,
-      errorElement: (
-        <LazyRoute>
-          <Error />
-        </LazyRoute>
-      ),
+      errorElement: <Error />,
     },
     {
       path: '/home',
@@ -167,11 +173,7 @@ function App() {
           element: <h1>Not found</h1>,
         },
       ],
-      errorElement: (
-        <LazyRoute>
-          <Error />
-        </LazyRoute>
-      ),
+      errorElement: <Error />,
     },
     {
       path: '/signup',
