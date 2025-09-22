@@ -12,7 +12,7 @@ import {
   useSidebar,
 } from '@/components/ui/sidebar';
 import { NavLink } from 'react-router';
-
+import { cn } from '@/lib/utils';
 export function NavMain({
   items,
 }: {
@@ -50,6 +50,11 @@ export function NavMain({
                       asChild
                       tooltip={item.title}
                       isActive={isActive}
+                      className={cn(
+                        isActive &&
+                          ' not-dark:!text-primary-foreground not-dark:bg-gradient-to-tr from-gray-800 to-neutral-700',
+                        'py-5'
+                      )}
                     >
                       <div>
                         {item.icon && <item.icon />}

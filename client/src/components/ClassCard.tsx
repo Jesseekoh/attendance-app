@@ -1,4 +1,13 @@
-import { BookOpen, MapPin, User, Calendar, Clock } from 'lucide-react';
+import {
+  BookOpen,
+  MapPin,
+  User,
+  Calendar,
+  Clock,
+  Users,
+  CheckCircle,
+  XCircle,
+} from 'lucide-react';
 import { Link } from 'react-router';
 import { ClassInfoType } from './RecentClasses';
 import * as React from 'react';
@@ -12,10 +21,17 @@ import {
 } from '@/components/ui/card';
 import { Badge } from './ui/badge';
 import { cn } from '@/lib/utils';
+
+type ClassStats = {
+  totalStudents: number;
+  absentStudents: number;
+  presentStudents: number;
+};
 interface ClassCardProps {
   classInfo: ClassInfoType;
   withFooter?: boolean;
   key: string;
+  stats?: ClassStats;
   footerLinkTo?: string;
   footerLabel?: string;
 }
@@ -24,6 +40,7 @@ const ClassCard: React.FC<ClassCardProps> = ({
   withFooter,
   footerLinkTo,
   footerLabel,
+  stats,
 }) => {
   return (
     // <div>
@@ -82,8 +99,25 @@ const ClassCard: React.FC<ClassCardProps> = ({
           </div>
         </div>
       </CardContent>
+
       {withFooter && (
         <CardFooter>
+          {stats && (
+            <div className="flex items-center gap-4 text-sm">
+              <div className="flex items-center gap-1">
+                <Users className="w-4 h-4" />
+                <span>{stats.totalStudents} Total</span>
+              </div>
+              <div className="flex items-center gap-1 text-green-600">
+                <CheckCircle className="w-4 h-4" />
+                <span>{stats.presentStudents} Present</span>
+              </div>
+              <div className="flex items-center gap-1 text-red-600">
+                <XCircle className="w-4 h-4" />
+                <span>{stats.absentStudents} Absent</span>
+              </div>
+            </div>
+          )}
           <CardAction className="w-full">
             <Link
               to={footerLinkTo ?? '/classes/' + classInfo.id}
