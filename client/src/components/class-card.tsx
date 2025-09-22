@@ -66,6 +66,7 @@ export function ClassCard({
             <span>{time}</span>
           </div>
 
+    
           <div className="flex items-center gap-4 text-sm">
             <div className="flex items-center gap-1">
               <Users className="w-4 h-4" />
