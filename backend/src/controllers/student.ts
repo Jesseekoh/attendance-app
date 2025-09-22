@@ -2,6 +2,7 @@ import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../config/db';
 import logger from '../utils/logger';
 import { Roles } from '../constants/role';
+import { z } from 'zod';
 
 async function getAllStudents(req: Request, res: Response) {
   try {
@@ -15,6 +16,14 @@ async function enrollCourses(req: Request, res: Response) {
   const { studentId } = req.params;
   const { courses } = req.body;
   try {
+    const result = z.array(z.string().uuid()).safeParse(courses);
+    if (!result.success) {
+      res.status(400).json({
+        success: false,
+        message: 'Courses must be an array of UUID strings',
+      });
+      return;
+    }
     const user = await prisma.student.findUnique({
       where: { userId: studentId },
       include: { enrollments: { select: { course: true } } },
@@ -38,7 +47,6 @@ async function enrollCourses(req: Request, res: Response) {
         studentId,
       }));
 
-      // await prisma.$transaction(async (tx) => {
       await prisma.enrollments.deleteMany({
         where: {
           studentId,
@@ -50,9 +58,7 @@ async function enrollCourses(req: Request, res: Response) {
 
       await prisma.enrollments.createMany({
         data: enrollments,
-        // skipDuplicates: true,
       });
-      // });
 
       res.status(200).json({
         success: true,
@@ -240,20 +246,40 @@ async function getStudentRecentClasses(req: Request, res: Response) {
             lt: new Date(),
           },
         },
-        include: {
+        orderBy: {
+          startTime: 'desc',
+        },
+        select: {
+          id: true,
+          endTime: true,
+          startTime: true,
           attendance: {
             where: {
               studentId: id,
             },
+          },
+          venue: {
             select: {
-              studentId: true,
+              name: true,
             },
           },
-          course: true,
-          venue: { select: { name: true } },
+          course: {
+            select: {
+              id: true,
+              code: true,
+              desc: true,
+              title: true,
+            },
+          },
           teacher: {
-            include: {
-              user: { select: { email: true, name: true, role: true } },
+            select: {
+              user: {
+                select: {
+                  email: true,
+                  id: true,
+                  name: true,
+                },
+              },
             },
           },
         },
@@ -312,10 +338,6 @@ async function getStudentRecentClasses(req: Request, res: Response) {
           AND s."departmentId" = c."departmentId"
         GROUP BY c.id, c."courseId", c."departmentId"
       `;
-      // console.log(classes);
-      // for (const i of classes) {
-      //   i[studentCount] = Number;
-      // }
       res.status(200).json({
         success: true,
         page,
