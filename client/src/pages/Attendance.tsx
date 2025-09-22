@@ -5,14 +5,16 @@ import ClassCard from '../components/ClassCard';
 import { ClassInfoType } from '../components/RecentClasses';
 import { useQuery } from '@tanstack/react-query';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useAuth } from '@/contexts/AuthContext';
 const Attendance = () => {
+  const { user } = useAuth();
   const [items, setItems] = useState<ClassInfoType[]>([]);
   const [page, setPage] = useState(2);
   const [hasMore, setHasMore] = useState(true);
   const { data, isLoading, isError } = useQuery({
     queryKey: ['attendance-data'],
     queryFn: async () => {
-      const resp = await api.get('/classes/recent');
+      const resp = await api.get(`/${user?.role}s/${user?.id}/classes/recent`);
       return resp.data.data.recentClasses;
     },
   });
@@ -49,7 +51,7 @@ const Attendance = () => {
   const fetchData = async () => {
     try {
       const resp = await api.get(
-        `http://localhost:5000/api/v1/classes/recent?page=${page}`
+        `/${user?.role}s/${user?.id}/classes/recent?page=${page}`
       );
       const newItems = resp.data.data.recentClasses;
       setItems((prev) => [...prev, ...newItems]);

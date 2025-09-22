@@ -1,4 +1,6 @@
 import { ColumnDef } from '@tanstack/react-table';
+import { Badge } from '../ui/badge';
+import { cn } from '@/lib/utils';
 
 type Student = {
   id: string;
@@ -8,10 +10,6 @@ type Student = {
 };
 
 export const Columns: ColumnDef<Student>[] = [
-  // {
-  //   accessorKey: "id",
-  //   header: "ID",
-  // },
   {
     accessorKey: 'name',
     header: 'Name',
@@ -24,7 +22,15 @@ export const Columns: ColumnDef<Student>[] = [
     accessorKey: 'attended',
     header: 'Status',
     cell: ({ row }) => {
-      return row.getValue('attended') ? 'Present' : 'Missed';
+      const attended: boolean = row.getValue('attended');
+      return (
+        <Badge
+          variant={attended ? 'default' : 'destructive'}
+          className={cn(attended && 'bg-green-600')}
+        >
+          {attended ? 'Present' : 'Missed'}
+        </Badge>
+      );
     },
   },
 ];

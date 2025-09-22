@@ -31,7 +31,7 @@ const TeacherClasses = () => {
   }
 
   return (
-    <div>
+    <div className="flex flex-col gap-3">
       {data.length > 0 ? (
         data.map((classInfo: ClassInfoType) => (
           <ClassCard
