@@ -1,14 +1,4 @@
-import {
-  BookOpen,
-  MapPin,
-  User,
-  Calendar,
-  Clock,
-  Users,
-  CheckCircle,
-  XCircle,
-} from 'lucide-react';
-import { Link } from 'react-router';
+import { BookOpen, MapPin, User, Calendar, Clock } from 'lucide-react';
 import { ClassInfoType } from './RecentClasses';
 import * as React from 'react';
 import {
@@ -21,6 +11,10 @@ import {
 } from '@/components/ui/card';
 import { Badge } from './ui/badge';
 import { cn } from '@/lib/utils';
+import { useAuth } from '@/contexts/AuthContext';
+import { ROLES } from '@/config/roles';
+import StudentClassCardAction from './StudentClassCardAction';
+import TeacherClassCardAction from './TeacherClassCardAction';
 
 type ClassStats = {
   totalStudents: number;
@@ -30,7 +24,6 @@ type ClassStats = {
 interface ClassCardProps {
   classInfo: ClassInfoType;
   withFooter?: boolean;
-  key: string;
   stats?: ClassStats;
   footerLinkTo?: string;
   footerLabel?: string;
@@ -42,6 +35,7 @@ const ClassCard: React.FC<ClassCardProps> = ({
   footerLabel,
   stats,
 }) => {
+  const { user } = useAuth();
   return (
     // <div>
     <Card className="gap-2">
@@ -102,29 +96,13 @@ const ClassCard: React.FC<ClassCardProps> = ({
 
       {withFooter && (
         <CardFooter>
-          {stats && (
-            <div className="flex items-center gap-4 text-sm">
-              <div className="flex items-center gap-1">
-                <Users className="w-4 h-4" />
-                <span>{stats.totalStudents} Total</span>
-              </div>
-              <div className="flex items-center gap-1 text-green-600">
-                <CheckCircle className="w-4 h-4" />
-                <span>{stats.presentStudents} Present</span>
-              </div>
-              <div className="flex items-center gap-1 text-red-600">
-                <XCircle className="w-4 h-4" />
-                <span>{stats.absentStudents} Absent</span>
-              </div>
-            </div>
-          )}
-          <CardAction className="w-full">
-            <Link
-              to={footerLinkTo ?? '/classes/' + classInfo.id}
-              className="rounded-lg text-center inline-block w-full bg-primary text-primary-foreground px-4 py-2"
-            >
-              {footerLabel ?? 'View Details'}
-            </Link>
+          <CardAction>
+            {user?.role === ROLES.STUDENT && (
+              <StudentClassCardAction classId={classInfo.id} />
+            )}
+            {user?.role === ROLES.TEACHER && (
+              <TeacherClassCardAction classId={classInfo.id} stats={stats} />
+            )}
           </CardAction>
         </CardFooter>
       )}
