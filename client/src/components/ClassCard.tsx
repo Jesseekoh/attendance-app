@@ -31,8 +31,6 @@ interface ClassCardProps {
 const ClassCard: React.FC<ClassCardProps> = ({
   classInfo,
   withFooter,
-  footerLinkTo,
-  footerLabel,
   stats,
 }) => {
   const { user } = useAuth();

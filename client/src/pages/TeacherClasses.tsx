@@ -34,13 +34,7 @@ const TeacherClasses = () => {
     <div className="flex flex-col gap-3">
       {data.length > 0 ? (
         data.map((classInfo: ClassInfoType) => (
-          <ClassCard
-            classInfo={classInfo}
-            key={classInfo.id}
-            withFooter
-            footerLinkTo={`/classes/${classInfo.id}/attendance`}
-            footerLabel="View Attendance"
-          />
+          <ClassCard classInfo={classInfo} key={classInfo.id} withFooter />
         ))
       ) : (
         <Card>

@@ -8,7 +8,6 @@ import { Button } from '@/components/ui/button.tsx';
 import { cn } from '@/lib/utils.ts';
 import { ClassInfoType } from '@/components/RecentClasses.tsx';
 import { useAuth } from '@/contexts/AuthContext';
-import MarkAttendanceButton from './MarkAttendanceButton';
 
 export default function OngoingClasses() {
   const { user } = useAuth();

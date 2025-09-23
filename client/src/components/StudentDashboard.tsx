@@ -3,12 +3,9 @@ import RecentClasses from '../components/RecentClasses';
 import DashboardStats from '../components/DashboardStats';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useAuth } from '@/contexts/AuthContext';
 import OngoingClasses from '@/components/OngoingClasses.tsx';
 import GreetingBanner from './GreetingBanner';
 const StudentDashboard = () => {
-  const { user } = useAuth();
-
   return (
     <div className="flex flex-1 flex-col gap-4">
       <GreetingBanner />
