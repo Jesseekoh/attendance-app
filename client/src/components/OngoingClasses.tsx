@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button.tsx';
 import { cn } from '@/lib/utils.ts';
 import { ClassInfoType } from '@/components/RecentClasses.tsx';
 import { useAuth } from '@/contexts/AuthContext';
+import MarkAttendanceButton from './MarkAttendanceButton';
 
 export default function OngoingClasses() {
   const { user } = useAuth();
@@ -65,7 +66,11 @@ export default function OngoingClasses() {
     <div className="pt-2 flex flex-col gap-2">
       {ongoingClasses.length > 0 ? (
         ongoingClasses.map((classInfo: ClassInfoType) => (
-          <ClassCard classInfo={classInfo} key={classInfo.id} />
+          <ClassCard
+            classInfo={classInfo}
+            key={classInfo.id}
+            withFooter={true}
+          />
         ))
       ) : (
         <p>You have no ongoing classes...</p>
