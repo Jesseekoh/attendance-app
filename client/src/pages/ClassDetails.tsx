@@ -15,73 +15,12 @@ import {
 } from '@/components/ui/card';
 import { useAuth } from '@/contexts/AuthContext';
 import { ROLES } from '@/config/roles';
-import { ErrorResponse } from '@/types';
+import MarkAttendanceButton from '@/components/MarkAttendanceButton';
 
 const ClassDetails = () => {
   const classData = useLoaderData();
   const { classId } = useParams();
   const { user } = useAuth();
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const getCurrentPositionAsync = (options?: PositionOptions) =>
-    new Promise<GeolocationPosition>((resolve, reject) => {
-      if (!('geolocation' in navigator)) {
-        reject(new Error('Geolocation is not supported by this browser'));
-        return;
-      }
-      navigator.geolocation.getCurrentPosition(resolve, reject, options);
-    });
-
-  const handleSubmitAttendance = async (
-    event: React.MouseEvent<HTMLButtonElement>
-  ) => {
-    event.preventDefault();
-    setIsSubmitting(true);
-
-    try {
-      const pos = await getCurrentPositionAsync({
-        maximumAge: 0,
-        timeout: 10000,
-        enableHighAccuracy: true,
-      });
-
-      try {
-        await api.post('/classes/' + classId, {
-          studentLocation: {
-            latitude: pos.coords.latitude,
-            longitude: pos.coords.longitude,
-          },
-        });
-        toast.success('Marked attendance successfully');
-      } catch (error) {
-        const axiosErr = error as AxiosError;
-        const data = axiosErr.response?.data as ErrorResponse;
-        toast.error(data?.message || 'Something went wrong');
-      }
-    } catch (err: unknown) {
-      let message = 'Unable to get location';
-      const geoErr = err as GeolocationPositionError & { message?: string };
-      if (typeof geoErr === 'object' && geoErr && 'code' in geoErr) {
-        switch (geoErr.code) {
-          case geoErr.PERMISSION_DENIED:
-            message = 'Location permission denied';
-            break;
-          case geoErr.POSITION_UNAVAILABLE:
-            message = 'Location unavailable';
-            break;
-          case geoErr.TIMEOUT:
-            message = 'Location request timed out';
-            break;
-          default:
-            message = geoErr.message || message;
-        }
-      }
-      toast.error(message);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   const startTime = new Date(classData.data.startTime);
   const endTime = new Date(classData.data.endTime);
@@ -133,14 +72,7 @@ const ClassDetails = () => {
           <CardFooter>
             <CardAction>
               <div className="card-action">
-                <Button
-                  className="w-full"
-                  type="button"
-                  onClick={handleSubmitAttendance}
-                  disabled={isSubmitting}
-                >
-                  {isSubmitting ? 'Marking…' : 'Mark Attendance'}
-                </Button>
+                <MarkAttendanceButton classId={classId!} />
               </div>
             </CardAction>
           </CardFooter>
