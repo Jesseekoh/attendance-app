@@ -142,8 +142,8 @@ const ScheduleClass = () => {
   return (
     <>
       <Sheet>
-        <SheetTrigger>
-          <Button size="sm" className="w-max !hover:bg-blue-800">
+        <SheetTrigger className="w-max">
+          <Button size="sm" className="!hover:bg-blue-800">
             <Plus className="w-4 h-4 mr-2" />
             Create Lecture schedule
           </Button>
@@ -151,11 +151,6 @@ const ScheduleClass = () => {
         <SheetContent className="max-w-[420px] w-full">
           <SheetHeader>
             <SheetTitle>Schedule a Lecture</SheetTitle>
-            <SheetClose>bulabal</SheetClose>
-            <SheetDescription>
-              This action cannot be undone. This will permanently delete your
-              account and remove your data from our servers.
-            </SheetDescription>
           </SheetHeader>
           <div className="p-4 pb-0">
             <Form {...form}>
