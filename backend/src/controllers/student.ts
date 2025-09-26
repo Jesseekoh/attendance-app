@@ -2,7 +2,9 @@ import { Request, Response, NextFunction } from 'express';
 import { prisma } from '../config/db';
 import logger from '../utils/logger';
 import { Roles } from '../constants/role';
+import { fromZonedTime } from 'date-fns-tz';
 import { z } from 'zod';
+import { userClassQuerySchema } from '../schema';
 
 async function getAllStudents(req: Request, res: Response) {
   try {
@@ -153,47 +155,169 @@ async function getStudentStats(req: Request, res: Response) {
   }
 }
 
-async function getStudentClasses(req: Request, res: Response) {
+async function getStudentTodayClasses(req: Request, res: Response) {
+  const { id, role } = req.user;
   const { studentId } = req.params;
-
   try {
-    const enrollments = await prisma.enrollments.findMany({
-      where: { studentId },
-      select: { courseId: true },
+    const result = userClassQuerySchema.safeParse(req.query);
+    if (!result.success) {
+      res.status(400).json({
+        success: false,
+        message: 'Invalid query parameter',
+        errors: result.error.flatten().fieldErrors,
+      });
+      return;
+    }
+    const student = await prisma.student.findUnique({
+      where: {
+        userId: studentId,
+      },
     });
 
-    const courseIds = enrollments.map((e) => e.courseId);
-    if (courseIds.length === 0) {
-      res.status(200).json({
-        success: true,
-        message: 'Fetched classes successfully',
-        data: [],
+    if (!student) {
+      res.status(404).json({
+        success: false,
+        message: `student with ID ${studentId} does not exist`,
+      });
+      return;
+    }
+    if (studentId !== id) {
+      res.status(403).json({
+        message: 'You cannot access a fellow students records',
+        success: false,
       });
       return;
     }
 
+    const enrollments = await prisma.enrollments.findMany({
+      where: {
+        studentId,
+      },
+      select: {
+        courseId: true,
+      },
+    });
+
+    const courseIds = enrollments.map((e) => e.courseId);
+    const { date, timezone } = result.data;
+    const start = fromZonedTime(`${date}T00:00:00`, timezone!);
+    const end = fromZonedTime(`${date}T23:59:00`, timezone!);
     const classes = await prisma.class.findMany({
-      where: { courseId: { in: courseIds } },
+      where: {
+        courseId: { in: courseIds },
+        departmentId: student.departmentId,
+        startTime: { lte: end, gte: start },
+      },
       orderBy: { startTime: 'asc' },
-      include: {
+      select: {
         attendance: {
           where: { studentId },
           select: { studentId: true },
         },
-        course: true,
+        course: {
+          select: {
+            code: true,
+            title: true,
+            desc: true,
+            id: true,
+          },
+        },
         venue: { select: { name: true } },
         teacher: {
-          include: {
+          select: {
             user: { select: { email: true, name: true, role: true } },
           },
         },
       },
     });
 
-    const formattedClasses = classes.map((cls) => ({
-      ...cls,
-      attended: cls.attendance.length > 0,
-    }));
+    const formattedClasses = classes.map((cls) => {
+      const { attendance, ...rest } = cls;
+      return { ...rest, attended: attendance.length > 0 };
+    });
+
+    res.status(200).json({
+      success: true,
+      message: 'Fetched classes successfully',
+      data: formattedClasses,
+    });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ success: false, message: 'Some error was encountered' });
+  }
+}
+
+async function getStudentClasses(req: Request, res: Response) {
+  const { role, id } = req.user;
+  const { studentId } = req.params;
+
+  try {
+    const student = await prisma.student.findUnique({
+      where: {
+        userId: studentId,
+      },
+    });
+
+    if (!student) {
+      res.status(404).json({
+        success: false,
+        message: `student with ID ${studentId} does not exist`,
+      });
+      return;
+    }
+    if (studentId !== id) {
+      res.status(403).json({
+        message: 'You cannot access a fellow students records',
+        success: false,
+      });
+      return;
+    }
+
+    const enrollments = await prisma.enrollments.findMany({
+      where: {
+        studentId,
+      },
+      select: {
+        courseId: true,
+      },
+    });
+
+    const courseIds = enrollments.map((e) => e.courseId);
+
+    const classes = await prisma.class.findMany({
+      where: {
+        courseId: { in: courseIds },
+        departmentId: student.departmentId,
+      },
+      orderBy: { startTime: 'asc' },
+      select: {
+        department: true,
+        attendance: {
+          where: { studentId },
+          select: { studentId: true },
+        },
+        course: {
+          select: {
+            code: true,
+            title: true,
+            desc: true,
+            id: true,
+          },
+        },
+        venue: { select: { name: true } },
+        teacher: {
+          select: {
+            user: { select: { email: true, name: true, role: true } },
+          },
+        },
+      },
+    });
+
+    const formattedClasses = classes.map((cls) => {
+      const { attendance, ...rest } = cls;
+      return { ...rest, attended: attendance.length > 0 };
+    });
 
     res.status(200).json({
       success: true,
@@ -220,132 +344,81 @@ async function getStudentRecentClasses(req: Request, res: Response) {
     const page = isNaN(parseInt(pageStr)) ? 1 : parseInt(pageStr);
 
     const pageSize = 10;
-    if (role === 'student') {
-      const user = await prisma.student.findUnique({ where: { userId: id } });
-      const departmentId = user?.departmentId;
 
-      const enrolledCourses = await prisma.enrollments.findMany({
-        where: {
-          studentId: id,
-        },
-        select: {
-          courseId: true,
-        },
-      });
+    const user = await prisma.student.findUnique({ where: { userId: id } });
+    const departmentId = user?.departmentId;
 
-      const enrolledCourseIds = enrolledCourses.map((obj) => obj.courseId);
+    const enrolledCourses = await prisma.enrollments.findMany({
+      where: {
+        studentId: id,
+      },
+      select: {
+        courseId: true,
+      },
+    });
 
-      const totalClasses = await prisma.class.count();
-      const classes = await prisma.class.findMany({
-        take: pageSize,
-        skip: (page - 1) * pageSize,
-        where: {
-          courseId: { in: enrolledCourseIds },
-          departmentId,
-          endTime: {
-            lt: new Date(),
+    const enrolledCourseIds = enrolledCourses.map((obj) => obj.courseId);
+
+    const totalClasses = await prisma.class.count();
+    const classes = await prisma.class.findMany({
+      take: pageSize,
+      skip: (page - 1) * pageSize,
+      where: {
+        courseId: { in: enrolledCourseIds },
+        departmentId,
+        endTime: {
+          lt: new Date(),
+        },
+      },
+      orderBy: {
+        startTime: 'desc',
+      },
+      select: {
+        id: true,
+        endTime: true,
+        startTime: true,
+        attendance: {
+          where: {
+            studentId: id,
           },
         },
-        orderBy: {
-          startTime: 'desc',
+        venue: {
+          select: {
+            name: true,
+          },
         },
-        select: {
-          id: true,
-          endTime: true,
-          startTime: true,
-          attendance: {
-            where: {
-              studentId: id,
-            },
+        course: {
+          select: {
+            id: true,
+            code: true,
+            desc: true,
+            title: true,
           },
-          venue: {
-            select: {
-              name: true,
-            },
-          },
-          course: {
-            select: {
-              id: true,
-              code: true,
-              desc: true,
-              title: true,
-            },
-          },
-          teacher: {
-            select: {
-              user: {
-                select: {
-                  email: true,
-                  id: true,
-                  name: true,
-                },
+        },
+        teacher: {
+          select: {
+            user: {
+              select: {
+                email: true,
+                id: true,
+                name: true,
               },
             },
           },
         },
-      });
-      let formattedClasses = classes.map((cls) => ({
-        ...cls,
-        attended: cls.attendance.length > 0,
-      }));
+      },
+    });
+    let formattedClasses = classes.map((cls) => ({
+      ...cls,
+      attended: cls.attendance.length > 0,
+    }));
 
-      res.status(200).json({
-        success: true,
-        page,
-        message: 'Fetched classes successfully',
-        data: { recentClasses: formattedClasses, totalClasses },
-      });
-      return;
-    } else if (role === 'teacher') {
-      const totalClasses = await prisma.class.count({
-        where: { teacherId: id },
-      });
-      const recentClasses = await prisma.class.findMany({
-        take: pageSize,
-        skip: (page - 1) * pageSize,
-        where: {
-          teacherId: id,
-          endTime: {
-            lt: new Date(),
-          },
-        },
-        include: {
-          _count: {
-            select: {
-              attendance: true,
-            },
-          },
-          venue: true,
-          teacher: {
-            include: {
-              user: true,
-            },
-          },
-          course: true,
-        },
-      });
-
-      const classes = await prisma.$queryRaw`
-        SELECT 
-          c.id,
-          c."courseId",
-          c."departmentId",
-          COUNT(DISTINCT s."userId")::INT AS studentCount
-        FROM "Class" c
-        JOIN "Enrollments" e ON e."courseId" = c."courseId"
-        JOIN "Student" s ON s."userId" = e."studentId"
-        WHERE c."teacherId" = ${id}
-          AND s."departmentId" = c."departmentId"
-        GROUP BY c.id, c."courseId", c."departmentId"
-      `;
-      res.status(200).json({
-        success: true,
-        page,
-        classes,
-        message: 'Fetched classes successfully',
-        data: { recentClasses, totalClasses },
-      });
-    }
+    res.status(200).json({
+      success: true,
+      page,
+      message: 'Fetched classes successfully',
+      data: { recentClasses: formattedClasses, totalClasses },
+    });
   } catch (error) {
     logger.error(error);
     res.status(500).json({ success: false, message: 'Sever Error' });
@@ -468,4 +541,5 @@ export default {
   getStudentStats,
   getStudentOngoingClasses,
   getStudentClasses,
+  getStudentTodayClasses,
 };

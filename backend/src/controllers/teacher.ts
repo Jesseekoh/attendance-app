@@ -2,7 +2,9 @@ import { NextFunction, Request, Response } from 'express';
 import logger from '../utils/logger';
 import { prisma } from '../config/db';
 import { Roles } from '../constants/role';
-
+import { fromZonedTime } from 'date-fns-tz';
+import { z } from 'zod';
+import { userClassQuerySchema } from '../schema';
 // Add courses to list of courses a teacher is teaching
 export async function addTeacherCourses(req: Request, res: Response) {
   const { id, role } = req.user;
@@ -59,6 +61,66 @@ export async function addTeacherCourses(req: Request, res: Response) {
       success: false,
       error,
       message: 'Something went wrong. Try again',
+    });
+  }
+}
+
+/**
+ * Get all classes a teacher will hold today
+ * Accepts date and timezone as query parameters
+ */
+export async function getTeacherTodayClasses(req: Request, res: Response) {
+  const { id, role } = req.user;
+  const { teacherId } = req.params;
+  try {
+    // Validate query
+    const result = userClassQuerySchema.safeParse(req.query);
+    if (!result.success) {
+      res.status(400).json({
+        success: false,
+        message: 'Invalid query parameter',
+        errors: result.error.flatten().fieldErrors,
+      });
+      return;
+    }
+    const { date, timezone } = result.data;
+    const start = fromZonedTime(`${date}T00:00:00`, timezone);
+    const end = fromZonedTime(`${date}T23:59:59`, timezone);
+
+    // Find all classes for this teacher today
+    const classes = await prisma.class.findMany({
+      where: {
+        teacherId: id,
+        startTime: { gte: start, lte: end },
+      },
+      orderBy: { startTime: 'asc' },
+      select: {
+        id: true,
+        startTime: true,
+        endTime: true,
+        course: {
+          select: {
+            code: true,
+            title: true,
+            desc: true,
+            id: true,
+          },
+        },
+        venue: { select: { name: true } },
+        department: { select: { name: true } },
+      },
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Fetched today's classes for teacher successfully",
+      data: classes,
+    });
+  } catch (error) {
+    logger.error(error);
+    res.status(500).json({
+      success: false,
+      message: "Error fetching today's classes for teacher",
     });
   }
 }

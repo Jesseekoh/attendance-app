@@ -8,6 +8,7 @@ import {
   getTeacherClasses,
   getTeacherCourses,
   getTeacherRecentClasses,
+  getTeacherTodayClasses,
   getTeacherUpcomingClasses,
 } from '../controllers/teacher';
 import { Roles } from '../constants/role';
@@ -164,4 +165,10 @@ router.get(
   getTeacherUpcomingClasses
 );
 
+router.get(
+  '/:teacherId/classes/today',
+  authenticateToken,
+  roleBasedAccess([Roles.TEACHER]),
+  getTeacherTodayClasses
+);
 export default router;
