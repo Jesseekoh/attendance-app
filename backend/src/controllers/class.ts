@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { prisma } from '../config/db';
 import { haversineDistanceMeters, toRadians } from '../utils/helper';
 import { Roles } from '../constants/role';
+import { lectureSessionService } from '../services/lectureSession.service';
 
 async function createClass(req: Request, res: Response) {
   const isValidRequest = ClassSchema.safeParse(req.body);
@@ -20,15 +21,13 @@ async function createClass(req: Request, res: Response) {
   const { startTime, endTime, venueId, courseId, departmentId } = req.body;
 
   try {
-    const newClass = await prisma.class.create({
-      data: {
-        endTime,
-        startTime,
-        venueId,
-        courseId,
-        teacherId: id,
-        departmentId,
-      },
+    const newClass = await lectureSessionService.createLectureSession({
+      startTime,
+      endTime,
+      venueId,
+      courseId,
+      departmentId,
+      teacherId: id,
     });
 
     res.status(200).json({
