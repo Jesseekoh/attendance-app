@@ -101,7 +101,7 @@ prisma
   .then(() => {
     logger.info('Database connected successfully');
   })
-  .catch((error) => {
+  .catch((error: unknown) => {
     logger.error('failed to connect to database: ', error);
   });
 

@@ -1,7 +1,6 @@
 import { prisma } from '../config/db';
 import { Request, Response } from 'express';
 import logger from '../utils/logger';
-import { Prisma } from '../../generated/prisma';
 import { Roles } from '../constants/role';
 // Function to register a new user
 export const registerUser = async (req: Request, res: Response) => {

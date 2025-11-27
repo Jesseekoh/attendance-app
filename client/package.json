@@ -30,7 +30,7 @@
     "@tanstack/react-table": "^8.21.3",
     "@yudiel/react-qr-scanner": "^2.2.1",
     "axios": "^1.8.4",
-    "better-auth": "^1.2.8",
+    "better-auth": "^1.4.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^4.1.0",

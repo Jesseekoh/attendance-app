@@ -1,7 +1,6 @@
-import { PrismaClient } from '../generated/prisma';
+import { PrismaClient } from '../generated/prisma/client';
 import logger from './utils/logger';
-
-const prisma = new PrismaClient();
+import { prisma } from './config/db';
 const departments = [
   'Computer Science',
   'Mechanical Engineering',

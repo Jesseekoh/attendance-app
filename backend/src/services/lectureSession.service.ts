@@ -1,5 +1,4 @@
 import { prisma } from '../config/db';
-import { Prisma } from '../../generated/prisma';
 import { createLectureSessionInput } from '../types';
 export class LectureSessionService {
   async getLectureSessionById(lectureSessionId: string) {
